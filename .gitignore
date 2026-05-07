@@ -39,8 +39,8 @@ desktop.ini
 *.log
 
 # Ignorar datos físicos de la base de datos (¡EVITA QUE GITHUB EXPLOTE!)
-db/mongodb/data/
-db/postgresql/data/
+db/mongodb/
+db/postgresql/
 db/sql-server/data/
 
 # --- Configuraciones Locales y Secretos (.NET) ---
