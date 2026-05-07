@@ -13,6 +13,7 @@ namespace QualityDoc.API.Data
         // =======================================================
         // 1. REGISTRO DE TABLAS (DbSets)
         // =======================================================
+   
         public DbSet<Role> Roles { get; set; }
         public DbSet<Norm> Norms { get; set; }
         public DbSet<DocumentStatus> DocumentStatuses { get; set; }
@@ -41,12 +42,13 @@ namespace QualityDoc.API.Data
             modelBuilder.Entity<DocumentStatus>().HasIndex(ds => ds.StatusName).IsUnique();
             modelBuilder.Entity<Company>().HasIndex(c => c.TaxId).IsUnique();
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
-            
+
             // Llave única compuesta para evitar códigos de documento duplicados en una misma empresa
             modelBuilder.Entity<Document>().HasIndex(d => new { d.CompanyId, d.DocCode }).IsUnique();
 
             // 🚀 NUEVA RESTRICCIÓN: Un documento no puede tener dos pasos de firma con el mismo orden
             //modelBuilder.Entity<DocumentSignatureStep>().HasIndex(s => new { s.DocId, s.StepOrder }).IsUnique();
+
 
             // B. FILTROS GLOBALES DE CONSULTA (Soft Delete)
             // Esto oculta automáticamente la "basura" en cualquier consulta LINQ que hagas después.
@@ -56,10 +58,9 @@ namespace QualityDoc.API.Data
             modelBuilder.Entity<DocumentCategory>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
             modelBuilder.Entity<Document>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
             modelBuilder.Entity<DocumentVersion>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
-            
+
             // 🚀 NUEVO FILTRO: Aplicado a la nueva tabla de pasos del workflow
-            //modelBuilder.Entity<DocumentSignatureStep>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive"); 
-            
+            //modelBuilder.Entity<DocumentSignatureStep>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
             modelBuilder.Entity<DocumentApproval>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
 
             // C. CONFIGURACIÓN DINÁMICA DE VALORES POR DEFECTO Y AUDITORÍA
@@ -105,6 +106,20 @@ namespace QualityDoc.API.Data
                 .Property(d => d.IsExternal)
                 .HasDefaultValue(false);
 
+            // =======================================================
+            // 🛡️ RESTRICCIONES ESTRICTAS DE FLUJO (NUEVO)
+            // =======================================================
+            modelBuilder.Entity<DocumentApproval>(entity =>
+            {
+                // Aseguramos que EF Core sepa que son obligatorios y sin valores por defecto
+                entity.Property(e => e.StepOrder).IsRequired();
+                entity.Property(e => e.StepType).IsRequired().HasMaxLength(30);
+                
+                // Registramos los Check Constraints para sincronizar con SQL Server
+                entity.ToTable(t => t.HasCheckConstraint("CHK_StepType", "step_type IN ('Elaboró', 'Revisó', 'Aprobó')"));
+                entity.ToTable(t => t.HasCheckConstraint("CHK_ApprovalStatus", "approval_status IN ('Pending', 'Approved', 'Rejected')"));
+            });
+
 
             // =======================================================
             // D. CONFIGURACIÓN DE TRIGGERS (Armadura para el OUTPUT de EF Core)
@@ -116,7 +131,7 @@ namespace QualityDoc.API.Data
 
             modelBuilder.Entity<DocumentVersion>()
                 .ToTable(tb => tb.HasTrigger("trg_HandleDocumentObsolescence"));
-                
+
             modelBuilder.Entity<Document>()
                 .ToTable(tb => tb.HasTrigger("trg_UpdateDocumentTimestamp"));
         }

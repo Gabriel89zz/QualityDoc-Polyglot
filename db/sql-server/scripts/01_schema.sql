@@ -192,17 +192,24 @@ CREATE TABLE DocumentApprovals (
     version_id INT NOT NULL,
     approver_id INT NOT NULL,
     
-    -- Campos de Flujo Estricto
-    step_order INT NOT NULL DEFAULT 1,
-    step_type NVARCHAR(30) NOT NULL DEFAULT 'Revisó',
+    -- Campos de Flujo Estricto (Sin DEFAULTs para forzar al backend a enviar el dato exacto)
+    step_order INT NOT NULL,
+    step_type NVARCHAR(30) NOT NULL, 
     
-    approval_status NVARCHAR(20) DEFAULT 'Pending' CHECK (approval_status IN ('Pending', 'Approved', 'Rejected')), 
+    -- Estado de la decisión y evidencia legal
+    approval_status NVARCHAR(20) DEFAULT 'Pending', 
     comments NVARCHAR(MAX), 
     signature_token NVARCHAR(MAX), 
     signed_at DATETIME2 NULL,
     
+    -- Relaciones Foráneas
     CONSTRAINT FK_Approvals_Version FOREIGN KEY (version_id) REFERENCES DocumentVersions(version_id),
     CONSTRAINT FK_Approvals_User FOREIGN KEY (approver_id) REFERENCES Users(user_id),
+    
+    -- Candados de Seguridad (Restricciones explícitas y con nombre)
+    CONSTRAINT CHK_StepType CHECK (step_type IN ('Elaboró', 'Revisó', 'Aprobó')),
+    CONSTRAINT CHK_ApprovalStatus CHECK (approval_status IN ('Pending', 'Approved', 'Rejected')),
+    
     -- Audit Fields 
     status NVARCHAR(20) DEFAULT 'Active',
     created_at DATETIME2 DEFAULT GETUTCDATE(),
@@ -321,12 +328,15 @@ CREATE PROCEDURE sp_SignDocumentWorkflow
 AS
 BEGIN
     BEGIN TRANSACTION;
+
     BEGIN TRY
         DECLARE @VersionID INT;
         DECLARE @CurrentStepOrder INT;
         DECLARE @DocID INT;
         DECLARE @DeptID INT;
         DECLARE @CompanyID INT;
+        
+        -- 🛡️ CUMPLE CONSTRAINT: Genera 'Approved' o 'Rejected' exactos para CHK_ApprovalStatus
         DECLARE @StatusString NVARCHAR(20) = CASE WHEN @IsApproved = 1 THEN 'Approved' ELSE 'Rejected' END;
 
         -- 1. Obtenemos el VersionID y el Paso Actual
@@ -384,7 +394,7 @@ BEGIN
 
                 IF @AprobadorUserID IS NOT NULL
                 BEGIN
-                    -- Crear tarea en la bandeja al Aprobador
+                    -- 🛡️ CUMPLE CONSTRAINT: Inserción explícita sin depender de DEFAULTs
                     INSERT INTO DocumentApprovals 
                         (version_id, step_order, step_type, approver_id, approval_status, status, created_at, created_by)
                     VALUES 
@@ -411,7 +421,16 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        
+        -- 🛡️ DEFENSA ACTIVA: Intercepción del Error 547 (Violación de Constraint CHECK o FOREIGN KEY)
+        IF ERROR_NUMBER() = 547
+        BEGIN
+            THROW 50001, 'Error de integridad: La operación fue bloqueada porque el estado o tipo de paso enviado no es válido según las reglas estrictas.', 1;
+        END
+        ELSE
+        BEGIN
+            THROW;
+        END
     END CATCH
 END;
 GO

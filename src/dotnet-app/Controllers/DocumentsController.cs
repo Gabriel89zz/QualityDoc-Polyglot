@@ -630,7 +630,6 @@ namespace QualityDoc.API.Controllers
             if (!isAdmin && !isCreator) return RedirectToAction("AccessDenied", "Auth");
 
             var companyId = GetCurrentCompanyId();
-
             var version = await _context.DocumentVersions
                 .Include(v => v.Document) 
                 .FirstOrDefaultAsync(v => v.VersionId == versionId && v.DocId == docId);
@@ -668,18 +667,19 @@ namespace QualityDoc.API.Controllers
                 return RedirectToAction(nameof(Details), new { id = docId });
             }
 
+            // 🚀 Creación de la aprobación explícita alineada a los nuevos constraints
             var approval = new DocumentApproval
             {
                 VersionId = version.VersionId,
                 StepOrder = 1,
-                StepType = "Revisó",
+                StepType = "Revisó", 
                 ApproverId = assignedUser.UserId, 
-                ApprovalStatus = "Pending",
+                ApprovalStatus = "Pending", 
                 Status = "Active",
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = GetCurrentUserId()
             };
-
+            
             _context.DocumentApprovals.Add(approval);
 
             version.StatusId = 2;
@@ -687,9 +687,18 @@ namespace QualityDoc.API.Controllers
             version.UpdatedBy = GetCurrentUserId();
             _context.Update(version);
 
-            await _context.SaveChangesAsync();
+            // 🛡️ MODIFICACIÓN: Bloque Try-Catch para atrapar violaciones de Constraints de SQL
+            try
+            {
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "El documento fue enviado al Revisor de su departamento.";
+            }
+            catch (DbUpdateException)
+            {
+                // Si SQL rechaza el StepType o ApprovalStatus, EF Core lanza esta excepción
+                TempData["ErrorMessage"] = "Error de integridad referencial o de validación estricta en la base de datos. Contacte al administrador.";
+            }
 
-            TempData["SuccessMessage"] = "El documento fue enviado al Revisor de su departamento.";
             return RedirectToAction(nameof(Details), new { id = docId });
         }
 
