@@ -1,0 +1,126 @@
+@model IEnumerable<QualityDoc.API.Models.Department>
+
+@{
+    ViewData["Title"] = "Departamentos de la Empresa";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-end border-b border-gray-200 pb-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Departamentos</h1>
+            <p class="text-gray-500 text-sm">Estructura organizacional interna</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm flex items-center transition duration-150">
+                <i class="fa-solid fa-plus mr-2"></i> Nuevo Departamento
+            </a>
+        </div>
+    </div>
+
+    <!-- 🚨 Lector de Errores TempData -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700 font-bold">
+                        @TempData["ErrorMessage"]
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                    <tr>
+                        <th class="p-4">Nombre del Departamento</th>
+                        <th class="p-4">Estado</th>
+                        <th class="p-4">Fecha de Registro</th>
+                        <th class="p-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-gray-400">
+                                <i class="fa-solid fa-sitemap text-3xl mb-2"></i>
+                                <p>Aún no has configurado departamentos.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="hover:bg-gray-50 transition duration-150">
+                                <td class="p-4 font-bold text-gray-800">
+                                    <i class="fa-solid fa-layer-group text-gray-400 mr-2"></i> @item.DeptName
+                                </td>
+                                <td class="p-4">
+                                    @if (item.Status == "Active")
+                                    {
+                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold flex w-max items-center">
+                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span> Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold flex w-max items-center">
+                                            <span class="w-2 h-2 bg-red-500 rounded-full mr-1.5"></span> Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                <td class="p-4 text-gray-500">
+                                    @item.CreatedAt.ToString("dd MMM yyyy")
+                                </td>
+                                <td class="p-4 text-center flex justify-center items-center space-x-4">
+                                    
+                                    <!-- Ver Detalles siempre está activo -->
+                                    <a asp-action="Details" asp-route-id="@item.DeptId" class="text-gray-400 hover:text-teal-600 transition" title="Ver Detalles">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    
+                                    @if (item.Status == "Active")
+                                    {
+                                        <!-- Botón Editar (Activo) -->
+                                        <a asp-action="Edit" asp-route-id="@item.DeptId" class="text-gray-400 hover:text-blue-600 transition" title="Editar">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        
+                                        <!-- Botón de Desactivar (POST) -->
+                                        <form asp-action="Delete" asp-route-id="@item.DeptId" method="post" class="inline-block m-0 p-0">
+                                            <button type="submit" class="text-gray-400 hover:text-red-600 transition bg-transparent border-none p-0 cursor-pointer" title="Desactivar" onclick="return confirm('¿Estás seguro de desactivar este departamento?');">
+                                                <i class="fa-solid fa-power-off"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <!-- Botón Editar (Bloqueado) -->
+                                        <span class="text-gray-300 cursor-not-allowed" title="Restaura el departamento para poder editarlo">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </span>
+
+                                        <!-- Botón de Reactivar (POST) -->
+                                        <form asp-action="Reactivate" asp-route-id="@item.DeptId" method="post" class="inline-block m-0 p-0">
+                                            <button type="submit" class="text-gray-400 hover:text-green-600 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar" onclick="return confirm('¿Deseas volver a activar este departamento?');">
+                                                <i class="fa-solid fa-arrow-rotate-left"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

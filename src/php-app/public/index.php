@@ -1,0 +1,1 @@
+<?php echo "Laravel (PHP) listo para auditoría"; ?>

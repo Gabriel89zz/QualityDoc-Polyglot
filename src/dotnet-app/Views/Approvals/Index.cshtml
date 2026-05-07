@@ -1,0 +1,289 @@
+@model IEnumerable<QualityDoc.API.Models.DocumentApproval>
+
+@{
+    ViewData["Title"] = "Centro de Tareas";
+    
+    // Extraemos las listas del ViewBag
+    var rechazados = ViewBag.RejectedDocs as IEnumerable<QualityDoc.API.Models.DocumentVersion>;
+    var olvidados = ViewBag.ForgottenDrafts as IEnumerable<QualityDoc.API.Models.DocumentVersion>;
+
+    // Contadores para las notificaciones
+    int countFirmas = Model?.Count() ?? 0;
+    int countRechazados = rechazados?.Count() ?? 0;
+    int countOlvidados = olvidados?.Count() ?? 0;
+}
+
+<div class="max-w-7xl mx-auto mt-6">
+    
+    <!-- HEADER -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-black text-gray-800 tracking-tight flex items-center">
+            <i class="fa-solid fa-list-check text-purple-600 mr-3"></i> Mi Centro de Tareas
+        </h2>
+        <p class="text-gray-600 font-medium text-lg mt-1">
+            Gestiona tus firmas pendientes, atiende rechazos y envía tus borradores al flujo.
+        </p>
+    </div>
+
+    <!-- 🚀 ALERTAS DEL SISTEMA -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded shadow-sm">
+            <div class="flex items-center">
+                <i class="fa-solid fa-circle-check text-green-500 text-xl mr-3"></i>
+                <p class="text-sm font-bold text-green-800">@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded shadow-sm">
+            <div class="flex items-center">
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl mr-3"></i>
+                <p class="text-sm font-bold text-red-800">@TempData["ErrorMessage"]</p>
+            </div>
+        </div>
+    }
+
+    <!-- 🚀 TARJETAS DE NAVEGACIÓN (TABS) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        
+        <!-- Tarjeta 1: Firmas -->
+        <div onclick="showTab('firmas')" id="tab-btn-firmas" class="cursor-pointer bg-white border-2 border-purple-500 rounded-lg p-4 flex items-center justify-between shadow-sm transition transform hover:-translate-y-1">
+            <div class="flex items-center">
+                <i class="fa-solid fa-pen-nib text-purple-500 text-2xl mr-4"></i>
+                <div>
+                    <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Por Firmar</p>
+                    <p class="text-2xl font-black text-gray-800 leading-none">@countFirmas</p>
+                </div>
+            </div>
+            @if(countFirmas > 0)
+            {
+                <span class="relative flex h-4 w-4">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-4 w-4 bg-purple-500"></span>
+                </span>
+            }
+        </div>
+
+        <!-- Tarjeta 2: Rechazados -->
+        <div onclick="showTab('rechazos')" id="tab-btn-rechazos" class="cursor-pointer bg-white border border-gray-200 hover:border-red-400 rounded-lg p-4 flex items-center justify-between shadow-sm transition transform hover:-translate-y-1">
+            <div class="flex items-center">
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mr-4"></i>
+                <div>
+                    <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Rechazados</p>
+                    <p class="text-2xl font-black text-gray-800 leading-none">@countRechazados</p>
+                </div>
+            </div>
+            @if(countRechazados > 0)
+            {
+                <span class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full border border-red-200 shadow-sm"><i class="fa-solid fa-bell mr-1"></i> Corregir</span>
+            }
+        </div>
+
+        <!-- Tarjeta 3: Olvidados -->
+        <div onclick="showTab('olvidados')" id="tab-btn-olvidados" class="cursor-pointer bg-white border border-gray-200 hover:border-yellow-400 rounded-lg p-4 flex items-center justify-between shadow-sm transition transform hover:-translate-y-1">
+            <div class="flex items-center">
+                <i class="fa-solid fa-file-circle-exclamation text-yellow-500 text-2xl mr-4"></i>
+                <div>
+                    <p class="text-sm text-gray-500 font-bold uppercase tracking-wider">Borradores</p>
+                    <p class="text-2xl font-black text-gray-800 leading-none">@countOlvidados</p>
+                </div>
+            </div>
+            @if(countOlvidados > 0)
+            {
+                <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2.5 py-1 rounded-full border border-yellow-200 shadow-sm">Sin Enviar</span>
+            }
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CONTENIDO 1: TABLA DE FIRMAS PENDIENTES -->
+    <!-- ========================================== -->
+    <div id="tab-firmas" class="block bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-purple-50">
+            <h3 class="text-sm font-bold text-purple-800 uppercase"><i class="fa-solid fa-pen-nib mr-2"></i> Documentos en espera de tu firma</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Documento</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Área</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tu Tarea</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-blue-100 rounded-lg text-blue-600">
+                                            <i class="fa-solid fa-file-pdf text-xl"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-black text-gray-900">@item.DocumentVersion?.Document?.DocCode</div>
+                                            <div class="text-sm text-gray-500 max-w-xs truncate" title="@item.DocumentVersion?.Document?.DocName">
+                                                @item.DocumentVersion?.Document?.DocName (v @item.DocumentVersion?.VersionNum)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <i class="fa-solid fa-building-user mr-1.5 text-gray-500"></i> @item.DocumentVersion?.Document?.Department?.DeptName
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                        <i class="fa-solid fa-signature mr-1.5"></i> @item.StepType
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@item.CreatedAt.ToString("dd/MMM/yyyy HH:mm")</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a asp-action="Review" asp-route-id="@item.ApprovalId" class="text-white bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded shadow-sm transition inline-flex items-center">
+                                        Evaluar <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="px-6 py-16 text-center text-gray-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i class="fa-solid fa-mug-hot text-5xl mb-4 text-gray-300"></i>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-1">¡Todo al día!</h3>
+                                    <p class="text-sm">No tienes ningún documento pendiente de firma en este momento.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CONTENIDO 2: TABLA DE RECHAZADOS -->
+    <!-- ========================================== -->
+    <div id="tab-rechazos" class="hidden bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-red-50">
+            <h3 class="text-sm font-bold text-red-800 uppercase"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Documentos Devueltos para Corrección</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Documento</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Versión Rechazada</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha Rechazo</th>
+                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @if (rechazados != null && rechazados.Any())
+                    {
+                        foreach (var item in rechazados)
+                        {
+                            <tr class="hover:bg-red-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-black text-gray-900">@item.Document?.DocCode</div>
+                                    <div class="text-sm text-gray-500 max-w-xs truncate">@item.Document?.DocName</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">v @item.VersionNum</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@(item.UpdatedAt?.ToString("dd/MMM/yyyy") ?? item.CreatedAt.ToString("dd/MMM/yyyy"))</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a asp-controller="Documents" asp-action="Details" asp-route-id="@item.DocId" class="text-red-600 hover:text-white border border-red-600 hover:bg-red-600 px-4 py-2 rounded shadow-sm transition">Ver Comentarios</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="px-6 py-10 text-center text-gray-400"><p>No tienes documentos rechazados. ¡Buen trabajo!</p></td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- CONTENIDO 3: TABLA DE OLVIDADOS -->
+    <!-- ========================================== -->
+    <div id="tab-olvidados" class="hidden bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-yellow-50">
+            <h3 class="text-sm font-bold text-yellow-800 uppercase"><i class="fa-solid fa-file-circle-exclamation mr-2"></i> Borradores que no has enviado a flujo</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Documento</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Versión Creada</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @if (olvidados != null && olvidados.Any())
+                    {
+                        foreach (var item in olvidados)
+                        {
+                            <tr class="hover:bg-yellow-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-black text-gray-900">@item.Document?.DocCode</div>
+                                    <div class="text-sm text-gray-500 max-w-xs truncate">@item.Document?.DocName</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">v @item.VersionNum</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@item.CreatedAt.ToString("dd/MMM/yyyy")</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a asp-controller="Documents" asp-action="Details" asp-route-id="@item.DocId" class="text-yellow-700 hover:text-white border border-yellow-600 hover:bg-yellow-600 px-4 py-2 rounded shadow-sm transition">Iniciar Flujo</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="px-6 py-10 text-center text-gray-400"><p>No tienes borradores olvidados.</p></td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showTab(tabName) {
+            // Ocultar todas las tablas
+            ['firmas', 'rechazos', 'olvidados'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('tab-' + t).classList.remove('block');
+                
+                // Resetear el borde de las tarjetas
+                let btn = document.getElementById('tab-btn-' + t);
+                btn.classList.remove('border-2', 'border-purple-500', 'border-red-500', 'border-yellow-500');
+                btn.classList.add('border', 'border-gray-200');
+            });
+
+            // Mostrar la tabla clickeada
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.getElementById('tab-' + tabName).classList.add('block');
+            
+            // Resaltar la tarjeta activa
+            let activeBtn = document.getElementById('tab-btn-' + tabName);
+            activeBtn.classList.remove('border', 'border-gray-200');
+            if(tabName === 'firmas') activeBtn.classList.add('border-2', 'border-purple-500');
+            if(tabName === 'rechazos') activeBtn.classList.add('border-2', 'border-red-500');
+            if(tabName === 'olvidados') activeBtn.classList.add('border-2', 'border-yellow-500');
+        }
+    </script>
+}

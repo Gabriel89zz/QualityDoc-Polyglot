@@ -1,0 +1,66 @@
+# --- .NET (Módulo Central) ---
+
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docuser
+
+# --- Node.js / TypeScript (Servicio de Búsqueda) ---
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+.env
+
+# --- PHP (Portal de Consulta) ---
+
+vendor/
+.phpunit.result.cache
+.php-cs-fixer.cache
+
+# --- Docker & Bases de Datos ---
+
+.env
+docker/db_data/
+docker/volumes/
+*.db
+*.sqlite
+
+# --- Sistema Operativo & Varios ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# Ignorar datos físicos de la base de datos (¡EVITA QUE GITHUB EXPLOTE!)
+db/mongodb/data/
+db/postgresql/data/
+db/sql-server/data/
+
+# --- Configuraciones Locales y Secretos (.NET) ---
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+*.pubxml
+*.pubxml.user
+
+# --- Archivos Subidos por Usuarios (Sistema de Gestión) ---
+# Evita que los PDFs, manuales o checklists de prueba se suban al repositorio
+wwwroot/uploads/
+wwwroot/docs/
+wwwroot/files/
+
+# --- Certificados y Llaves ---
+*.pem
+*.key
+*.pfx
+*.crt
+
+# --- Otros IDEs ---
+.idea/

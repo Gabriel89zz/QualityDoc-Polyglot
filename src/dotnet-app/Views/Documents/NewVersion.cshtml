@@ -1,0 +1,87 @@
+@model QualityDoc.API.Models.NewDocumentVersionViewModel
+
+@{
+    ViewData["Title"] = "Subir Nueva Versión";
+}
+
+<div class="max-w-4xl mx-auto mt-6">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 px-6 py-4">
+            <h4 class="text-white text-lg font-semibold flex items-center">
+                <i class="fa-solid fa-upload mr-2"></i> Subir Nueva Versión
+            </h4>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <!-- 🚀 OJO AQUÍ: enctype="multipart/form-data" es obligatorio para subir archivos -->
+            <form asp-action="NewVersion" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4 text-sm font-medium"></div>
+
+                <!-- 🚀 CAMPO OCULTO VITAL: Para saber a qué documento le pertenece esta versión -->
+                <input type="hidden" asp-for="DocId" />
+
+                <!-- Información de solo lectura para orientar al usuario -->
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-4 mb-6 flex items-center">
+                    <i class="fa-solid fa-file-circle-check text-3xl text-gray-400 mr-4"></i>
+                    <div>
+                        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Actualizando Documento</p>
+                        <p class="text-lg font-bold text-gray-900">@Model.DocCode - @Model.DocName</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    
+                    <!-- Motivo del Cambio -->
+                    <div>
+                        <label asp-for="ChangeDescription" class="block text-sm font-bold text-gray-700 mb-1">
+                            Motivo del Cambio (Justificación) <span class="text-red-500">*</span>
+                        </label>
+                        <textarea asp-for="ChangeDescription" rows="3" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. Se actualizó el diagrama de flujo debido a la compra de la nueva máquina CNC..." required></textarea>
+                        <span asp-validation-for="ChangeDescription" class="text-red-500 text-xs mt-1 block"></span>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fa-solid fa-circle-info mr-1"></i> Este campo es auditable por ISO 9001 y obligatorio.
+                        </p>
+                    </div>
+
+                    <!-- Archivo Nuevo -->
+                    <div>
+                        <label asp-for="NewFile" class="block text-sm font-bold text-gray-700 mb-1">
+                            Nuevo Archivo (PDF/Word) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-100 transition duration-150 ease-in-out">
+                            <i class="fa-solid fa-file-arrow-up text-4xl text-gray-400 mb-3"></i>
+                            
+                            <!-- El 'name' debe coincidir con la propiedad del ViewModel -->
+                            <input type="file" name="NewFile" id="NewFile" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mx-auto mt-2" accept=".pdf,.doc,.docx,.xls,.xlsx" required />
+                            
+                            <p class="text-xs text-gray-500 mt-3">Tamaño máximo recomendado: 10MB.</p>
+                            
+                            @if (ViewData.ModelState["NewFile"]?.Errors.Count > 0)
+                            {
+                                <span class="text-red-500 text-sm font-bold block mt-3">@ViewData.ModelState["NewFile"]?.Errors[0].ErrorMessage</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200 my-6" />
+
+                <!-- Botones -->
+                <div class="flex justify-end space-x-3">
+                    <a asp-action="Details" asp-route-id="@Model.DocId" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Guardar Nueva Versión
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

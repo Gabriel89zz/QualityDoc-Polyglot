@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # --- PROXY INICIAL (Reverse Proxy) ---
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: nginx_gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./src/php-app:/var/www/html
+    depends_on:
+      - dotnet-app
+      - php-app
+      - python-app 
+    networks:
+      - quality-net
+
+  # --- BASES DE DATOS ---
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_server_admin
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SQL_SERVER_PASSWORD}
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SQL_SERVER_PASSWORD}", "-C", "-Q", "SELECT 1"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - ./db/sql-server/data:/var/opt/mssql/data
+      - ./db/sql-server/scripts:/usr/config/scripts:ro
+      - ./db/sql-server/entrypoint.sh:/usr/config/entrypoint.sh:ro
+    command: /bin/bash /usr/config/entrypoint.sh
+    networks:
+      - quality-net
+    ports:
+      - "1434:1433"
+
+  postgres-db:
+    image: postgres:15
+    container_name: postgres_audit
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      retries: 5
+    volumes:
+      - ./db/postgresql:/var/lib/postgresql/data
+    networks:
+      - quality-net
+
+  mongo-db:
+    image: mongo:latest
+    container_name: mongo_metadata
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - ./db/mongodb:/data/db
+    networks:
+      - quality-net
+
+  # --- APLICACIONES (Microservicios) ---
+  
+  # Administración (C# MVC)
+  dotnet-app:
+    build: 
+      context: .
+      dockerfile: docker/dotnet/Dockerfile
+    container_name: dotnet_core_mvc
+    environment:
+      # 🚀 MAGIA AQUÍ: Cuando C# corra en Docker, usará "sql-server" y el puerto interno 1433 en lugar de localhost
+      - ConnectionStrings__DefaultConnection=Server=sql-server;Database=QualityDocDB;User Id=sa;Password=${SQL_SERVER_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True;
+    depends_on:
+      sql-server:
+        condition: service_healthy
+    networks:
+      - quality-net
+
+  # Auditoría (PHP Laravel)
+  php-app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: php_laravel_audit
+    volumes:
+      - ./src/php-app:/var/www/html
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - quality-net
+
+  # Búsqueda (Python FastAPI)
+  python-app:
+    build:
+      context: .
+      dockerfile: docker/python/Dockerfile
+    container_name: python_fastapi_search
+    depends_on:
+      - mongo-db
+    networks:
+      - quality-net
+
+networks:
+  quality-net:
+    driver: bridge

@@ -1,0 +1,56 @@
+@model QualityDoc.API.Models.Company
+
+@{
+    ViewData["Title"] = "Suspender Empresa";
+}
+
+<div class="max-w-2xl mx-auto">
+    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-blue-600 transition">Empresas</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-gray-400">Suspender Cliente</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden">
+        <div class="bg-red-50 border-b border-red-100 p-6 flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-3xl"></i>
+            </div>
+            <div class="ml-4">
+                <h2 class="text-xl font-bold text-red-800">¿Estás seguro de suspender esta empresa?</h2>
+                <p class="text-sm text-red-600 mt-1">
+                    Esta acción ejecutará un <strong>Soft Delete</strong>. La empresa @Model.LegalName, todos sus usuarios y documentos pasarán a estado inactivo de forma inmediata.
+                </p>
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-50">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
+                <div>
+                    <dt class="text-xs font-semibold text-gray-500 uppercase">Razón Social</dt>
+                    <dd class="mt-1 text-base font-bold text-gray-900">@Model.LegalName</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold text-gray-500 uppercase">RFC / Tax ID</dt>
+                    <dd class="mt-1 text-base text-gray-700 font-mono">@Model.TaxId</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold text-gray-500 uppercase">Fecha de Registro</dt>
+                    <dd class="mt-1 text-sm text-gray-700">@Model.CreatedAt.ToString("dd/MM/yyyy")</dd>
+                </div>
+            </dl>
+        </div>
+
+        <form asp-action="Delete" class="p-6 border-t border-gray-100 flex items-center justify-end space-x-4">
+            <input type="hidden" asp-for="CompanyId" />
+            <a asp-action="Index" class="text-gray-500 hover:text-gray-700 text-sm font-medium transition">
+                Cancelar
+            </a>
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center">
+                <i class="fa-solid fa-power-off mr-2"></i> Confirmar Suspensión
+            </button>
+        </form>
+    </div>
+</div>

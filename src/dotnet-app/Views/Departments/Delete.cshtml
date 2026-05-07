@@ -1,0 +1,63 @@
+@model QualityDoc.API.Models.Department
+
+@{
+    ViewData["Title"] = "Suspender Departamento";
+}
+
+<div class="max-w-2xl mx-auto">
+    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-blue-600 transition">Departamentos</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-gray-400">Confirmar Suspensión</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-sm border border-red-100 overflow-hidden">
+        <div class="bg-red-50 border-b border-red-100 p-6 flex items-center">
+            <div class="bg-red-600 text-white h-12 w-12 flex items-center justify-center rounded-lg text-xl mr-4 shadow-md">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-red-900">¿Suspender departamento?</h2>
+                <p class="text-sm text-red-700">Esta acción desactivará el área y afectará la visibilidad de su personal.</p>
+            </div>
+        </div>
+
+        <div class="p-8">
+            <div class="mb-8">
+                <p class="text-xs text-gray-400 font-semibold uppercase mb-1">Departamento a desactivar:</p>
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <i class="fa-solid fa-sitemap text-gray-400 mr-3 text-xl"></i>
+                    <span class="text-lg font-bold text-gray-800">@Model.DeptName</span>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-circle-info text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            El registro no se eliminará de la base de datos para mantener la <span class="font-bold">trazabilidad ISO 9001</span>. Solo dejará de estar disponible para nuevas operaciones.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="DeptId" />
+                
+                <div class="flex justify-end space-x-3">
+                    <a asp-action="Index" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2 px-6 rounded-lg transition duration-150">
+                        No, cancelar
+                    </a>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2 px-6 rounded-lg shadow-sm flex items-center transition duration-150">
+                        <i class="fa-solid fa-power-off mr-2"></i> Confirmar Suspensión
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

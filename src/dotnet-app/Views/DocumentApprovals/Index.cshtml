@@ -1,0 +1,173 @@
+@model IEnumerable<QualityDoc.API.Models.DocumentApproval>
+@using QualityDoc.API.Models
+
+@{
+    ViewData["Title"] = "Torre de Control";
+    var drafts = ViewBag.Drafts as IEnumerable<DocumentVersion>;
+    var creators = ViewBag.Creators as Dictionary<int, string>;
+}
+
+<div class="max-w-7xl mx-auto mt-6 space-y-10">
+    
+    <!-- HEADER -->
+    <div>
+        <h2 class="text-3xl font-black text-gray-800 tracking-tight flex items-center">
+            <i class="fa-solid fa-radar text-blue-600 mr-3"></i> Torre de Control
+        </h2>
+        <p class="text-gray-600 font-medium text-lg mt-1">
+            Monitoreo global de documentos en redacción y flujos de aprobación.
+        </p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TABLA 1: FLUJOS ACTIVOS (EN REVISIÓN) -->
+    <!-- ========================================== -->
+    <div>
+        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+            <i class="fa-solid fa-bars-progress text-orange-500 mr-2"></i> Flujos en Proceso
+        </h3>
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Documento</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Departamento</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Paso Actual</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-red-500 uppercase tracking-wider"><i class="fa-solid fa-clock mr-1"></i> Pendiente Con</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-black text-gray-900">@item.DocumentVersion?.Document?.DocCode</div>
+                                        <div class="text-sm text-gray-500 max-w-xs truncate" title="@item.DocumentVersion?.Document?.DocName">
+                                            @item.DocumentVersion?.Document?.DocName (v @item.DocumentVersion?.VersionNum)
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            @item.DocumentVersion?.Document?.Department?.DeptName
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-bold">
+                                        @item.StepOrder. @item.StepType
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold mr-3 border border-red-200">
+                                                @item.Approver?.FullName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <div class="text-sm font-bold text-red-600">
+                                                @item.Approver?.FullName
+                                                <div class="text-xs text-gray-400 font-normal">Desde: @item.CreatedAt.ToString("dd/MMM/yy")</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a asp-controller="Documents" asp-action="Details" asp-route-id="@item.DocumentVersion?.DocId" class="text-gray-500 hover:text-blue-600 px-3 py-1 bg-gray-100 hover:bg-blue-50 rounded transition">
+                                            Ver Documento <i class="fa-solid fa-arrow-right ml-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-400">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <i class="fa-solid fa-check-double text-4xl mb-3 text-green-400"></i>
+                                        <h3 class="text-base font-medium text-gray-900">Cero cuellos de botella</h3>
+                                        <p class="text-sm">Todos los flujos iniciados están al día.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TABLA 2: BORRADORES (FLUJO NO INICIADO) -->
+    <!-- ========================================== -->
+    <div>
+        <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+            <i class="fa-solid fa-file-pen text-yellow-500 mr-2"></i> Documentos en Borrador (Sin iniciar)
+        </h3>
+        <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Documento</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Departamento</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-yellow-600 uppercase tracking-wider"><i class="fa-solid fa-user-pen mr-1"></i> En redacción por</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @if (drafts != null && drafts.Any())
+                        {
+                            foreach (var draft in drafts)
+                            {
+                                // 🚀 CORRECCIÓN: Convertimos el int? a int (con 0 como valor por defecto si es nulo)
+                                int creatorId = draft.CreatedBy ?? 0;
+                                string creatorName = creators != null && creators.ContainsKey(creatorId) ? creators[creatorId] : "Usuario Desconocido";
+
+                                <tr class="hover:bg-yellow-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-black text-gray-900">@draft.Document?.DocCode</div>
+                                        <div class="text-sm text-gray-500 max-w-xs truncate" title="@draft.Document?.DocName">
+                                            @draft.Document?.DocName (v @draft.VersionNum)
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            @draft.Document?.Department?.DeptName
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 font-bold mr-3 border border-yellow-200">
+                                                @creatorName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            <div class="text-sm font-bold text-yellow-700">
+                                                @creatorName
+                                                <div class="text-xs text-gray-400 font-normal">Creado: @draft.CreatedAt.ToString("dd/MMM/yy")</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a asp-controller="Documents" asp-action="Details" asp-route-id="@draft.DocId" class="text-gray-500 hover:text-blue-600 px-3 py-1 bg-gray-100 hover:bg-blue-50 rounded transition">
+                                            Ver Detalles <i class="fa-solid fa-arrow-right ml-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="px-6 py-10 text-center text-gray-400">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-gray-300"></i>
+                                        <h3 class="text-base font-medium text-gray-900">Sin borradores</h3>
+                                        <p class="text-sm">Todo el trabajo está ya en flujo de aprobación o publicado.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

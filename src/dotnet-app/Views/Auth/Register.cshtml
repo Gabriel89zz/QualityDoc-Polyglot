@@ -1,0 +1,111 @@
+@model QualityDoc.API.ViewModels.RegisterViewModel
+
+@{
+    Layout = null; // Está bien dejarlo en null para que no salga la barra lateral
+    ViewData["Title"] = "Registro de Nueva Empresa";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - QualityDoc SaaS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 font-sans antialiased text-white">
+
+    <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-blue-500">
+                QualityDoc <span class="text-gray-400 text-xl font-light">| SaaS</span>
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-400">
+                Registra tu empresa y comienza la gestión de calidad
+            </p>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
+            <div class="bg-gray-800 py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-700">
+                <form asp-action="Register" method="post" class="space-y-6">
+                    
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="bg-red-900 border-l-4 border-red-500 p-4 mb-4 rounded">
+                            <div asp-validation-summary="ModelOnly" class="text-red-200 text-sm font-semibold"></div>
+                        </div>
+                    }
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-medium text-blue-400 border-b border-gray-700 pb-2">Datos de Empresa</h3>
+                            
+                            <div>
+                                <label asp-for="LegalName" class="block text-sm font-medium text-gray-300"></label>
+                                <input asp-for="LegalName" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" placeholder="Ej. Merco S.A. de C.V." />
+                                <span asp-validation-for="LegalName" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                            </div>
+
+                            <div>
+                                <label asp-for="TaxId" class="block text-sm font-medium text-gray-300">RFC / Tax ID</label>
+                                <input asp-for="TaxId" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" placeholder="ABC123456XYZ" />
+                                <span asp-validation-for="TaxId" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-medium text-blue-400 border-b border-gray-700 pb-2">Administrador</h3>
+                            
+                            <div>
+                                <label asp-for="AdminFullName" class="block text-sm font-medium text-gray-300">Nombre Completo</label>
+                                <input asp-for="AdminFullName" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
+                                <span asp-validation-for="AdminFullName" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                            </div>
+
+                            <div>
+                                <label asp-for="Email" class="block text-sm font-medium text-gray-300"></label>
+                                <input asp-for="Email" type="email" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
+                                <span asp-validation-for="Email" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label asp-for="Password" class="block text-sm font-medium text-gray-300">Contraseña</label>
+                            <input asp-for="Password" type="password" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
+                            <span asp-validation-for="Password" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="ConfirmPassword" class="block text-sm font-medium text-gray-300">Confirmar Contraseña</label>
+                            <input asp-for="ConfirmPassword" type="password" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
+                            <span asp-validation-for="ConfirmPassword" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900 transition duration-200">
+                            Finalizar Registro
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-400">
+                        ¿Ya tienes una cuenta? 
+                        <a asp-action="Login" class="font-medium text-blue-400 hover:text-blue-300 transition">
+                            Inicia sesión aquí
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <partial name="_ValidationScriptsPartial" />
+
+</body>
+</html>

@@ -1,0 +1,158 @@
+@model QualityDoc.API.Models.Company
+
+@{
+    ViewData["Title"] = "Detalles de la Empresa";
+}
+
+<div class="max-w-4xl mx-auto">
+    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-blue-600 transition">Empresas</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-gray-400">Ficha Técnica</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-blue-50 border-b border-blue-100 p-6 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="bg-blue-600 text-white h-12 w-12 flex items-center justify-center rounded-lg text-xl mr-4 shadow-sm">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-blue-900">@Model.LegalName</h2>
+                    <p class="text-sm text-blue-700 font-mono">RFC: @Model.TaxId</p>
+                </div>
+            </div>
+            <div>
+                @if (Model.Status == "Active")
+                {
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
+                        Operación Activa
+                    </span>
+                }
+                else
+                {
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold border border-red-200">
+                        Inactiva / Suspendida
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div class="p-8">
+            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Trazabilidad del Sistema</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <p class="text-xs text-gray-400 font-semibold uppercase mb-1">Registro Inicial</p>
+                    <p class="text-sm text-gray-800"><i class="fa-regular fa-calendar mr-2 text-gray-400"></i> @Model.CreatedAt.ToString("dd MMMM, yyyy - HH:mm") UTC</p>
+                    
+                    <p class="text-sm text-gray-800 mt-2">
+                        <i class="fa-solid fa-user-shield mr-2 text-gray-400"></i> Creado por: <span class="font-semibold">@(Model.CreatedByNavigation?.FullName ?? "Sistema")</span>
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <p class="text-xs text-gray-400 font-semibold uppercase mb-1">Última Modificación</p>
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <p class="text-sm text-gray-800"><i class="fa-regular fa-clock mr-2 text-gray-400"></i> @Model.UpdatedAt.Value.ToString("dd MMMM, yyyy - HH:mm") UTC</p>
+                        
+                        <p class="text-sm text-gray-800 mt-2">
+                            <i class="fa-solid fa-user-pen mr-2 text-gray-400"></i> Modificado por: <span class="font-semibold">@(Model.UpdatedByNavigation?.FullName ?? "Sistema")</span>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-sm text-gray-500 italic mt-2">No registra modificaciones posteriores.</p>
+                    }
+                </div>
+
+                @if (Model.Status == "Inactive" || Model.Status == "Deleted")
+                {
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-100 md:col-span-2 mt-2">
+                        <p class="text-xs text-red-500 font-semibold uppercase mb-1">Detalles de Suspensión</p>
+                        <p class="text-sm text-red-800"><i class="fa-solid fa-calendar-xmark mr-2 text-red-400"></i> @(Model.DeletedAt?.ToString("dd MMMM, yyyy - HH:mm") ?? "Fecha desconocida") UTC</p>
+                        
+                        <p class="text-sm text-red-800 mt-2">
+                            <i class="fa-solid fa-user-slash mr-2 text-red-400"></i> Suspendido por: <span class="font-semibold">@(Model.DeletedByNavigation?.FullName ?? "Sistema")</span>
+                        </p>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <!-- 🚀 NUEVA SECCIÓN: ADMINISTRADORES DE LA EMPRESA -->
+        <div class="p-8 border-t border-gray-100 bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold text-gray-800">Administradores de la Cuenta (QA Managers)</h3>
+                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">@(Model.Users?.Count() ?? 0) Administradores</span>
+            </div>
+            
+            @if (Model.Users != null && Model.Users.Any())
+            {
+                <div class="overflow-x-auto rounded-lg border border-gray-100">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3 font-medium">Nombre</th>
+                                <th class="p-3 font-medium">Correo</th>
+                                <th class="p-3 font-medium">Rol</th>
+                                <th class="p-3 font-medium text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="p-3 font-medium text-gray-800">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 font-bold text-xs">
+                                                @user.FullName.Substring(0, 1).ToUpper()
+                                            </div>
+                                            @user.FullName
+                                        </div>
+                                    </td>
+                                    <td class="p-3 text-gray-500">@user.Email</td>
+                                    <td class="p-3">
+                                        <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-bold">
+                                            <i class="fa-solid fa-user-tie mr-1"></i> @(user.Role?.RoleName ?? "Sin Rol")
+                                        </span>
+                                    </td>
+                                    <td class="p-3 text-center">
+                                        @if (user.Status == "Active")
+                                        {
+                                            <i class="fa-solid fa-circle-check text-green-500" title="Activo"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fa-solid fa-circle-xmark text-red-400" title="Inactivo"></i>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="bg-gray-50 p-6 rounded-lg text-center border border-gray-100">
+                    <i class="fa-solid fa-user-shield text-gray-400 text-3xl mb-2"></i>
+                    <p class="text-sm text-gray-500">Esta empresa aún no tiene un Administrador asignado.</p>
+                </div>
+            }
+        </div>
+
+        <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-between">
+            <a asp-action="Index" class="text-gray-500 hover:text-gray-700 text-sm font-medium py-2 px-4 transition">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Volver a la lista
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.CompanyId" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-bold py-2 px-4 rounded-lg transition duration-150">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Editar Cliente
+            </a>
+        </div>
+    </div>
+</div>

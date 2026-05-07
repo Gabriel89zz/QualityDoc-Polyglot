@@ -1,0 +1,117 @@
+@model IEnumerable<QualityDoc.API.Models.Company>
+
+@{
+    ViewData["Title"] = "Gestión de Empresas Clientes";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-end border-b border-gray-200 pb-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Empresas Clientes</h1>
+            <p class="text-gray-500 text-sm">Panel de administración global (Multi-tenant)</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm flex items-center transition duration-150">
+                <i class="fa-solid fa-plus mr-2"></i> Alta de Empresa
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                    <tr>
+                        <th class="p-4">Razón Social</th>
+                        <th class="p-4">RFC / Tax ID</th>
+                        <th class="p-4">Estado</th>
+                        <th class="p-4">Fecha de Alta</th>
+                        <th class="p-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-gray-400">
+                                <i class="fa-solid fa-folder-open text-3xl mb-2"></i>
+                                <p>No hay empresas registradas actualmente.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="hover:bg-gray-50 transition duration-150">
+                                <td class="p-4 font-bold text-gray-800">
+                                    <i class="fa-regular fa-building text-gray-400 mr-2"></i> @item.LegalName
+                                </td>
+                                
+                                <td class="p-4 text-gray-600 font-mono text-xs">
+                                    @item.TaxId
+                                </td>
+                                
+                                <td class="p-4">
+                                    @if (item.Status == "Active")
+                                    {
+                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold flex w-max items-center">
+                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span> Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold flex w-max items-center">
+                                            <span class="w-2 h-2 bg-red-500 rounded-full mr-1.5"></span> Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                
+                                <td class="p-4 text-gray-500">
+                                    @item.CreatedAt.ToString("dd MMM yyyy")
+                                </td>
+                                
+                                <td class="p-4 text-center space-x-4 flex justify-center items-center">
+                                    
+                                    <!-- Ver Detalles siempre está activo -->
+                                    <a asp-action="Details" asp-route-id="@item.CompanyId" class="text-gray-400 hover:text-teal-600 transition" title="Ver Detalles de Trazabilidad">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+
+                                    @if (item.Status == "Active")
+                                    {
+                                        <!-- Botón Editar (Activo) -->
+                                        <a asp-action="Edit" asp-route-id="@item.CompanyId" class="text-gray-400 hover:text-blue-600 transition" title="Editar Configuración">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+
+                                        <!-- Botón Suspender (POST) -->
+                                        <form asp-action="Delete" asp-route-id="@item.CompanyId" method="post" class="inline-block m-0 p-0">
+                                            <button type="submit" class="text-gray-400 hover:text-red-600 transition bg-transparent border-none p-0 cursor-pointer" title="Suspender Inquilino" onclick="return confirm('¿Estás seguro de suspender esta empresa?');">
+                                                <i class="fa-solid fa-power-off"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <!-- Botón Editar (Bloqueado) -->
+                                        <span class="text-gray-300 cursor-not-allowed" title="Restaura la empresa para poder editarla">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </span>
+
+                                        <!-- Botón Reactivar (POST) -->
+                                        <form asp-action="Reactivate" asp-route-id="@item.CompanyId" method="post" class="inline-block m-0 p-0" onsubmit="return confirm('¿Estás seguro de que deseas reactivar esta empresa y a su Administrador (QA Manager)?');">
+                                            <button type="submit" class="text-gray-400 hover:text-green-600 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar Empresa">
+                                                <i class="fa-solid fa-rotate-left"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

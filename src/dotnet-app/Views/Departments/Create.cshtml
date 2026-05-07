@@ -1,0 +1,60 @@
+@model QualityDoc.API.Models.Department
+
+@{
+    ViewData["Title"] = "Nuevo Departamento";
+}
+
+<div class="max-w-2xl mx-auto space-y-6">
+    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-blue-600 transition">Departamentos</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-gray-400">Nuevo</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        
+        <div class="bg-blue-50 border-b border-blue-100 p-6">
+            <div class="flex items-center">
+                <div class="bg-blue-600 text-white h-10 w-10 flex items-center justify-center rounded-lg text-lg mr-4 shadow-sm">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-blue-900">Crear Departamento</h2>
+                    <p class="text-sm text-blue-700">Registra una nueva área para tu empresa.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4"></div>
+
+                <div class="mb-6">
+                    <label asp-for="DeptName" class="block text-sm font-bold text-gray-700 mb-2">Nombre del Departamento <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-sitemap text-gray-400"></i>
+                        </div>
+                        <input asp-for="DeptName" class="pl-10 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition" placeholder="Ej. Calidad, Producción, Recursos Humanos..." required autocomplete="off" />
+                    </div>
+                    <span asp-validation-for="DeptName" class="text-red-500 text-xs mt-1 block font-semibold"></span>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+                    <a asp-action="Index" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2 px-4 rounded-lg transition duration-150">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm flex items-center transition duration-150">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

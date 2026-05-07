@@ -1,0 +1,96 @@
+@model QualityDoc.API.Models.Company
+
+@{
+    ViewData["Title"] = "Editar Empresa";
+}
+
+<div class="max-w-3xl mx-auto">
+    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a asp-action="Index" class="hover:text-blue-600 transition">Empresas</a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <i class="fa-solid fa-chevron-right text-[10px] mx-2"></i>
+                    <span class="text-gray-400">Modificar Cliente</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-gray-50 border-b border-gray-100 p-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Actualizar Datos Legales</h2>
+                <p class="text-sm text-gray-500">Editando la ficha de: <span class="font-semibold">@Model.LegalName</span></p>
+            </div>
+            <div class="text-xs text-gray-400 text-right">
+                <p>ID Sistema: #@Model.CompanyId</p>
+                <p>Registrada: @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+
+        <form asp-action="Edit" class="p-8 space-y-6">
+            <div asp-validation-summary="ModelOnly" class="bg-red-50 border-l-4 border-red-500 p-4 text-red-700 text-sm mb-4"></div>
+            
+            <input type="hidden" asp-for="CompanyId" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label asp-for="LegalName" class="block text-sm font-semibold text-gray-700">Nombre Legal / Razón Social</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-building text-gray-400 text-xs"></i>
+                        </div>
+                        <input asp-for="LegalName" 
+                               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition" />
+                    </div>
+                    <span asp-validation-for="LegalName" class="text-red-500 text-xs italic"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="TaxId" class="block text-sm font-semibold text-gray-700">RFC / Tax ID</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-id-card text-gray-400 text-xs"></i>
+                        </div>
+                        <input asp-for="TaxId" 
+                               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono transition uppercase" />
+                    </div>
+                    <span asp-validation-for="TaxId" class="text-red-500 text-xs italic"></span>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                    <label asp-for="Status" class="block text-sm font-semibold text-gray-700">Estado de Operación</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-toggle-on text-gray-400 text-xs"></i>
+                        </div>
+                        <select asp-for="Status" class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition appearance-none">
+                            <option value="Active">Activo (Acceso Permitido)</option>
+                            <option value="Inactive">Inactivo (Acceso Bloqueado)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="fa-solid fa-chevron-down text-gray-400 text-[10px]"></i>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Status" class="text-red-500 text-xs italic"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-100">
+                <a asp-action="Index" class="text-gray-500 hover:text-gray-700 text-sm font-medium transition">
+                    Descartar Cambios
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-200 flex items-center">
+                    <i class="fa-solid fa-rotate mr-2"></i> Actualizar Información
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

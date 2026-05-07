@@ -1,0 +1,109 @@
+@model QualityDoc.API.Models.Role
+
+@{
+    ViewData["Title"] = "Editar Rol";
+    bool isSystemRole = ViewBag.IsSystemRole ?? false;
+}
+
+<div class="max-w-3xl mx-auto">
+    <!-- Breadcrumb de navegación -->
+    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-blue-600 transition">Roles del Sistema</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-gray-400">Editar Rol</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Encabezado con Insignia Dinámica -->
+        <div class="bg-blue-50 border-b border-blue-100 p-6 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="bg-blue-600 text-white h-10 w-10 flex items-center justify-center rounded-lg text-lg mr-4 shadow-sm">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-blue-900">Editar Rol</h2>
+                    <p class="text-sm text-blue-700">Actualizando permisos y configuración de acceso.</p>
+                </div>
+            </div>
+            <div>
+                @if (Model.Status == "Active")
+                {
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
+                        Rol Activo
+                    </span>
+                }
+                else
+                {
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold border border-red-200">
+                        Rol Inactivo
+                    </span>
+                }
+            </div>
+        </div>
+
+        <!-- Cuerpo del Formulario -->
+        <form asp-action="Edit" class="p-8 space-y-6">
+            <div asp-validation-summary="ModelOnly" class="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 mb-4"></div>
+            
+            <!-- 🚀 MUY IMPORTANTE: Campos ocultos para EF Core -->
+            <input type="hidden" asp-for="RoleId" />
+            <input type="hidden" asp-for="Status" />
+
+            <!-- Nombre del Rol con Lógica de Bloqueo -->
+            <div>
+                <label asp-for="RoleName" class="block text-sm font-bold text-gray-700 mb-1">Nombre del Rol <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        @if (isSystemRole)
+                        {
+                            <i class="fa-solid fa-lock text-gray-400"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-user-tag text-gray-400"></i>
+                        }
+                    </div>
+                    
+                    @if (isSystemRole)
+                    {
+                        <!-- Input BLOQUEADO para Roles de Sistema -->
+                        <input asp-for="RoleName" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed outline-none" readonly="readonly" />
+                        <p class="text-xs text-blue-600 mt-2 font-medium">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> Protección de Sistema: El nombre de este rol maestro no puede ser modificado.
+                        </p>
+                    }
+                    else
+                    {
+                        <!-- Input NORMAL para Roles Personalizados -->
+                        <input asp-for="RoleName" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-gray-50" required />
+                    }
+                </div>
+                <span asp-validation-for="RoleName" class="text-xs text-red-500 mt-1 block"></span>
+            </div>
+
+            <!-- Información de Auditoría -->
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 flex items-center justify-between mt-4">
+                <div class="flex items-center text-xs text-gray-500">
+                    <i class="fa-solid fa-circle-info mr-2 text-blue-400"></i>
+                    <span>La fecha de creación se mantendrá intacta.</span>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100 mt-6">
+                <a asp-action="Index" class="text-gray-500 hover:text-gray-800 font-medium text-sm px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                    Cancelar
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-sm transition flex items-center">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> Actualizar Rol
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
