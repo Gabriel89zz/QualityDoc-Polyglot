@@ -22,7 +22,6 @@
 
 <div class="max-w-7xl mx-auto mt-6">
     
-    <!-- 🚀 ALERTAS DEL SISTEMA -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded shadow-sm">
@@ -43,7 +42,6 @@
         </div>
     }
 
-    <!-- HEADER: Título y Botones Administrativos -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
             <div class="flex items-center space-x-3">
@@ -76,7 +74,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 1: METADATOS (Información General) -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
         <div class="p-6">
             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b pb-2">Información del Documento</h3>
@@ -113,7 +110,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 2: HISTORIAL DE VERSIONES -->
     <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
             <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Archivos y Versiones</h3>
@@ -193,7 +189,6 @@
 
                                     @if (version.StatusId == 1 && hasPowerOverDoc)
                                     {
-                                        <!-- 🚀 NUEVO FORMULARIO: Reemplazar Archivo (Oculto) -->
                                         <form asp-action="ReplaceDraftFile" method="post" enctype="multipart/form-data" class="inline" id="form-replace-@version.VersionId">
                                             <input type="hidden" name="versionId" value="@version.VersionId" />
                                             <input type="hidden" name="docId" value="@Model.DocId" />
@@ -230,7 +225,6 @@
         </div>
     </div>
 
-    <!-- 🚀 SECCIÓN INTERACTIVA: BITÁCORA DE REVISIONES Y COMENTARIOS -->
     <div id="seccion-bitacora" class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
             <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest"><i class="fa-solid fa-comments mr-2"></i> Bitácora de Aprobaciones</h3>
@@ -251,35 +245,52 @@
                                 <h4 class="text-sm font-bold text-indigo-800 mb-3 bg-indigo-50 inline-block px-3 py-1 rounded-full border border-indigo-100">Mostrando historial de la Versión @version.VersionNum</h4>
                                 
                                 <div class="space-y-4 mt-2">
-                                    <!-- 1. COMENTARIO DEL CREADOR -->
+                                    
                                     @{
                                         int creatorId = (int?)version.CreatedBy ?? 0;
                                         string creatorName = creators != null && creators.ContainsKey(creatorId) ? creators[creatorId] : "Autor Desconocido";
                                     }
-                                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm">
+                                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm mb-4">
                                         <div class="flex-shrink-0 mt-1">
-                                            <i class="fa-solid fa-user-pen text-blue-500 text-2xl"></i>
+                                            <i class="fa-solid fa-file-pen text-gray-400 text-2xl"></i>
                                         </div>
                                         <div class="flex-grow">
                                             <div class="flex justify-between items-start mb-1">
                                                 <div>
                                                     <span class="font-bold text-gray-900 text-sm">@creatorName</span>
-                                                    <span class="text-xs text-blue-600 ml-2 font-semibold bg-blue-100 px-2 py-0.5 rounded">Creador</span>
+                                                    <span class="text-xs text-gray-500 ml-2 font-semibold bg-gray-200 px-2 py-0.5 rounded">Autor</span>
                                                 </div>
                                                 <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> @version.CreatedAt.ToString("dd/MMM/yyyy HH:mm")</span>
                                             </div>
-                                            <p class="text-sm font-semibold text-blue-700 mb-2">Acción: Subió el archivo y solicitó revisión</p>
-                                            
-                                            <div class="bg-white p-3 rounded border border-blue-200 text-sm text-gray-700 relative">
-                                                <i class="fa-solid fa-quote-left text-blue-100 absolute top-2 left-2 text-lg"></i>
-                                                <p class="pl-6 relative z-10 italic font-medium">
-                                                    @(string.IsNullOrEmpty(version.ChangeDescription) ? "Sin descripción detallada." : version.ChangeDescription)
+                                            <p class="text-sm font-semibold text-gray-600 mb-2">Acción: Creó el borrador inicial</p>
+                                            <div class="bg-white p-3 rounded border border-gray-200 text-sm text-gray-700 relative">
+                                                <i class="fa-solid fa-quote-left text-gray-100 absolute top-2 left-2 text-lg"></i>
+                                                <p class="pl-6 relative z-10 italic">
+                                                    @(string.IsNullOrEmpty(version.ChangeDescription) ? "Creación inicial del documento." : version.ChangeDescription)
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- 2. COMENTARIOS DE LOS REVISORES / APROBADORES -->
+                                    @if (version.StatusId >= 2)
+                                    {
+                                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm mb-4">
+                                            <div class="flex-shrink-0 mt-1">
+                                                <i class="fa-solid fa-paper-plane text-blue-500 text-2xl"></i>
+                                            </div>
+                                            <div class="flex-grow">
+                                                <div class="flex justify-between items-start mb-1">
+                                                    <div>
+                                                        <span class="font-bold text-gray-900 text-sm">@creatorName</span>
+                                                        <span class="text-xs text-blue-600 ml-2 font-semibold bg-blue-100 px-2 py-0.5 rounded">Flujo</span>
+                                                    </div>
+                                                    <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> @(version.UpdatedAt?.ToString("dd/MMM/yyyy HH:mm") ?? version.CreatedAt.ToString("dd/MMM/yyyy HH:mm"))</span>
+                                                </div>
+                                                <p class="text-sm font-semibold text-blue-700">Acción: Finalizó borrador y solicitó revisión formal</p>
+                                            </div>
+                                        </div>
+                                    }
+
                                     @if (version.Approvals != null && version.Approvals.Any(a => a.ApprovalStatus != "Pending"))
                                     {
                                         foreach (var approval in version.Approvals.Where(a => a.ApprovalStatus != "Pending").OrderBy(a => a.UpdatedAt ?? a.CreatedAt))
@@ -330,7 +341,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 3: AUDITORÍA DE SISTEMA -->
     <div class="bg-gray-50 rounded-lg p-4 text-xs text-gray-500 border border-gray-200 flex flex-col sm:flex-row justify-between items-center">
         <div class="flex items-center space-x-4">
             <span><i class="fa-solid fa-calendar-plus mr-1"></i> Creado: @Model.CreatedAt.ToString("dd/MMM/yyyy HH:mm")</span>
@@ -346,7 +356,6 @@
 
 </div>
 
-<!-- 🚀 SCRIPT PARA CONTROLAR LA INTERACTIVIDAD -->
 @section Scripts {
     <script>
         function showComments(versionId) {

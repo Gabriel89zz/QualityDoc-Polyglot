@@ -50,7 +50,10 @@ services:
       interval: 10s
       retries: 5
     volumes:
-      - ./db/postgresql:/var/lib/postgresql/data
+      # Guarda los binarios pesados en /data
+      - ./db/postgresql/data:/var/lib/postgresql/data
+      # Ejecuta los scripts iniciales (esquemas/semillas) desde /scripts
+      - ./db/postgresql/scripts:/docker-entrypoint-initdb.d
     networks:
       - quality-net
 
@@ -61,7 +64,10 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
-      - ./db/mongodb:/data/db
+      # Guarda los binarios pesados en /data
+      - ./db/mongodb/data:/data/db
+      # Ejecuta scripts iniciales (si tienes alguno) desde /scripts
+      - ./db/mongodb/scripts:/docker-entrypoint-initdb.d
     networks:
       - quality-net
 
