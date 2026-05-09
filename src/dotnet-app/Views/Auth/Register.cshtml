@@ -1,111 +1,436 @@
 @model QualityDoc.API.ViewModels.RegisterViewModel
-
 @{
-    Layout = null; // Está bien dejarlo en null para que no salga la barra lateral
-    ViewData["Title"] = "Registro de Nueva Empresa";
+    Layout = null; 
 }
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="light">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - QualityDoc SaaS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta - QualityDoc</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-900 font-sans antialiased text-white">
-
-    <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-blue-500">
-                QualityDoc <span class="text-gray-400 text-xl font-light">| SaaS</span>
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-400">
-                Registra tu empresa y comienza la gestión de calidad
-            </p>
-        </div>
-
-        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
-            <div class="bg-gray-800 py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-700">
-                <form asp-action="Register" method="post" class="space-y-6">
-                    
-                    @if (!ViewData.ModelState.IsValid)
-                    {
-                        <div class="bg-red-900 border-l-4 border-red-500 p-4 mb-4 rounded">
-                            <div asp-validation-summary="ModelOnly" class="text-red-200 text-sm font-semibold"></div>
-                        </div>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Google Sans Flex', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: 'var(--color-primary)',
+                            hover: 'var(--color-primary-hover)',
+                            light: 'var(--color-surface-light)',
+                            dark: 'var(--color-surface-dark)',
+                        }
                     }
+                }
+            }
+        }
+    </script>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-blue-400 border-b border-gray-700 pb-2">Datos de Empresa</h3>
-                            
-                            <div>
-                                <label asp-for="LegalName" class="block text-sm font-medium text-gray-300"></label>
-                                <input asp-for="LegalName" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" placeholder="Ej. Merco S.A. de C.V." />
-                                <span asp-validation-for="LegalName" class="text-red-400 text-xs font-semibold mt-1 block"></span>
-                            </div>
+    <style>
+        :root {
+            --color-primary: #754ee5;
+            --color-primary-hover: #5e3ab8; 
+            --color-bg-light: #FAFAFA; 
+            --color-bg-dark: #2a2b2e; 
+            --color-surface-light: #ffffff; 
+            --color-surface-dark: #1e293b; 
+            --color-text-light: #0f172a; 
+            --color-text-dark: #f8fafc;
+        }
 
-                            <div>
-                                <label asp-for="TaxId" class="block text-sm font-medium text-gray-300">RFC / Tax ID</label>
-                                <input asp-for="TaxId" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" placeholder="ABC123456XYZ" />
-                                <span asp-validation-for="TaxId" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+        html.dark {
+            --color-primary: #baa5ff;
+            --color-primary-hover: #a48aed; 
+        }
+
+        body {
+            background-color: var(--color-bg-light);
+            color: var(--color-text-light);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        html.dark body {
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-dark);
+        }
+
+        /* 🚀 Escapamos la arroba con @@ para Razor */
+        @@keyframes float {
+            0% { transform: translateY(0px) rotate(var(--tw-rotate, 0deg)); }
+            50% { transform: translateY(-15px) rotate(var(--tw-rotate, 0deg)); }
+            100% { transform: translateY(0px) rotate(var(--tw-rotate, 0deg)); }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .animate-float-delayed {
+            animation: float 6s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+
+        .glass-dark {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="antialiased min-h-screen flex w-full">
+
+    <section class="w-full lg:w-[55%] flex flex-col relative px-8 sm:px-12 md:px-24 h-screen overflow-y-auto no-scrollbar">
+        
+        <header class="absolute top-8 left-8 right-8 sm:left-12 sm:right-12 md:left-24 md:right-24 flex justify-between items-center z-10">
+            <div class="flex lg:hidden items-center gap-2 text-brand font-bold text-2xl transition-colors duration-300">
+                <i data-lucide="hexagon" class="w-8 h-8"></i> QMS
+            </div>
+
+            <div class="flex items-center gap-4 bg-white/80 dark:bg-[#2a2b2e]/80 backdrop-blur-md px-4 py-2 rounded-full lg:bg-transparent lg:p-0 lg:w-full lg:max-w-lg lg:mx-auto lg:justify-start">
+                <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 hidden sm:block">
+                    ¿Ya tienes una cuenta?
+                    <a asp-action="Login" class="font-semibold text-slate-900 dark:text-white hover:text-brand dark:hover:text-brand transition-colors">Inicia sesión</a>
+                </p>
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand" aria-label="Cambiar tema">
+                    <i data-lucide="moon" id="moonIcon" class="w-5 h-5 lg:w-6 lg:h-6 text-slate-600 dark:text-slate-300"></i>
+                    <i data-lucide="sun" id="sunIcon" class="w-5 h-5 lg:w-6 lg:h-6 text-slate-600 dark:text-slate-300 hidden"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex flex-col justify-center max-w-lg w-full mx-auto py-24 lg:py-12">
+            
+            <div class="mb-8 mt-10 lg:mt-0">
+                <h1 class="text-4xl lg:text-5xl font-bold tracking-tight mb-3">Crear cuenta</h1>
+                <p class="text-base text-slate-500 dark:text-slate-400">Configura tu espacio de trabajo para empezar.</p>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-sm mb-4 font-semibold"></div>
+
+            <form asp-controller="Auth" asp-action="Register" method="post" id="registerForm" class="space-y-5">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label asp-for="AdminFullName" class="block text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Nombre completo</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="user" class="w-5 h-5 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
                             </div>
+                            <input 
+                                asp-for="AdminFullName" 
+                                placeholder="Ej. Juan Pérez" 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
+                                required
+                            >
                         </div>
-
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-blue-400 border-b border-gray-700 pb-2">Administrador</h3>
-                            
-                            <div>
-                                <label asp-for="AdminFullName" class="block text-sm font-medium text-gray-300">Nombre Completo</label>
-                                <input asp-for="AdminFullName" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
-                                <span asp-validation-for="AdminFullName" class="text-red-400 text-xs font-semibold mt-1 block"></span>
-                            </div>
-
-                            <div>
-                                <label asp-for="Email" class="block text-sm font-medium text-gray-300"></label>
-                                <input asp-for="Email" type="email" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
-                                <span asp-validation-for="Email" class="text-red-400 text-xs font-semibold mt-1 block"></span>
-                            </div>
-                        </div>
+                        <span asp-validation-for="AdminFullName" class="text-red-500 text-xs font-semibold mt-1 block"></span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                        <div>
-                            <label asp-for="Password" class="block text-sm font-medium text-gray-300">Contraseña</label>
-                            <input asp-for="Password" type="password" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
-                            <span asp-validation-for="Password" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                    <div class="space-y-1.5">
+                        <label asp-for="Email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Correo electrónico</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="mail" class="w-5 h-5 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
+                            </div>
+                            <input 
+                                asp-for="Email" 
+                                type="email" 
+                                placeholder="tu.correo@empresa.com" 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
+                                required
+                            >
                         </div>
+                        <span asp-validation-for="Email" class="text-red-500 text-xs font-semibold mt-1 block"></span>
+                    </div>
+                </div>
 
-                        <div>
-                            <label asp-for="ConfirmPassword" class="block text-sm font-medium text-gray-300">Confirmar Contraseña</label>
-                            <input asp-for="ConfirmPassword" type="password" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm text-white" />
-                            <span asp-validation-for="ConfirmPassword" class="text-red-400 text-xs font-semibold mt-1 block"></span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label asp-for="LegalName" class="block text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Empresa</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="building" class="w-5 h-5 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
+                            </div>
+                            <input 
+                                asp-for="LegalName" 
+                                placeholder="Nombre de la empresa" 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
+                                required
+                            >
                         </div>
+                        <span asp-validation-for="LegalName" class="text-red-500 text-xs font-semibold mt-1 block"></span>
                     </div>
 
-                    <div class="pt-6">
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900 transition duration-200">
-                            Finalizar Registro
-                        </button>
+                    <div class="space-y-1.5">
+                        <label asp-for="TaxId" class="block text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">RFC / Tax ID</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="id-card" class="w-5 h-5 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
+                            </div>
+                            <input 
+                                asp-for="TaxId" 
+                                placeholder="ABC123456XYZ" 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white uppercase"
+                                required
+                            >
+                        </div>
+                        <span asp-validation-for="TaxId" class="text-red-500 text-xs font-semibold mt-1 block"></span>
                     </div>
-                </form>
+                </div>
 
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-400">
-                        ¿Ya tienes una cuenta? 
-                        <a asp-action="Login" class="font-medium text-blue-400 hover:text-blue-300 transition">
-                            Inicia sesión aquí
-                        </a>
-                    </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label asp-for="Password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Contraseña</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="lock" class="w-5 h-5 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
+                            </div>
+                            <input 
+                                asp-for="Password" 
+                                type="password" 
+                                placeholder="••••••••" 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
+                                required
+                            >
+                        </div>
+                        <span asp-validation-for="Password" class="text-red-500 text-xs font-semibold mt-1 block"></span>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label asp-for="ConfirmPassword" class="block text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Confirmar contraseña</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
+                            </div>
+                            <input 
+                                asp-for="ConfirmPassword" 
+                                type="password" 
+                                placeholder="••••••••" 
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
+                                required
+                            >
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="text-red-500 text-xs font-semibold mt-1 block"></span>
+                    </div>
+                </div>
+
+                <div class="pt-2 px-1">
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <input type="checkbox" id="terms" class="mt-1 w-5 h-5 rounded border-slate-300 text-brand focus:ring-brand dark:border-slate-600 dark:bg-slate-800 transition-colors duration-300">
+                        <span class="text-sm text-slate-500 dark:text-slate-400 leading-tight">
+                            He leído y acepto los <a href="#" class="text-brand hover:text-brand-hover font-medium transition-colors">Términos de Servicio</a> y la <a href="#" class="text-brand hover:text-brand-hover font-medium transition-colors">Política de Privacidad</a>.
+                        </span>
+                    </label>
+                </div>
+
+                <p id="errorMessage" class="text-sm text-red-500 hidden mt-1">
+                    <i data-lucide="alert-circle" class="w-4 h-4 inline mr-1"></i> 
+                    <span id="errorText">Por favor, completa todos los campos correctamente.</span>
+                </p>
+
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full mt-2 py-4 px-4 bg-brand hover:bg-brand-hover text-white dark:text-slate-900 rounded-xl text-base font-medium shadow-md shadow-brand/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand dark:focus:ring-offset-[#2a2b2e] flex justify-center items-center gap-2"
+                >
+                    <span>Crear mi cuenta</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+
+                <p class="text-center text-sm text-slate-500 dark:text-slate-400 sm:hidden mt-6">
+                    ¿Ya tienes una cuenta? <a asp-action="Login" class="font-semibold text-brand transition-colors">Inicia sesión</a>
+                </p>
+            </form>
+
+        </div>
+    </section>
+
+    <section class="hidden lg:flex w-[45%] p-6">
+        
+        <div class="w-full h-full rounded-[2rem] bg-brand relative overflow-hidden flex flex-col justify-between shadow-xl shadow-brand/20 transition-colors duration-300">
+            
+            <div class="absolute top-10 left-10 flex items-center gap-3 z-20">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg">
+                    <i data-lucide="file-check" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="text-white font-bold text-2xl tracking-tight">QualityDoc</span>
+            </div>
+
+            <div class="absolute inset-0 opacity-10 text-white dark:text-slate-900 pointer-events-none transition-colors duration-300" style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 32px 32px;"></div>
+
+            <div class="relative z-10 w-full flex-1 flex flex-col items-center justify-center mt-20">
+                <div class="relative w-72 h-80 flex items-center justify-center"> 
+                    
+                    <div class="absolute w-56 h-72 bg-white rounded-2xl shadow-xl -rotate-6 animate-float z-10">
+                        <div class="w-32 h-3 bg-slate-200 rounded mt-10 ml-8"></div>
+                        <div class="w-24 h-3 bg-blue-100 rounded mt-6 ml-8"></div>
+                        <div class="w-40 h-3 bg-slate-200 rounded mt-6 ml-8"></div>
+                    </div>
+                    
+                    <div class="absolute w-56 h-72 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl rotate-6 animate-float-delayed border border-white/50 z-20 left-12 top-6">
+                        <div class="absolute top-6 right-6 text-brand">
+                            <i data-lucide="users" class="w-10 h-10"></i>
+                        </div>
+                        <div class="w-16 h-16 rounded-full bg-blue-50/80 mt-10 ml-8 flex items-center justify-center border border-blue-100">
+                             <i data-lucide="user-plus" class="w-8 h-8 text-brand/60"></i>
+                        </div>
+                        <div class="w-28 h-3 bg-slate-200 rounded mt-8 ml-8"></div>
+                        <div class="w-32 h-3 bg-blue-100 rounded mt-4 ml-8"></div>
+                    </div>
+                    
                 </div>
             </div>
+
+            <div class="relative z-10 px-10 pb-12 w-full flex flex-col ">
+                <h2 class="text-4xl font-extrabold text-white dark:text-slate-900 mb-4 transition-colors duration-300 leading-tight">Comienza tu viaje<br>hacia la excelencia.</h2>
+                <p class="text-white/90 dark:text-slate-800 text-base max-w-md leading-relaxed transition-colors duration-300">
+                    Únete a cientos de empresas que ya automatizan sus auditorías y optimizan su gestión documental con nosotros.
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 
     <partial name="_ValidationScriptsPartial" />
 
+    <script>
+        lucide.createIcons();
+
+        // Configuración de Tema Claro / Oscuro
+        const htmlNode = document.documentElement;
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlNode.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        } else {
+            htmlNode.classList.remove('dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            htmlNode.classList.toggle('dark');
+            
+            if (htmlNode.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                localStorage.setItem('theme', 'light');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        });
+
+        // 🚀 Lógica de Validación adaptada a los IDs generados por C# (asp-for)
+        const registerForm = document.getElementById('registerForm');
+        
+        // C# genera los IDs basándose en las propiedades de tu RegisterViewModel
+        const fullnameInput = document.getElementById('AdminFullName');
+        const emailInput = document.getElementById('Email');
+        const companyInput = document.getElementById('LegalName');
+        const rfcInput = document.getElementById('TaxId');
+        const passwordInput = document.getElementById('Password');
+        const confirmPasswordInput = document.getElementById('ConfirmPassword');
+        
+        const termsCheckbox = document.getElementById('terms');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        const inputs = [fullnameInput, emailInput, companyInput, rfcInput, passwordInput, confirmPasswordInput];
+
+        registerForm.addEventListener('submit', (e) => {
+            // Ya no usamos preventDefault general, solo si hay error
+            
+            inputs.forEach(input => input.classList.remove('border-red-500', 'focus:ring-red-500'));
+            errorMessage.classList.add('hidden');
+
+            const name = fullnameInput.value.trim();
+            const email = emailInput.value.trim();
+            const company = companyInput.value.trim();
+            const rfc = rfcInput.value.trim();
+            const password = passwordInput.value;
+            const confirm = confirmPasswordInput.value;
+
+            let hasError = false;
+            let msg = "Por favor, completa todos los campos requeridos.";
+
+            // 🚀 Escapamos @@ en JavaScript
+            if (!name) { fullnameInput.classList.add('border-red-500'); hasError = true; }
+            if (!email || !email.includes('@@')) { emailInput.classList.add('border-red-500'); hasError = true; }
+            if (!company) { companyInput.classList.add('border-red-500'); hasError = true; }
+            if (!rfc) { rfcInput.classList.add('border-red-500'); hasError = true; }
+            
+            if (!password || password.length < 6) { 
+                passwordInput.classList.add('border-red-500'); hasError = true; 
+                msg = "La contraseña debe tener al menos 6 caracteres.";
+            }
+            
+            if (password !== confirm) {
+                passwordInput.classList.add('border-red-500');
+                confirmPasswordInput.classList.add('border-red-500');
+                hasError = true;
+                msg = "Las contraseñas no coinciden.";
+            }
+
+            if (!termsCheckbox.checked) {
+                hasError = true;
+                msg = "Debes aceptar los Términos de Servicio.";
+            }
+
+            if (hasError) {
+                e.preventDefault(); // Detiene el envío si algo falla
+                errorText.textContent = msg;
+                errorMessage.classList.remove('hidden');
+                submitBtn.classList.add('animate-pulse');
+                setTimeout(() => submitBtn.classList.remove('animate-pulse'), 500);
+            } else {
+                // Efecto de carga simulado mientras C# procesa
+                submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-6 w-6 currentColor inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Creando cuenta...`;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+        });
+
+        // Limpiar errores al escribir
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                input.classList.remove('border-red-500', 'focus:ring-red-500');
+                if(!Array.from(inputs).some(i => i.classList.contains('border-red-500'))) {
+                    errorMessage.classList.add('hidden');
+                }
+            });
+        });
+
+        termsCheckbox.addEventListener('change', () => {
+            if(termsCheckbox.checked && !Array.from(inputs).some(i => i.classList.contains('border-red-500'))) {
+                errorMessage.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>

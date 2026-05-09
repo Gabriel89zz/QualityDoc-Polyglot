@@ -1,3 +1,21 @@
+:root {
+    /* Paleta de colores extraída de tu diseño de login */
+    --color-primary: #754ee5; /* [cite: 148, 149] */
+    --color-primary-hover: #5e3ab8; /* [cite: 150] */
+    --color-bg-light: #FAFAFA; /* [cite: 150] */
+    --color-bg-dark: #2a2b2e; /* [cite: 151] */
+    --color-surface-light: #ffffff; /* [cite: 151] */
+    --color-surface-dark: #1e293b; /* [cite: 151] */
+    --color-text-light: #0f172a; /* [cite: 151] */
+    --color-text-dark: #f8fafc; /* [cite: 151] */
+}
+
+/* Ajuste para modo oscuro global */
+html.dark {
+    --color-primary: #baa5ff; /* [cite: 153, 154] */
+    --color-primary-hover: #a48aed; /* [cite: 154] */
+}
+
 html {
   font-size: 14px;
 }

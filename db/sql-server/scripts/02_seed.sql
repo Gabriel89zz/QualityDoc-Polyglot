@@ -36,17 +36,17 @@ GO
 
 -- 4. EMPRESAS (Multi-tenant)
 INSERT INTO Companies (legal_name, tax_id) VALUES
-('QualityDoc System Root', 'ROOT-000000-000'),  -- ID 1: Tu entorno maestro
+--('QualityDoc System Root', 'ROOT-000000-000'),  -- ID 1: Tu entorno maestro
 ('Falcons Manufacturing', 'FALC-123456-789'),   -- ID 2: Empresa de prueba 1
 ('Merco Supermercados', 'MERC-987654-321');     -- ID 3: Empresa de prueba 2
 GO
 
 -- 5. DEPARTAMENTOS
 INSERT INTO Departments (company_id, dept_name) VALUES
-(1, 'Administración de Software'), -- ID 1 (Pertenece a QualityDoc)
-(2, 'Aseguramiento de Calidad'),   -- ID 2 (Pertenece a Falcons)
-(2, 'Ingeniería de Producción'),   -- ID 3 (Pertenece a Falcons)
-(3, 'Auditoría Interna');          -- ID 4 (Pertenece a Merco)
+--(1, 'Administración de Software'), -- ID 1 (Pertenece a QualityDoc)
+(1, 'Aseguramiento de Calidad'),   -- ID 2 (Pertenece a Falcons)
+(1, 'Ingeniería de Producción'),   -- ID 3 (Pertenece a Falcons)
+(2, 'Auditoría Interna');          -- ID 4 (Pertenece a Merco)
 GO
 
 -- 6. USUARIOS BASE PARA PRUEBAS
@@ -54,11 +54,11 @@ GO
 -- Aquí pongo un string temporal genérico para que no truene la BD.
 INSERT INTO Users (company_id, dept_id, role_id, full_name, email, password_hash, created_by) VALUES
 -- Tu usuario Super Admin (NULL en company_id y dept_id porque es el dueño supremo del sistema)
-(1, 1, 1, 'Hector Torres', 'hector@qualitydoc.com', '$2a$12$.uPJW3BoFdrdTjPuMHKXUeNldtKtmDK/ysKzOwcqM7QBNSGpXIeaG', NULL),
+(NULL, NULL, 1, 'Hector Torres', 'hector@qualitydoc.com', '$2a$12$.uPJW3BoFdrdTjPuMHKXUeNldtKtmDK/ysKzOwcqM7QBNSGpXIeaG', NULL),
 
 -- Usuario administrador del cliente Falcons (Ellos sí tienen empresa y departamento asignado)
-(2, 2, 2, 'Admin Falcons', 'calidad@falcons.com', '$2a$12$dR9OqQ6S.iJITr8wMQJ/N.9scRHa66h3P7AbpKvOGvf6yNgeIWhFq', 1),
+(1, 1, 2, 'Admin Falcons', 'calidad@falcons.com', '$2a$12$dR9OqQ6S.iJITr8wMQJ/N.9scRHa66h3P7AbpKvOGvf6yNgeIWhFq', 1),
 
 -- Usuario administrador del cliente Merco (Ellos sí tienen empresa y departamento asignado)
-(3, 4, 2, 'Auditor Merco', 'auditor@merco.com', '$2a$12$dR9OqQ6S.iJITr8wMQJ/N.9scRHa66h3P7AbpKvOGvf6yNgeIWhFq', 1);
+(2, 1, 2, 'Merco', 'merco@gmail.com', '$2a$12$dR9OqQ6S.iJITr8wMQJ/N.9scRHa66h3P7AbpKvOGvf6yNgeIWhFq', 1);
 GO

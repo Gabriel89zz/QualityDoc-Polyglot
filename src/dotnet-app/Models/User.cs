@@ -11,9 +11,9 @@ namespace QualityDoc.API.Models
         [Column("user_id")]
         public int UserId { get; set; }
 
-        [Required]
+        // 🚀 MODIFICACIÓN 1: Ya no es [Required] y ahora es int? (acepta null)
         [Column("company_id")]
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
 
         [Column("dept_id")]
         public int? DeptId { get; set; }
@@ -36,16 +36,20 @@ namespace QualityDoc.API.Models
         [Column("password_hash")]
         public string PasswordHash { get; set; }
 
-        // Propiedades de navegación
+        // ==========================================
+        // PROPIEDADES DE NAVEGACIÓN
+        // ==========================================
+        
+        // 🚀 MODIFICACIÓN 2: La relación con la Empresa ahora es opcional (Company?)
         [ForeignKey("CompanyId")]
-        public Company Company { get; set; }
+        public virtual Company? Company { get; set; }
 
         [ForeignKey("DeptId")]
-        public Department Department { get; set; }
+        public virtual Department? Department { get; set; }
 
         [ForeignKey("RoleId")]
-        public Role Role { get; set; }
+        public virtual Role Role { get; set; }
 
-        public ICollection<DocumentApproval> Approvals { get; set; }
+        public virtual ICollection<DocumentApproval> Approvals { get; set; }
     }
 }

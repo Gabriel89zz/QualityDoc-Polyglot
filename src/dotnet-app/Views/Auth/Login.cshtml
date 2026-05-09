@@ -1,56 +1,298 @@
 @model QualityDoc.API.ViewModels.LoginViewModel
 @{
-    Layout = null; // No queremos que cargue el menú de navegación aquí
+    Layout = null; 
 }
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QualityDoc - Iniciar Sesión</title>
+    <title>Iniciar Sesión - QualityDoc</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-900 flex items-center justify-center h-screen">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Google Sans Flex', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: 'var(--color-primary)',
+                            hover: 'var(--color-primary-hover)',
+                            light: 'var(--color-surface-light)',
+                            dark: 'var(--color-surface-dark)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-    <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-96 border border-gray-700">
-        <h2 class="text-2xl font-bold text-white mb-6 text-center">QualityDoc</h2>
+    <style>
+        :root {
+            --color-primary: #754ee5;
+            --color-primary-hover: #5e3ab8; 
+            --color-bg-light: #FAFAFA;
+            --color-bg-dark: #2a2b2e; 
+            --color-surface-light: #ffffff; 
+            --color-surface-dark: #1e293b; 
+            --color-text-light: #0f172a; 
+            --color-text-dark: #f8fafc;
+        }
+
+        html.dark {
+            --color-primary: #baa5ff; 
+            --color-primary-hover: #a48aed;
+        }
+
+        body {
+            background-color: var(--color-bg-light);
+            color: var(--color-text-light);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        html.dark body {
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-dark);
+        }
+
+        @@keyframes float {
+            0% { transform: translateY(0px) rotate(var(--tw-rotate, 0deg)); }
+            50% { transform: translateY(-15px) rotate(var(--tw-rotate, 0deg)); }
+            100% { transform: translateY(0px) rotate(var(--tw-rotate, 0deg)); }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
         
-        <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4 text-center font-semibold"></div>
+        .animate-float-delayed {
+            animation: float 6s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+    </style>
 
-        <form asp-controller="Auth" asp-action="Login" method="post" class="space-y-4">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="antialiased min-h-screen flex w-full">
+
+    <section class="hidden lg:flex w-[45%] p-6">
+        
+        <div class="w-full h-full rounded-[2rem] bg-brand relative overflow-hidden flex flex-col justify-between shadow-xl shadow-brand/20 transition-colors duration-300">
             
-            <div>
-                <label class="block text-gray-400 text-sm font-bold mb-2">Correo Institucional / Corporativo</label>
-                <input asp-for="Email" class="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                <span asp-validation-for="Email" class="text-red-500 text-xs mt-1 block font-semibold"></span>
-            </div>
-            
-            <div>
-                <label class="block text-gray-400 text-sm font-bold mb-2">Contraseña</label>
-                <input asp-for="Password" type="password" class="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                <span asp-validation-for="Password" class="text-red-500 text-xs mt-1 block font-semibold"></span>
+            <div class="absolute top-10 left-10 flex items-center gap-3 z-20">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg">
+                    <i data-lucide="file-check" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="text-white font-bold text-2xl tracking-tight">QualityDoc</span>
             </div>
 
-            <div class="pt-2">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded shadow-md transition duration-200">
-                    Ingresar al Sistema
+            <div class="absolute inset-0 opacity-10 text-white dark:text-slate-900 pointer-events-none transition-colors duration-300" style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 32px 32px;"></div>
+
+            <div class="relative z-10 w-full flex-1 flex flex-col items-center justify-center mt-20">
+                <div class="relative w-72 h-80 flex items-center justify-center"> 
+                    
+                    <div class="absolute w-56 h-72 bg-white rounded-2xl shadow-xl -rotate-6 animate-float z-10">
+                        <div class="w-32 h-3 bg-slate-200 rounded mt-10 ml-8"></div>
+                        <div class="w-24 h-3 bg-blue-100 rounded mt-6 ml-8"></div>
+                        <div class="w-40 h-3 bg-slate-200 rounded mt-6 ml-8"></div>
+                    </div>
+                    
+                    <div class="absolute w-56 h-72 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl rotate-6 animate-float-delayed border border-white/50 z-20 left-12 top-6">
+                        <div class="absolute top-6 right-6 text-brand">
+                            <i data-lucide="check-circle" class="w-10 h-10"></i>
+                        </div>
+                        <div class="w-28 h-3 bg-blue-100 rounded mt-16 ml-8"></div>
+                        <div class="w-32 h-3 bg-slate-200 rounded mt-6 ml-8"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative z-10 px-10 pb-12 w-full flex flex-col ">
+                <h2 class="text-4xl font-extrabold text-white dark:text-slate-900 mb-4 transition-colors duration-300 leading-tight">Control integral para<br>normativas globales.</h2>
+                <p class="text-white/90 dark:text-slate-800 text-base max-w-md leading-relaxed transition-colors duration-300">
+                    Trazabilidad total, flujos de aprobación seguros y gestión documental centralizada bajo estándares ISO 9001 e IATF 16949.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="w-full lg:w-[55%] flex flex-col relative px-8 sm:px-12 md:px-24">
+        
+        <header class="absolute top-8 right-8 left-8 lg:left-auto flex justify-between lg:justify-end items-center gap-6">
+            <div class="flex lg:hidden items-center gap-2 text-brand font-bold text-2xl transition-colors duration-300">
+                <i data-lucide="hexagon" class="w-8 h-8"></i> QMS
+            </div>
+
+            <div class="flex items-center gap-4">
+                <p class="text-base text-slate-500 dark:text-slate-400 hidden sm:block">
+                    ¿Tu empresa es nueva aquí?
+                    <a asp-action="Register" class="font-semibold text-slate-900 dark:text-white hover:text-brand dark:hover:text-brand transition-colors">Regístrate</a>
+                </p>
+                <button id="themeToggle" class="p-3 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand" aria-label="Cambiar tema">
+                    <i data-lucide="moon" id="moonIcon" class="w-6 h-6 text-slate-600 dark:text-slate-300"></i>
+                    <i data-lucide="sun" id="sunIcon" class="w-6 h-6 text-slate-600 dark:text-slate-300 hidden"></i>
                 </button>
             </div>
-        </form>
+        </header>
 
-        <div class="mt-6 text-center border-t border-gray-700 pt-4">
-            <p class="text-sm text-gray-400">
-                ¿Tu empresa es nueva aquí? <br>
-                <a asp-action="Register" class="font-medium text-blue-400 hover:text-blue-300 transition inline-block mt-1">
-                    Registra tu cuenta e instala el sistema
-                </a>
-            </p>
+        <div class="flex-1 flex flex-col justify-center max-w-md w-full mx-auto">
+            
+            <div class="mb-10 mt-20 lg:mt-0"> 
+                <h1 class="text-5xl font-bold tracking-tight mb-3">Iniciar sesión</h1>
+                <p class="text-base text-slate-500 dark:text-slate-400">Accede a tu panel de control de calidad.</p>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-sm mb-4 font-semibold"></div>
+
+            <form asp-controller="Auth" asp-action="Login" method="post" id="loginForm" class="space-y-6">
+                <div>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="mail" class="w-6 h-6 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
+                        </div>
+                        <input 
+                            asp-for="Email" 
+                            type="email" 
+                            id="email" 
+                            placeholder="tu.correo@empresa.com" 
+                            class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
+                            required
+                        >
+                    </div>
+                    <span asp-validation-for="Email" class="text-red-500 text-xs mt-1 block font-semibold"></span>
+                </div>
+
+                <div>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="lock" class="w-6 h-6 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
+                        </div>
+                        <input 
+                            asp-for="Password"
+                            type="password" 
+                            id="password" 
+                            placeholder="••••••••••••" 
+                            class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
+                            required
+                        >
+                    </div>
+                    <span asp-validation-for="Password" class="text-red-500 text-xs mt-1 block font-semibold"></span>
+                </div>
+
+                <div class="flex justify-between items-center px-1">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-brand focus:ring-brand dark:border-slate-600 dark:bg-slate-800 transition-colors duration-300">
+                        <span class="text-sm text-slate-500 dark:text-slate-400">Recordarme</span>
+                    </label>
+                    <a href="#" class="text-sm font-medium text-brand hover:text-brand-hover transition-colors duration-300">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <p id="errorMessage" class="text-sm text-red-500 hidden mt-1"><i data-lucide="alert-circle" class="w-4 h-4 inline mr-1"></i> Por favor, completa ambos campos correctamente.</p>
+
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full py-4 px-4 bg-brand hover:bg-brand-hover text-white dark:text-slate-900 rounded-xl text-base font-medium shadow-md shadow-brand/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand dark:focus:ring-offset-[#2a2b2e] flex justify-center items-center gap-2"
+                >
+                    <span>Comenzar gestión</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </form>
+
         </div>
-    </div>
+        
+        <div class="absolute bottom-8 text-center w-full max-w-md mx-auto left-0 right-0 px-8 lg:px-0">
+             <p class="text-xs text-slate-400 dark:text-slate-500">
+                 Accediendo, aceptas nuestras <a href="#" class="underline hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Políticas de Privacidad</a> y <a href="#" class="underline hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Términos de Servicio</a>.
+             </p>
+        </div>
+    </section>
 
     @section Scripts {
         @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     }
+
+    <script>
+        lucide.createIcons();
+
+        // Lógica del modo oscuro
+        const htmlNode = document.documentElement;
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlNode.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        } else {
+            htmlNode.classList.remove('dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            htmlNode.classList.toggle('dark');
+            
+            if (htmlNode.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                localStorage.setItem('theme', 'light');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        });
+
+        // Lógica del formulario adaptada para C# Backend
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        loginForm.addEventListener('submit', (e) => {
+            // Nota: YA NO usamos e.preventDefault() porque necesitamos que el form llegue a C#
+            
+            let hasError = false;
+
+            if (!emailInput.value.trim() || !emailInput.value.includes('@@')) {
+                emailInput.classList.add('border-red-500', 'focus:ring-red-500');
+                hasError = true;
+            }
+            if (!passwordInput.value.trim() || passwordInput.value.length < 3) {
+                passwordInput.classList.add('border-red-500', 'focus:ring-red-500');
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault(); // Solo cancelamos el envío si hay error
+                errorMessage.classList.remove('hidden');
+                submitBtn.classList.add('animate-pulse');
+                setTimeout(() => submitBtn.classList.remove('animate-pulse'), 500);
+            } else {
+                // Efecto visual de carga mientras el backend de C# procesa el login
+                submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-6 w-6 currentColor inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Verificando...`;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+        });
+
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                input.classList.remove('border-red-500', 'focus:ring-red-500');
+                errorMessage.classList.add('hidden');
+            });
+        });
+    </script>
 </body>
 </html>

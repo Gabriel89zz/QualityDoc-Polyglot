@@ -92,7 +92,7 @@ CREATE TABLE Departments (
 
 CREATE TABLE Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
-    company_id INT NOT NULL,
+    company_id INT NULL,
     dept_id INT,
     role_id INT NOT NULL,
     full_name NVARCHAR(200) NOT NULL,

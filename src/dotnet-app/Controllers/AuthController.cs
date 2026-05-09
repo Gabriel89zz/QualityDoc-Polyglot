@@ -39,7 +39,7 @@ namespace QualityDoc.API.Controllers
 
             var user = await _context.Users
                 .Include(u => u.Role)
-                .Include(u => u.Company)
+                .Include(u => u.Company) // 👈 Esto traerá null para el Super Admin, está bien.
                 .FirstOrDefaultAsync(u => u.Email == model.Email);
 
             if (user == null || user.Status != "Active" || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
@@ -54,8 +54,10 @@ namespace QualityDoc.API.Controllers
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.RoleName), 
-                new Claim("CompanyId", user.CompanyId.ToString()), 
-                new Claim("CompanyName", user.Company.LegalName)
+                
+                // 🚀 MODIFICACIÓN: Validación segura para el Super Admin sin empresa
+                new Claim("CompanyId", user.CompanyId.HasValue ? user.CompanyId.Value.ToString() : "0"), 
+                new Claim("CompanyName", user.Company != null ? user.Company.LegalName : "Sistema (Super Admin)")
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
