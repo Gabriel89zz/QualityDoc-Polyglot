@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Expediente del Documento";
     var versiones = ViewBag.Versions as IEnumerable<DocumentVersion>;
-    
     var creators = ViewBag.Creators as Dictionary<int, string>;
     
     // 🧠 Lógica de Permisos Visuales
@@ -20,89 +19,89 @@
     bool canUploadNewVersion = lastVersion != null && (lastVersion.StatusId == 3 || lastVersion.StatusId == 4);
 }
 
-<div class="max-w-7xl mx-auto mt-6">
+<div class="max-w-7xl mx-auto space-y-6 mt-4">
     
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded shadow-sm">
+        <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded-r-xl shadow-sm transition-colors duration-300 border-y-green-100 border-r-green-100 dark:border-transparent">
             <div class="flex items-center">
                 <i class="fa-solid fa-circle-check text-green-500 text-xl mr-3"></i>
-                <p class="text-sm font-bold text-green-800">@TempData["SuccessMessage"]</p>
+                <p class="text-sm font-bold text-green-800 dark:text-green-400">@TempData["SuccessMessage"]</p>
             </div>
         </div>
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded shadow-sm">
+        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm transition-colors duration-300 border-y-red-100 border-r-red-100 dark:border-transparent">
             <div class="flex items-center">
                 <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl mr-3"></i>
-                <p class="text-sm font-bold text-red-800">@TempData["ErrorMessage"]</p>
+                <p class="text-sm font-bold text-red-800 dark:text-red-400">@TempData["ErrorMessage"]</p>
             </div>
         </div>
     }
 
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-            <div class="flex items-center space-x-3">
-                <h2 class="text-3xl font-black text-gray-800 tracking-tight">
+            <div class="flex items-center space-x-3 mb-1">
+                <h2 class="text-3xl font-black text-slate-800 dark:text-white tracking-tight">
                     @Model.DocCode
                 </h2>
                 @if (Model.Status == "Active")
                 {
-                    <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full border border-green-200">Activo</span>
+                    <span class="px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-bold rounded-full border border-green-200 dark:border-green-800/30">Activo</span>
                 }
                 else
                 {
-                    <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full border border-red-200">Suspendido</span>
+                    <span class="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-bold rounded-full border border-red-200 dark:border-red-800/30">Suspendido</span>
                 }
             </div>
-            <p class="text-gray-600 font-medium text-lg mt-1">@Model.DocName</p>
+            <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">@Model.DocName</p>
         </div>
         
-        <div class="mt-4 sm:mt-0 flex flex-wrap gap-2">
-            <a asp-action="Index" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium py-2 px-4 rounded shadow-sm transition inline-flex items-center text-sm">
+        <div class="mt-4 sm:mt-0 flex flex-wrap gap-3">
+            <a asp-action="Index" class="bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors text-sm flex items-center">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver
             </a>
             
             @if (hasPowerOverDoc && isDraft)
             {
-                <a asp-action="Edit" asp-route-id="@Model.DocId" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded shadow-sm transition inline-flex items-center text-sm">
-                    <i class="fa-solid fa-pen mr-2"></i> Editar Documento
+                <a asp-action="Edit" asp-route-id="@Model.DocId" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-5 rounded-xl shadow-md shadow-brand/20 transition-colors inline-flex items-center text-sm">
+                    <i class="fa-solid fa-pen mr-2"></i> Editar Metadatos
                 </a>
             }
         </div>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
-        <div class="p-6">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b pb-2">Información del Documento</h3>
+    <div class="bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300 overflow-hidden">
+        <div class="p-6 md:p-8">
+            <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-100 dark:border-[#4a4b50] pb-3">Información Estructural</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-y-6 gap-x-8">
                 <div>
-                    <p class="text-sm text-gray-500 font-medium">Categoría</p>
-                    <p class="mt-1 text-base text-gray-900 font-semibold"><i class="fa-solid fa-folder-tree text-blue-500 mr-2"></i>@Model.Category?.CategoryName</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Categoría</p>
+                    <p class="mt-1 text-base text-slate-900 dark:text-white font-bold"><i class="fa-solid fa-folder-tree text-brand mr-2"></i>@Model.Category?.CategoryName</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 font-medium">Departamento Propietario</p>
-                    <p class="mt-1 text-base text-gray-900 font-semibold"><i class="fa-solid fa-building-user text-indigo-500 mr-2"></i>@Model.Department?.DeptName</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Departamento Propietario</p>
+                    <p class="mt-1 text-base text-slate-900 dark:text-white font-bold"><i class="fa-solid fa-building-user text-blue-500 dark:text-blue-400 mr-2"></i>@Model.Department?.DeptName</p>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 font-medium">Origen del Documento</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Origen del Documento</p>
                     <p class="mt-1">
                         @if (Model.IsExternal)
                         {
-                            <span class="inline-flex items-center text-sm font-semibold text-purple-700"><i class="fa-solid fa-cloud-arrow-down mr-2"></i> Externo</span>
+                            <span class="inline-flex items-center text-sm font-bold text-purple-700 dark:text-purple-400"><i class="fa-solid fa-cloud-arrow-down mr-2"></i> Externo</span>
                         }
                         else
                         {
-                            <span class="inline-flex items-center text-sm font-semibold text-teal-700"><i class="fa-solid fa-house-laptop mr-2"></i> Interno</span>
+                            <span class="inline-flex items-center text-sm font-bold text-teal-700 dark:text-teal-400"><i class="fa-solid fa-house-laptop mr-2"></i> Interno</span>
                         }
                     </p>
                 </div>
                 <div class="md:col-span-3">
-                    <p class="text-sm text-gray-500 font-medium mb-2">Descripción / Objetivo</p>
-                    <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded text-gray-700 text-sm">
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mb-2">Descripción / Objetivo</p>
+                    <div class="bg-slate-50 dark:bg-[#2a2b2e] border-l-4 border-slate-300 dark:border-[#4a4b50] p-4 rounded-r-xl text-slate-700 dark:text-slate-300 text-sm font-medium">
                         @(string.IsNullOrEmpty(Model.Description) ? "No se ha proporcionado un objetivo para este documento." : Model.Description)
                     </div>
                 </div>
@@ -110,81 +109,85 @@
         </div>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-            <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Archivos y Versiones</h3>
+    <div class="bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300 overflow-hidden">
+        <div class="px-6 md:px-8 py-5 border-b border-slate-200 dark:border-[#4a4b50] flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/50 dark:bg-[#2a2b2e]/50">
+            <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest mb-3 sm:mb-0"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Control de Versiones</h3>
             
             @if (hasPowerOverDoc && canUploadNewVersion)
             {
-                <a asp-action="NewVersion" asp-route-id="@Model.DocId" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded shadow-sm transition">
-                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Subir Nueva Versión
+                <a asp-action="NewVersion" asp-route-id="@Model.DocId" class="bg-brand hover:bg-brand-hover text-white text-xs font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors flex items-center">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2 text-base"></i> Subir Nueva Versión
                 </a>
             }
         </div>
         
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-white">
+            <table class="min-w-full text-left border-collapse">
+                <thead class="bg-white dark:bg-[#323338] border-b border-slate-200 dark:border-[#4a4b50]">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Versión</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Estatus</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Motivo del Cambio</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Fecha</th>
-                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Acciones</th>
+                        <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Versión</th>
+                        <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Estatus</th>
+                        <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Motivo del Cambio</th>
+                        <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Fecha</th>
+                        <th class="px-6 md:px-8 py-4 text-right text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Acciones de Archivo</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 bg-white">
+                <tbody class="divide-y divide-slate-100 dark:divide-[#4a4b50]">
                     @if (versiones != null && versiones.Any())
                     {
                         foreach (var version in versiones)
                         {
                             bool isLatest = version.VersionId == lastVersion?.VersionId;
-                            string rowClass = isLatest ? "bg-indigo-50 bg-opacity-50" : "hover:bg-gray-50";
+                            
+                            // 🚀 Clases iniciales dinámicas para el JS
+                            string activeClasses = "bg-brand/5 dark:bg-brand/10 border-brand";
+                            string inactiveClasses = "hover:bg-slate-50 dark:hover:bg-[#2a2b2e] border-transparent";
+                            string rowClass = isLatest ? activeClasses : inactiveClasses;
 
-                            <tr id="row-@version.VersionId" class="transition-colors version-row @rowClass">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-black text-gray-900">
+                            <tr id="row-@version.VersionId" class="transition-colors duration-200 version-row border-l-4 @rowClass">
+                                <td class="px-6 md:px-8 py-5 whitespace-nowrap text-base font-black text-slate-900 dark:text-white">
                                     v @version.VersionNum
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <td class="px-6 md:px-8 py-5 whitespace-nowrap text-sm">
                                     @if (version.StatusId == 1)
                                     {
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">
+                                        <span class="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-bold bg-slate-100 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-[#4a4b50]">
                                             <i class="fa-solid fa-pen-ruler mr-1.5"></i> Borrador
                                         </span>
                                     }
                                     else if (version.StatusId == 2)
                                     {
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        <span class="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30">
                                             <i class="fa-solid fa-spinner fa-spin mr-1.5"></i> En Revisión
                                         </span>
                                     }
                                     else if (version.StatusId == 3)
                                     {
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                                        <span class="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-bold bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/30">
                                             <i class="fa-solid fa-check-double mr-1.5"></i> Aprobado
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-200">
-                                            Obsoleto
+                                        <span class="inline-flex items-center px-2.5 py-1.5 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-500 border border-amber-200 dark:border-amber-800/30">
+                                            <i class="fa-solid fa-box-archive mr-1.5"></i> Obsoleto
                                         </span>
                                     }
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600 max-w-md truncate" title="@version.ChangeDescription">
+                                <td class="px-6 md:px-8 py-5 text-sm font-medium text-slate-600 dark:text-slate-400 max-w-xs xl:max-w-md truncate" title="@version.ChangeDescription">
                                     @version.ChangeDescription
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    @version.CreatedAt.ToString("dd/MMM/yyyy")
+                                <td class="px-6 md:px-8 py-5 whitespace-nowrap text-sm font-bold text-slate-500 dark:text-slate-400">
+                                    @version.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2 flex justify-end">
+                                <td class="px-6 md:px-8 py-5 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2">
                                     
-                                    <button type="button" onclick="showComments(@version.VersionId)" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded transition" title="Ver comentarios de esta versión">
-                                        <i class="fa-solid fa-comments"></i>
+                                    <button type="button" onclick="showComments(@version.VersionId)" class="text-brand hover:text-brand-hover bg-brand/10 hover:bg-brand/20 dark:text-brand-light dark:bg-brand/20 dark:hover:bg-brand/30 px-3.5 py-2 rounded-lg transition-colors" title="Ver comentarios / historial">
+                                        <i class="fa-solid fa-comments text-base"></i>
                                     </button>
 
-                                    <a href="@version.FilePath" target="_blank" class="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded transition" title="Ver PDF">
-                                        <i class="fa-solid fa-file-pdf"></i>
+                                    <a href="@version.FilePath" target="_blank" class="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3.5 py-2 rounded-lg transition-colors" title="Ver archivo PDF original">
+                                        <i class="fa-solid fa-file-pdf text-base"></i>
                                     </a>
 
                                     @if (version.StatusId == 1 && hasPowerOverDoc)
@@ -194,16 +197,16 @@
                                             <input type="hidden" name="docId" value="@Model.DocId" />
                                             <input type="file" name="newFile" id="file-@version.VersionId" accept=".pdf" class="hidden" onchange="if(confirm('¿Estás seguro de que deseas sobreescribir el borrador actual con este nuevo archivo PDF?')) { document.getElementById('form-replace-@version.VersionId').submit(); } else { this.value = ''; }" />
                                             
-                                            <button type="button" onclick="document.getElementById('file-@version.VersionId').click();" class="text-orange-600 hover:text-orange-900 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded transition" title="Corregir y reemplazar archivo PDF">
-                                                <i class="fa-solid fa-file-arrow-up"></i>
+                                            <button type="button" onclick="document.getElementById('file-@version.VersionId').click();" class="text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 px-3.5 py-2 rounded-lg transition-colors" title="Corregir y reemplazar archivo PDF">
+                                                <i class="fa-solid fa-file-arrow-up text-base"></i>
                                             </button>
                                         </form>
 
                                         <form asp-action="SendToReview" method="post" class="inline ml-2" onsubmit="return confirm('¿Iniciar el flujo de revisión para esta versión?');">
                                             <input type="hidden" name="versionId" value="@version.VersionId" />
                                             <input type="hidden" name="docId" value="@Model.DocId" />
-                                            <button type="submit" class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded transition" title="Solicitar Firmas">
-                                                <i class="fa-solid fa-paper-plane"></i>
+                                            <button type="submit" class="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 px-3.5 py-2 rounded-lg transition-colors" title="Solicitar Firmas (Iniciar Flujo)">
+                                                <i class="fa-solid fa-paper-plane text-base"></i>
                                             </button>
                                         </form>
                                     }
@@ -214,9 +217,10 @@
                     else
                     {
                         <tr>
-                            <td colspan="5" class="px-6 py-10 text-center text-gray-400">
-                                <i class="fa-solid fa-folder-open text-3xl mb-3"></i>
-                                <p>Este documento no tiene ninguna versión subida todavía.</p>
+                            <td colspan="5" class="px-6 md:px-8 py-12 text-center text-slate-400 dark:text-slate-500">
+                                <i class="fa-solid fa-folder-open text-4xl mb-4 opacity-50"></i>
+                                <p class="text-base font-bold text-slate-600 dark:text-slate-400">Sin historial de versiones</p>
+                                <p class="text-sm mt-1">Este documento no tiene ninguna versión subida todavía.</p>
                             </td>
                         </tr>
                     }
@@ -225,12 +229,14 @@
         </div>
     </div>
 
-    <div id="seccion-bitacora" class="bg-white shadow-sm rounded-lg border border-gray-200 mb-6">
-        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-            <h3 class="text-xs font-bold text-gray-700 uppercase tracking-widest"><i class="fa-solid fa-comments mr-2"></i> Bitácora de Aprobaciones</h3>
-            <span class="text-xs text-gray-500 bg-white px-2 py-1 rounded border border-gray-200">Selecciona una versión arriba para ver sus detalles</span>
+    <div id="seccion-bitacora" class="bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300 overflow-hidden mb-8">
+        <div class="px-6 md:px-8 py-5 border-b border-slate-200 dark:border-[#4a4b50] bg-slate-50/50 dark:bg-[#2a2b2e]/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest"><i class="fa-solid fa-comments mr-2"></i> Bitácora de Aprobaciones</h3>
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-[#323338] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] shadow-sm">
+                <i class="fa-solid fa-mouse-pointer mr-1 text-brand"></i> Haz clic en una versión arriba
+            </span>
         </div>
-        <div class="p-6">
+        <div class="p-6 md:p-8">
             @if (versiones != null && versiones.Any())
             {
                 <div class="space-y-6 relative">
@@ -240,32 +246,36 @@
                         bool isLatest = version.VersionId == lastVersion?.VersionId;
                         string displayClass = isLatest ? "block" : "hidden";
 
-                        <div id="comments-@version.VersionId" class="comments-section @displayClass">
-                            <div class="border-l-2 border-indigo-200 pl-4 ml-2">
-                                <h4 class="text-sm font-bold text-indigo-800 mb-3 bg-indigo-50 inline-block px-3 py-1 rounded-full border border-indigo-100">Mostrando historial de la Versión @version.VersionNum</h4>
+                        <div id="comments-@version.VersionId" class="comments-section @displayClass animate-fade-in">
+                            <div class="border-l-2 border-brand/30 dark:border-brand/50 pl-6 ml-2">
+                                <h4 class="text-sm font-bold text-brand dark:text-brand-light mb-6 bg-brand/5 dark:bg-brand/10 inline-block px-4 py-1.5 rounded-full border border-brand/20 dark:border-brand/30">
+                                    Historial de la <span class="font-black">Versión @version.VersionNum</span>
+                                </h4>
                                 
-                                <div class="space-y-4 mt-2">
+                                <div class="space-y-5">
                                     
                                     @{
                                         int creatorId = (int?)version.CreatedBy ?? 0;
                                         string creatorName = creators != null && creators.ContainsKey(creatorId) ? creators[creatorId] : "Autor Desconocido";
                                     }
-                                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm mb-4">
+                                    
+                                    <div class="bg-slate-50 dark:bg-[#2a2b2e] p-5 rounded-2xl border border-slate-200 dark:border-[#4a4b50] flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm relative overflow-hidden transition-colors">
+                                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-300 dark:bg-slate-600"></div>
                                         <div class="flex-shrink-0 mt-1">
-                                            <i class="fa-solid fa-file-pen text-gray-400 text-2xl"></i>
+                                            <i class="fa-solid fa-file-pen text-slate-400 dark:text-slate-500 text-2xl"></i>
                                         </div>
-                                        <div class="flex-grow">
-                                            <div class="flex justify-between items-start mb-1">
+                                        <div class="flex-grow w-full">
+                                            <div class="flex flex-wrap justify-between items-start mb-2 gap-2">
                                                 <div>
-                                                    <span class="font-bold text-gray-900 text-sm">@creatorName</span>
-                                                    <span class="text-xs text-gray-500 ml-2 font-semibold bg-gray-200 px-2 py-0.5 rounded">Autor</span>
+                                                    <span class="font-bold text-slate-900 dark:text-white text-sm">@creatorName</span>
+                                                    <span class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-2 font-bold bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] px-2 py-1 rounded-md">Autor</span>
                                                 </div>
-                                                <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> @version.CreatedAt.ToString("dd/MMM/yyyy HH:mm")</span>
+                                                <span class="text-xs font-bold text-slate-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> @version.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")</span>
                                             </div>
-                                            <p class="text-sm font-semibold text-gray-600 mb-2">Acción: Creó el borrador inicial</p>
-                                            <div class="bg-white p-3 rounded border border-gray-200 text-sm text-gray-700 relative">
-                                                <i class="fa-solid fa-quote-left text-gray-100 absolute top-2 left-2 text-lg"></i>
-                                                <p class="pl-6 relative z-10 italic">
+                                            <p class="text-sm font-bold text-slate-600 dark:text-slate-400 mb-3">Acción: Creó el borrador inicial</p>
+                                            <div class="bg-white dark:bg-[#323338] p-4 rounded-xl border border-slate-200 dark:border-[#4a4b50] text-sm text-slate-700 dark:text-slate-300 relative shadow-sm">
+                                                <i class="fa-solid fa-quote-left text-slate-100 dark:text-[#4a4b50] absolute top-3 left-3 text-2xl opacity-50"></i>
+                                                <p class="pl-8 relative z-10 italic font-medium leading-relaxed">
                                                     @(string.IsNullOrEmpty(version.ChangeDescription) ? "Creación inicial del documento." : version.ChangeDescription)
                                                 </p>
                                             </div>
@@ -274,19 +284,20 @@
 
                                     @if (version.StatusId >= 2)
                                     {
-                                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm mb-4">
+                                        <div class="bg-brand/5 dark:bg-brand/10 p-5 rounded-2xl border border-brand/20 dark:border-brand/30 flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm relative overflow-hidden transition-colors">
+                                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand"></div>
                                             <div class="flex-shrink-0 mt-1">
-                                                <i class="fa-solid fa-paper-plane text-blue-500 text-2xl"></i>
+                                                <i class="fa-solid fa-paper-plane text-brand text-2xl"></i>
                                             </div>
-                                            <div class="flex-grow">
-                                                <div class="flex justify-between items-start mb-1">
+                                            <div class="flex-grow w-full">
+                                                <div class="flex flex-wrap justify-between items-start mb-2 gap-2">
                                                     <div>
-                                                        <span class="font-bold text-gray-900 text-sm">@creatorName</span>
-                                                        <span class="text-xs text-blue-600 ml-2 font-semibold bg-blue-100 px-2 py-0.5 rounded">Flujo</span>
+                                                        <span class="font-bold text-slate-900 dark:text-white text-sm">@creatorName</span>
+                                                        <span class="text-[10px] uppercase tracking-wider text-brand dark:text-brand-light ml-2 font-bold bg-white dark:bg-[#323338] border border-brand/20 dark:border-brand/40 px-2 py-1 rounded-md">Emisor</span>
                                                     </div>
-                                                    <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> @(version.UpdatedAt?.ToString("dd/MMM/yyyy HH:mm") ?? version.CreatedAt.ToString("dd/MMM/yyyy HH:mm"))</span>
+                                                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> @(version.UpdatedAt?.ToLocalTime().ToString("dd/MMM/yyyy HH:mm") ?? version.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm"))</span>
                                                 </div>
-                                                <p class="text-sm font-semibold text-blue-700">Acción: Finalizó borrador y solicitó revisión formal</p>
+                                                <p class="text-sm font-bold text-brand dark:text-brand-light">Acción: Finalizó borrador y solicitó revisión formal en sistema</p>
                                             </div>
                                         </div>
                                     }
@@ -295,29 +306,34 @@
                                     {
                                         foreach (var approval in version.Approvals.Where(a => a.ApprovalStatus != "Pending").OrderBy(a => a.UpdatedAt ?? a.CreatedAt))
                                         {
-                                            string statusColor = approval.ApprovalStatus == "Approved" ? "text-green-600" : "text-red-600";
-                                            string bgCard = approval.ApprovalStatus == "Approved" ? "bg-green-50" : "bg-red-50";
-                                            string borderColor = approval.ApprovalStatus == "Approved" ? "border-green-100" : "border-red-100";
-                                            string statusIcon = approval.ApprovalStatus == "Approved" ? "fa-circle-check" : "fa-circle-xmark";
-                                            string statusText = approval.ApprovalStatus == "Approved" ? "Aprobó" : "Rechazó";
+                                            bool isApproved = approval.ApprovalStatus == "Approved";
+                                            
+                                            // Clases dinámicas adaptadas al modo oscuro
+                                            string statusColor = isApproved ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400";
+                                            string bgCard = isApproved ? "bg-green-50 dark:bg-green-900/10" : "bg-red-50 dark:bg-red-900/10";
+                                            string borderColor = isApproved ? "border-green-200 dark:border-green-900/30" : "border-red-200 dark:border-red-900/30";
+                                            string leftBorderColor = isApproved ? "bg-green-500" : "bg-red-500";
+                                            string statusIcon = isApproved ? "fa-circle-check" : "fa-circle-xmark";
+                                            string statusText = isApproved ? "Aprobó" : "Rechazó";
 
-                                            <div class="@bgCard p-4 rounded-lg border @borderColor flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm">
+                                            <div class="@bgCard p-5 rounded-2xl border @borderColor flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm relative overflow-hidden transition-colors">
+                                                <div class="absolute left-0 top-0 bottom-0 w-1 @leftBorderColor"></div>
                                                 <div class="flex-shrink-0 mt-1">
                                                     <i class="fa-solid @statusIcon @statusColor text-2xl"></i>
                                                 </div>
-                                                <div class="flex-grow">
-                                                    <div class="flex justify-between items-start mb-1">
+                                                <div class="flex-grow w-full">
+                                                    <div class="flex flex-wrap justify-between items-start mb-2 gap-2">
                                                         <div>
-                                                            <span class="font-bold text-gray-900 text-sm">@approval.Approver?.FullName</span>
-                                                            <span class="text-xs text-gray-500 ml-2 font-semibold bg-white border @borderColor px-2 py-0.5 rounded">Paso @approval.StepOrder: @approval.StepType</span>
+                                                            <span class="font-bold text-slate-900 dark:text-white text-sm">@approval.Approver?.FullName</span>
+                                                            <span class="text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-300 ml-2 font-bold bg-white dark:bg-[#323338] border @borderColor px-2 py-1 rounded-md shadow-sm">Paso @approval.StepOrder: @approval.StepType</span>
                                                         </div>
-                                                        <span class="text-xs text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> @(approval.UpdatedAt?.ToString("dd/MMM/yyyy HH:mm") ?? approval.CreatedAt.ToString("dd/MMM/yyyy HH:mm"))</span>
+                                                        <span class="text-xs font-bold text-slate-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> @(approval.UpdatedAt?.ToLocalTime().ToString("dd/MMM/yyyy HH:mm") ?? approval.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm"))</span>
                                                     </div>
-                                                    <p class="text-sm font-semibold @statusColor mb-2">Dictamen: @statusText el documento</p>
+                                                    <p class="text-sm font-bold @statusColor mb-3">Dictamen: @statusText el documento</p>
                                                     
-                                                    <div class="bg-white p-3 rounded border @borderColor text-sm text-gray-700 relative">
-                                                        <i class="fa-solid fa-quote-left text-gray-200 absolute top-2 left-2 text-lg"></i>
-                                                        <p class="pl-6 relative z-10 italic">
+                                                    <div class="bg-white dark:bg-[#323338] p-4 rounded-xl border @borderColor text-sm text-slate-700 dark:text-slate-300 relative shadow-sm">
+                                                        <i class="fa-solid fa-quote-left @(isApproved ? "text-green-100 dark:text-green-900/20" : "text-red-100 dark:text-red-900/20") absolute top-3 left-3 text-2xl opacity-70"></i>
+                                                        <p class="pl-8 relative z-10 italic font-medium leading-relaxed">
                                                             @(string.IsNullOrEmpty(approval.Comments) ? "Sin comentarios adicionales." : approval.Comments)
                                                         </p>
                                                     </div>
@@ -333,30 +349,36 @@
             }
             else
             {
-                <div class="text-center py-8 text-gray-400">
-                    <i class="fa-regular fa-comments text-4xl mb-3"></i>
-                    <p class="text-sm">Aún no hay historial para este documento.</p>
+                <div class="text-center py-10">
+                    <i class="fa-regular fa-comments text-4xl mb-4 text-slate-300 dark:text-slate-600"></i>
+                    <p class="text-base font-bold text-slate-600 dark:text-slate-400">Sin bitácora disponible</p>
+                    <p class="text-sm text-slate-500 mt-1">Aún no hay historial o comentarios para este documento.</p>
                 </div>
             }
         </div>
     </div>
 
-    <div class="bg-gray-50 rounded-lg p-4 text-xs text-gray-500 border border-gray-200 flex flex-col sm:flex-row justify-between items-center">
-        <div class="flex items-center space-x-4">
-            <span><i class="fa-solid fa-calendar-plus mr-1"></i> Creado: @Model.CreatedAt.ToString("dd/MMM/yyyy HH:mm")</span>
+    <div class="bg-slate-50 dark:bg-[#2a2b2e] rounded-xl p-5 text-xs text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-[#4a4b50] flex flex-col sm:flex-row justify-between items-center transition-colors font-semibold shadow-sm">
+        <div class="flex items-center space-x-5">
+            <span><i class="fa-solid fa-calendar-plus mr-1 text-slate-400"></i> Registro: @Model.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")</span>
             @if(Model.UpdatedAt.HasValue)
             {
-                <span><i class="fa-solid fa-pen mr-1"></i> Modificado: @Model.UpdatedAt.Value.ToString("dd/MMM/yyyy HH:mm")</span>
+                <span><i class="fa-solid fa-pen mr-1 text-slate-400"></i> Modificación: @Model.UpdatedAt.Value.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")</span>
             }
         </div>
-        <div class="mt-2 sm:mt-0">
-            <i class="fa-solid fa-fingerprint mr-1"></i> ID Registro: #@Model.DocId
+        <div class="mt-3 sm:mt-0 px-3 py-1 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-md shadow-sm">
+            <i class="fa-solid fa-fingerprint mr-1 text-brand"></i> ID Interno: #@Model.DocId
         </div>
     </div>
 
 </div>
 
 @section Scripts {
+    <style>
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
     <script>
         function showComments(versionId) {
             // 1. Ocultar todos los bloques de comentarios
@@ -373,18 +395,18 @@
                 targetBlock.classList.add('block');
             }
 
-            // 3. Quitar el sombreado de todas las filas en la tabla
+            // 3. Quitar el estado activo de TODAS las filas (Adaptado a Modo Oscuro/Claro)
             var rows = document.querySelectorAll('.version-row');
             rows.forEach(function(row) {
-                row.classList.remove('bg-indigo-50', 'bg-opacity-50');
-                row.classList.add('hover:bg-gray-50');
+                row.classList.remove('bg-brand/5', 'dark:bg-brand/10', 'border-brand');
+                row.classList.add('hover:bg-slate-50', 'dark:hover:bg-[#2a2b2e]', 'border-transparent');
             });
 
-            // 4. Sombrear la fila que se acaba de seleccionar
+            // 4. Aplicar el estado activo a la fila seleccionada
             var targetRow = document.getElementById('row-' + versionId);
             if (targetRow) {
-                targetRow.classList.remove('hover:bg-gray-50');
-                targetRow.classList.add('bg-indigo-50', 'bg-opacity-50');
+                targetRow.classList.remove('hover:bg-slate-50', 'dark:hover:bg-[#2a2b2e]', 'border-transparent');
+                targetRow.classList.add('bg-brand/5', 'dark:bg-brand/10', 'border-brand');
             }
             
             // 5. UX Premium: Hacer un scroll suave hacia abajo para leer los comentarios

@@ -5,200 +5,142 @@
     bool isActive = Model.Status == "Active";
 }
 
-<div class="max-w-5xl mx-auto mt-8 mb-10">
-    
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden flex flex-col">
+<div class="max-w-4xl mx-auto space-y-6 mt-4">
+    <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-brand transition-colors">Categorías</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-slate-400 dark:text-slate-500">Ficha Técnica</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
         
-        <!-- 1. ENCABEZADO DINÁMICO (Azul si Activa, Gris si Inactiva) -->
-        <div class="@(isActive ? "bg-blue-600" : "bg-slate-600") px-8 py-8 flex justify-between items-start transition-colors duration-300">
-            <div class="flex items-center">
-                <div class="w-20 h-20 bg-white/20 rounded-2xl border border-white/10 flex justify-center items-center text-4xl font-extrabold text-white shadow-inner mr-6">
+        <div class="@(isActive ? "bg-brand" : "bg-slate-600 dark:bg-slate-800") p-8 flex flex-col md:flex-row justify-between items-center transition-colors duration-300 relative overflow-hidden">
+            <div class="absolute right-0 top-0 opacity-10 translate-x-1/4 -translate-y-1/4">
+                <i class="fa-solid fa-folder-tree text-9xl text-white"></i>
+            </div>
+
+            <div class="flex items-center relative z-10">
+                <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 flex justify-center items-center text-4xl font-black text-white shadow-xl mr-6">
                     @Model.CategoryName.Substring(0, 1).ToUpper()
                 </div>
                 
                 <div>
-                    <h2 class="text-3xl font-bold text-white tracking-tight">@Model.CategoryName</h2>
-                    <div class="flex items-center mt-1.5 @(isActive ? "text-blue-100" : "text-slate-200") text-sm">
-                        <i class="fa-solid fa-layer-group mr-2 opacity-80"></i>
-                        <span>
-                            Nivel @Model.HierarchyLevel - 
-                            @(Model.HierarchyLevel == 1 ? "Manuales/Políticas" :
-                              Model.HierarchyLevel == 2 ? "Procedimientos" :
-                              Model.HierarchyLevel == 3 ? "Instructivos" : "Formatos/Registros")
+                    <h2 class="text-3xl font-black text-white tracking-tight">@Model.CategoryName</h2>
+                    <div class="flex items-center mt-2 text-white/80 text-sm font-medium">
+                        <span class="bg-white/20 px-3 py-1 rounded-full border border-white/20">
+                            <i class="fa-solid fa-layer-group mr-1.5"></i> Nivel ISO @Model.HierarchyLevel
                         </span>
                     </div>
                 </div>
             </div>
 
-            <!-- Badge de Estado en la esquina superior derecha -->
-            @if (isActive)
-            {
-                <span class="bg-blue-500/50 text-white border border-blue-400/50 text-xs font-semibold px-4 py-1.5 rounded-full shadow-sm">
-                    Categoría Activa
-                </span>
-            }
-            else
-            {
-                <span class="bg-red-500/80 text-white border border-red-400/50 text-xs font-semibold px-4 py-1.5 rounded-full shadow-sm">
-                    Categoría Inactiva
-                </span>
-            }
-        </div>
-
-        <!-- 2. CUERPO DE LA TARJETA -->
-        <div class="p-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mb-10">
-                <!-- Columna Izquierda -->
-                <div>
-                    <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">Clasificación</h3>
-                    <div class="flex items-start mb-5">
-                        <div class="bg-gray-50 p-2 rounded text-gray-500 mr-3 border border-gray-100">
-                            <i class="fa-solid fa-barcode w-4 text-center"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-0.5">Prefijo de Codificación</p>
-                            <p class="font-mono font-bold text-gray-900 text-base">@Model.Prefix</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start">
-                        <div class="bg-gray-50 p-2 rounded text-gray-500 mr-3 border border-gray-100">
-                            <i class="fa-solid fa-align-left w-4 text-center"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-0.5">Descripción de Uso</p>
-                            <p class="font-medium text-gray-800 text-sm leading-snug">
-                                @(!string.IsNullOrEmpty(Model.Description) ? Model.Description : "No se especificó una descripción para esta categoría.")
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Columna Derecha -->
-                <div>
-                    <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">Normatividad</h3>
-                    <div class="flex items-start">
-                        <div class="bg-gray-50 p-2 rounded text-gray-500 mr-3 border border-gray-100">
-                            <i class="fa-solid fa-shield-halved w-4 text-center"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-0.5">Norma Aplicable</p>
-                            <p class="font-bold text-gray-900 text-base">
-                                @(Model.Norm != null ? Model.Norm.NormName : "Genérica (Todas)")
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <h3 class="text-sm font-bold text-gray-900 mb-4">Auditoría de Registro</h3>
-            <hr class="border-gray-100 mb-4" />
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <!-- Tarjeta 1: Fecha de Alta -->
-                <div class="bg-[#fafafa] border border-gray-100 rounded-lg p-5">
-                    <p class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-3">Fecha de Alta</p>
-                    <div class="space-y-2.5 text-sm text-gray-700">
-                        <div class="flex items-center">
-                            <i class="fa-regular fa-calendar w-5 text-gray-400 text-center mr-2"></i>
-                            <span>@Model.CreatedAt.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")</span>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fa-solid fa-user-shield w-5 text-gray-400 text-center mr-2"></i>
-                            <span>Registrado por: 
-                                <span class="font-bold text-black">
-                                    @(Model.CreatedBy == 1 ? "Sistema" : Model.CreatedByNavigation?.FullName ?? "Usuario Desconocido")
-                                </span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tarjeta 2: Última Actualización -->
-                <div class="bg-[#fafafa] border border-gray-100 rounded-lg p-5">
-                    <p class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-3">Última Actualización</p>
-                    @if (Model.UpdatedAt.HasValue)
-                    {
-                        <div class="space-y-2.5 text-sm text-gray-700">
-                            <div class="flex items-center">
-                                <i class="fa-regular fa-calendar w-5 text-gray-400 text-center mr-2"></i>
-                                <span>@Model.UpdatedAt.Value.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fa-solid fa-user-pen w-5 text-gray-400 text-center mr-2"></i>
-                                <span>Actualizado por: 
-                                    <span class="font-bold text-black">
-                                        @(Model.UpdatedBy == 1 ? "Sistema" : Model.UpdatedByNavigation?.FullName ?? "Usuario Desconocido")
-                                    </span>
-                                </span>
-                            </div>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="h-full flex items-center pb-2">
-                            <p class="text-[14px] text-gray-500 italic">Sin cambios registrados.</p>
-                        </div>
-                    }
-                </div>
-
-                <!-- 🚀 NUEVO: Detalles de Suspensión -->
-                @if (!isActive)
+            <div class="mt-6 md:mt-0 relative z-10">
+                @if (isActive)
                 {
-                    <div class="bg-red-50 border border-red-100 rounded-lg p-5 md:col-span-2 mt-2">
-                        <p class="text-[11px] text-red-500 font-semibold uppercase tracking-wider mb-3">Detalles de Suspensión</p>
-                        <div class="space-y-2.5 text-sm text-red-800">
-                            <div class="flex items-center">
-                                <i class="fa-solid fa-calendar-xmark w-5 text-red-400 text-center mr-2"></i>
-                                <span>@(Model.DeletedAt?.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm") ?? "Fecha desconocida")</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fa-solid fa-user-slash w-5 text-red-400 text-center mr-2"></i>
-                                <span>Suspendido por: 
-                                    <span class="font-bold text-black">
-                                        @(Model.DeletedByNavigation?.FullName ?? "Sistema")
-                                    </span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    <span class="bg-green-400/20 text-green-50 px-4 py-2 rounded-full text-xs font-bold border border-green-400/30 backdrop-blur-sm">
+                        <i class="fa-solid fa-circle-check mr-1.5"></i> Categoría Vigente
+                    </span>
+                }
+                else
+                {
+                    <span class="bg-red-400/20 text-red-50 px-4 py-2 rounded-full text-xs font-bold border border-red-400/30 backdrop-blur-sm">
+                        <i class="fa-solid fa-ban mr-1.5"></i> Suspendida
+                    </span>
                 }
             </div>
+        </div>
 
-            <!-- 3. FOOTER DE ACCIONES -->
-            <hr class="border-gray-100 mb-6" />
-            
-            <div class="flex justify-between items-center">
-                <a asp-action="Index" class="text-gray-500 hover:text-gray-800 font-semibold text-sm transition flex items-center">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Volver al listado
-                </a>
-                
-                <div class="flex space-x-3">
-                    @if (isActive)
+        <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div class="space-y-6">
+                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-[#4a4b50] pb-2">Identificación de Folios</h3>
+                    
+                    <div class="flex items-center">
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] p-3 rounded-xl mr-4 text-brand dark:text-brand-light border border-slate-100 dark:border-[#4a4b50] shadow-sm">
+                            <i class="fa-solid fa-tag w-5 h-5 text-center"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase">Prefijo del Documento</p>
+                            <p class="text-xl font-mono font-black text-slate-800 dark:text-white">@Model.Prefix-</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] p-3 rounded-xl mr-4 text-blue-500 dark:text-blue-400 border border-slate-100 dark:border-[#4a4b50] shadow-sm">
+                            <i class="fa-solid fa-list-ol w-5 h-5 text-center"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase">Nivel de Jerarquía</p>
+                            <p class="text-sm font-bold text-slate-800 dark:text-white">Grado @Model.HierarchyLevel (Pirámide Documental)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-[#4a4b50] pb-2">Propósito</h3>
+                    <div class="bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-200 dark:border-[#4a4b50] text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic">
+                        <i class="fa-solid fa-quote-left text-slate-200 dark:text-[#4a4b50] text-2xl mr-2"></i>
+                        @(string.IsNullOrEmpty(Model.Description) ? "Sin descripción técnica asignada." : Model.Description)
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-4">Registro de Auditoría</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-100 dark:border-transparent">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase mb-1">Creado el</p>
+                    <p class="text-sm text-slate-800 dark:text-slate-300">
+                        <i class="fa-regular fa-calendar mr-2 text-slate-400"></i> 
+                        @Model.CreatedAt.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-100 dark:border-transparent">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase mb-1">Última actualización</p>
+                    @if (Model.UpdatedAt.HasValue)
                     {
-                        <!-- Botón Suspender convertido a POST -->
-                        <form asp-action="Delete" asp-route-id="@Model.CategoryId" method="post" class="m-0">
-                            <button type="submit" class="px-6 py-2.5 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-50 transition flex items-center" onclick="return confirm('¿Estás seguro de suspender esta categoría documental?');">
-                                <i class="fa-solid fa-ban mr-2"></i> Suspender
-                            </button>
-                        </form>
+                        <p class="text-sm text-slate-800 dark:text-slate-300">
+                            <i class="fa-regular fa-clock mr-2 text-slate-400"></i> 
+                            @Model.UpdatedAt.Value.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")
+                        </p>
                     }
                     else
                     {
-                        <!-- Botón Reactivar convertido a POST -->
-                        <form asp-action="Reactivate" asp-route-id="@Model.CategoryId" method="post" class="m-0">
-                            <button type="submit" class="px-6 py-2.5 bg-white border border-green-200 text-green-600 rounded-lg text-sm font-bold hover:bg-green-50 transition flex items-center" onclick="return confirm('¿Deseas volver a activar esta categoría documental?');">
-                                <i class="fa-solid fa-arrow-rotate-left mr-2"></i> Restaurar
-                            </button>
-                        </form>
+                        <p class="text-sm text-slate-400 italic">Sin modificaciones posteriores.</p>
                     }
-                    <a asp-action="Edit" asp-route-id="@Model.CategoryId" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-md transition flex items-center">
-                        <i class="fa-solid fa-pen-to-square mr-2"></i> Editar Categoría
-                    </a>
                 </div>
             </div>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-[#2a2b2e] p-6 border-t border-slate-100 dark:border-[#4a4b50] flex flex-col sm:flex-row justify-between items-center transition-colors duration-300 gap-4">
+            <a asp-action="Index" class="text-slate-500 hover:text-slate-800 dark:hover:text-white text-sm font-bold flex items-center transition">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Volver al listado
+            </a>
             
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+                @if (isActive)
+                {
+                    <form asp-action="Delete" asp-route-id="@Model.CategoryId" method="post" class="m-0 w-full sm:w-auto">
+                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-white dark:bg-[#323338] border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center justify-center" onclick="return confirm('¿Estás seguro de suspender esta categoría documental?');">
+                            <i class="fa-solid fa-ban mr-2"></i> Suspender
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="Reactivate" asp-route-id="@Model.CategoryId" method="post" class="m-0 w-full sm:w-auto">
+                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-white dark:bg-[#323338] border border-green-200 dark:border-green-900/50 text-green-600 dark:text-green-400 rounded-xl text-sm font-bold hover:bg-green-50 dark:hover:bg-green-900/20 transition flex items-center justify-center" onclick="return confirm('¿Deseas reactivar esta categoría?');">
+                            <i class="fa-solid fa-arrow-rotate-left mr-2"></i> Restaurar
+                        </button>
+                    </form>
+                }
+                
+                <a asp-action="Edit" asp-route-id="@Model.CategoryId" class="w-full sm:w-auto bg-brand hover:bg-brand-hover text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md shadow-brand/20 transition flex items-center justify-center">
+                    <i class="fa-solid fa-pen-to-square mr-2"></i> Editar Categoría
+                </a>
+            </div>
         </div>
     </div>
 </div>

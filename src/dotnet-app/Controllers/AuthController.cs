@@ -3,19 +3,28 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization; // 🚀 Agregado para el método GoToPhpPortal
 using QualityDoc.API.Data;
 using QualityDoc.API.ViewModels;
-using QualityDoc.API.Models; 
+using QualityDoc.API.Models;
+using System; // 🚀 Agregado para StringComparison
+
+// 🚀 NUEVOS USINGS PARA JWT
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace QualityDoc.API.Controllers
 {
     public class AuthController : Controller
     {
         private readonly QualityDocDbContext _context;
+        private readonly IConfiguration _config; 
 
-        public AuthController(QualityDocDbContext context)
+        public AuthController(QualityDocDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         // =======================================================
@@ -26,6 +35,15 @@ namespace QualityDoc.API.Controllers
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
+                var role = User.FindFirst(ClaimTypes.Role)?.Value;
+                
+                // 🚀 LA TRAMPA EN EL GET: Si ya está logueado y es operario, mandarlo a PHP
+                if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
+                                     role.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return RedirectToAction("GoToPhpPortal", "Auth");
+                }
+
                 return RedirectToAction("Index", "Home");
             }
             return View();
@@ -39,7 +57,7 @@ namespace QualityDoc.API.Controllers
 
             var user = await _context.Users
                 .Include(u => u.Role)
-                .Include(u => u.Company) // 👈 Esto traerá null para el Super Admin, está bien.
+                .Include(u => u.Company) 
                 .FirstOrDefaultAsync(u => u.Email == model.Email);
 
             if (user == null || user.Status != "Active" || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
@@ -55,7 +73,6 @@ namespace QualityDoc.API.Controllers
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.RoleName), 
                 
-                // 🚀 MODIFICACIÓN: Validación segura para el Super Admin sin empresa
                 new Claim("CompanyId", user.CompanyId.HasValue ? user.CompanyId.Value.ToString() : "0"), 
                 new Claim("CompanyName", user.Company != null ? user.Company.LegalName : "Sistema (Super Admin)")
             };
@@ -65,6 +82,14 @@ namespace QualityDoc.API.Controllers
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme, 
                 new ClaimsPrincipal(claimsIdentity));
+
+            // 🚀 EL TRUCO DE LA REDIRECCIÓN BLINDADO
+            if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
+                user.Role.RoleName.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase))
+            {
+                var jwtToken = GenerarTokenParaPhp(user);
+                return Redirect($"http://127.0.0.1/auth/token?token={jwtToken}");
+            }
 
             return RedirectToAction("Index", "Home");
         }
@@ -76,7 +101,6 @@ namespace QualityDoc.API.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            // Si ya está logueado, no tiene sentido que se registre de nuevo
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
@@ -90,73 +114,62 @@ namespace QualityDoc.API.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // 🛡️ Validación extra: Verificar que el correo no esté repetido en todo el sistema
             if (await _context.Users.AnyAsync(u => u.Email == model.Email))
             {
                 ModelState.AddModelError("Email", "Este correo electrónico ya está registrado en el sistema.");
                 return View(model);
             }
 
-            // ⚡ INICIAMOS LA TRANSACCIÓN ATÓMICA
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // ==========================================
-                // PASO 1: Crear la Empresa (El Padre)
-                // ==========================================
                 var newCompany = new Company
                 {
                     LegalName = model.LegalName,
                     TaxId = model.TaxId,
                     Status = "Active",
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = 1 // 1 = El sistema/SuperAdmin
+                    CreatedBy = 1
                 };
-                _context.Companies.Add(newCompany);
-                await _context.SaveChangesAsync(); // SQL genera el CompanyId
 
-                // ==========================================
-                // PASO 2: Crear el departamento "Dirección" exclusivo
-                // ==========================================
+                _context.Companies.Add(newCompany);
+                await _context.SaveChangesAsync(); 
+
                 var defaultDept = new Department
                 {
                     DeptName = "Dirección",
-                    CompanyId = newCompany.CompanyId, // 👈 Lo atamos a su propia empresa
+                    CompanyId = newCompany.CompanyId, 
                     Status = "Active",
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = 1 
                 };
-                _context.Departments.Add(defaultDept);
-                await _context.SaveChangesAsync(); // 👈 SQL genera el DeptId
 
-                // ==========================================
-                // PASO 3: Crear el Usuario Administrador (El Hijo)
-                // ==========================================
+                _context.Departments.Add(defaultDept);
+                await _context.SaveChangesAsync(); 
+
                 var newUser = new User
                 {
                     CompanyId = newCompany.CompanyId, 
-                    RoleId = 2,       // 2 = Rol de Administrador General
-                    DeptId = defaultDept.DeptId, // 👈 MAGIA: Usamos el ID del departamento recién nacido
+                    RoleId = 2,       
+                    DeptId = defaultDept.DeptId, 
                     FullName = model.AdminFullName,
                     Email = model.Email,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password), // 🔐 Encriptación automática de BCrypt
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password), 
                     Status = "Active",
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = 1
                 };
+
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                // PASO 4: Si llegamos hasta aquí sin errores, guardamos TODO definitivamente
                 await transaction.CommitAsync();
 
-                // Redirigimos al Login para que estrene sus nuevas credenciales
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
-                // 💥 SI ALGO FALLA: Deshacemos todo (ni empresa, ni depto, ni usuario)
                 await transaction.RollbackAsync();
                 ModelState.AddModelError(string.Empty, "Ocurrió un error crítico durante el registro: " + ex.Message);
                 return View(model);
@@ -167,11 +180,14 @@ namespace QualityDoc.API.Controllers
         // 3. ZONA DE UTILIDADES 
         // =======================================================
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+       [HttpGet]
+       [HttpPost] 
         public async Task<IActionResult> Logout()
         {
+            // Mata la cookie de C#
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    
+            // Ahora sí, te manda a la pantalla de login limpio
             return RedirectToAction("Login");
         }
 
@@ -179,6 +195,56 @@ namespace QualityDoc.API.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        // =======================================================
+        // 4. MÉTODOS PARA EL PUENTE C# -> PHP (JWT)
+        // =======================================================
+
+        // 🚀 NUEVO MÉTODO PARA ATRAPAR SESIONES VIVAS Y SALTAR A PHP
+        [HttpGet]
+        [Authorize] 
+        public async Task<IActionResult> GoToPhpPortal()
+        {
+            // Obtenemos el ID del usuario desde su cookie activa
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login");
+
+            // Buscamos sus datos en la BD para armarle su Token
+            var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == int.Parse(userIdStr));
+            if (user == null) return RedirectToAction("Logout");
+
+            // Generamos el Token y saltamos a Nginx / Laravel
+            var jwtToken = GenerarTokenParaPhp(user);
+            return Redirect($"http://127.0.0.1/auth/token?token={jwtToken}");
+        }
+
+        private string GenerarTokenParaPhp(User user)
+        {
+            var secretKey = _config["JwtConfig:SecretKey"];
+            if (string.IsNullOrEmpty(secretKey)) 
+                throw new Exception("La clave JWT no está configurada en appsettings.json");
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                new Claim("role", user.Role.RoleName),
+                new Claim("name", user.FullName),
+                new Claim("company_id", user.CompanyId.HasValue ? user.CompanyId.Value.ToString() : "0"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _config["JwtConfig:Issuer"] ?? "QualityDoc-CSharp",
+                audience: _config["JwtConfig:Audience"] ?? "QualityDoc-PHP",
+                claims: claims,
+                expires: DateTime.UtcNow.AddSeconds(30), 
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

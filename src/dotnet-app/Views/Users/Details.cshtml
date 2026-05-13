@@ -5,23 +5,24 @@
 }
 
 <div class="max-w-4xl mx-auto space-y-6">
-    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider">
+    <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
         <ol class="inline-flex items-center space-x-2">
-            <li><a asp-action="Index" class="hover:text-blue-600 transition">Personal</a></li>
+            <li><a asp-action="Index" class="hover:text-brand transition-colors">Personal</a></li>
             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
-            <li class="text-gray-400">Detalles del Perfil</li>
+            <li class="text-slate-400 dark:text-slate-500">Detalles del Perfil</li>
         </ol>
     </nav>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="bg-blue-600 p-8 text-white relative">
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
+        
+        <div class="bg-brand p-8 text-white relative">
             <div class="flex flex-col md:flex-row items-center">
                 <div class="h-24 w-24 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-3xl font-bold shadow-xl mb-4 md:mb-0 md:mr-6">
                     @(string.IsNullOrEmpty(Model.FullName) ? "U" : Model.FullName.Substring(0, 1).ToUpper())
                 </div>
                 <div class="text-center md:text-left">
                     <h2 class="text-3xl font-bold">@Model.FullName</h2>
-                    <p class="text-blue-100 flex items-center justify-center md:justify-start mt-1">
+                    <p class="text-brand-light/90 flex items-center justify-center md:justify-start mt-1">
                         <i class="fa-solid fa-envelope mr-2 text-sm"></i> @Model.Email
                     </p>
                 </div>
@@ -45,89 +46,87 @@
         <div class="p-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Organización</h3>
+                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Organización</h3>
                     
                     <div class="flex items-start">
-                        <div class="bg-gray-100 p-2 rounded-lg mr-3 text-gray-500">
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] p-2.5 rounded-xl mr-3 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-transparent">
                             <i class="fa-solid fa-building w-4 h-4 text-center"></i>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-400">Empresa</p>
-                            <p class="text-sm font-bold text-gray-700">@(Model.Company?.LegalName ?? "N/A")</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">Empresa</p>
+                            <p class="text-sm font-bold text-slate-800 dark:text-white">@(Model.Company?.LegalName ?? "N/A")</p>
                         </div>
                     </div>
 
                     <div class="flex items-start">
-                        <div class="bg-gray-100 p-2 rounded-lg mr-3 text-gray-500">
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] p-2.5 rounded-xl mr-3 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-transparent">
                             <i class="fa-solid fa-sitemap w-4 h-4 text-center"></i>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-400">Departamento</p>
-                            <p class="text-sm font-bold text-gray-700">@(Model.Department?.DeptName ?? "Sin Área")</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">Departamento</p>
+                            <p class="text-sm font-bold text-slate-800 dark:text-white">@(Model.Department?.DeptName ?? "Sin Área")</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="space-y-4">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Seguridad</h3>
+                    <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Seguridad</h3>
 
                     <div class="flex items-start">
-                        <div class="bg-gray-100 p-2 rounded-lg mr-3 text-gray-500">
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] p-2.5 rounded-xl mr-3 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-transparent">
                             <i class="fa-solid fa-shield-halved w-4 h-4 text-center"></i>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-400">Rol Asignado</p>
-                            <p class="text-sm font-bold text-gray-700">@(Model.Role?.RoleName ?? "Sin Permisos")</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">Rol Asignado</p>
+                            <p class="text-sm font-bold text-slate-800 dark:text-white">@(Model.Role?.RoleName ?? "Sin Permisos")</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Auditoría de Registro</h3>
+            <h3 class="text-sm font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-4">Auditoría de Registro</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                    <p class="text-xs text-gray-400 font-semibold uppercase mb-1">Fecha de Alta</p>
-                    <p class="text-sm text-gray-800">
-                        <i class="fa-regular fa-calendar mr-2 text-gray-400"></i> 
+                <div class="bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-100 dark:border-transparent">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase mb-1">Fecha de Alta</p>
+                    <p class="text-sm text-slate-800 dark:text-slate-300">
+                        <i class="fa-regular fa-calendar mr-2 text-slate-400"></i> 
                         @Model.CreatedAt.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")
                     </p>
-                    <p class="text-sm text-gray-800 mt-2">
-                        <i class="fa-solid fa-user-shield mr-2 text-gray-400"></i> 
-                        Registrado por: <span class="font-semibold">@(Model.CreatedByNavigation?.FullName ?? "Sistema")</span>
+                    <p class="text-sm text-slate-800 dark:text-slate-300 mt-2">
+                        <i class="fa-solid fa-user-shield mr-2 text-slate-400"></i> 
+                        Registrado por: <span class="font-semibold text-slate-800 dark:text-white">@(Model.CreatedByNavigation?.FullName ?? "Sistema")</span>
                     </p>
                 </div>
 
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                    <p class="text-xs text-gray-400 font-semibold uppercase mb-1">Última Actualización</p>
+                <div class="bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-100 dark:border-transparent">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase mb-1">Última Actualización</p>
                     @if (Model.UpdatedAt.HasValue)
                     {
-                        <p class="text-sm text-gray-800">
-                            <i class="fa-regular fa-clock mr-2 text-gray-400"></i> 
+                        <p class="text-sm text-slate-800 dark:text-slate-300">
+                            <i class="fa-regular fa-clock mr-2 text-slate-400"></i> 
                             @Model.UpdatedAt.Value.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")
                         </p>
-                        <p class="text-sm text-gray-800 mt-2">
-                            <i class="fa-solid fa-user-pen mr-2 text-gray-400"></i> 
-                            Modificado por: <span class="font-semibold">@(Model.UpdatedByNavigation?.FullName ?? "Sistema")</span>
+                        <p class="text-sm text-slate-800 dark:text-slate-300 mt-2">
+                            <i class="fa-solid fa-user-pen mr-2 text-slate-400"></i> 
+                            Modificado por: <span class="font-semibold text-slate-800 dark:text-white">@(Model.UpdatedByNavigation?.FullName ?? "Sistema")</span>
                         </p>
                     }
                     else
                     {
-                        <p class="text-sm text-gray-500 italic mt-2">Sin cambios registrados.</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 italic mt-2">Sin cambios registrados.</p>
                     }
                 </div>
 
-                <!-- 🚀 NUEVO APARTADO: DETALLES DE SUSPENSIÓN -->
                 @if (Model.Status == "Inactive" || Model.Status == "Deleted")
                 {
-                    <div class="bg-red-50 p-4 rounded-lg border border-red-100 md:col-span-2 mt-2">
-                        <p class="text-xs text-red-500 font-semibold uppercase mb-1">Detalles de Suspensión</p>
-                        <p class="text-sm text-red-800">
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-transparent md:col-span-2 mt-2">
+                        <p class="text-xs text-red-500 dark:text-red-400 font-semibold uppercase mb-1">Detalles de Suspensión</p>
+                        <p class="text-sm text-red-800 dark:text-red-300">
                             <i class="fa-solid fa-calendar-xmark mr-2 text-red-400"></i> 
                             @(Model.DeletedAt?.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm") ?? "Fecha desconocida")
                         </p>
-                        
-                        <p class="text-sm text-red-800 mt-2">
+                        <p class="text-sm text-red-800 dark:text-red-300 mt-2">
                             <i class="fa-solid fa-user-slash mr-2 text-red-400"></i> 
                             Suspendido por: <span class="font-semibold">@(Model.DeletedByNavigation?.FullName ?? "Sistema")</span>
                         </p>
@@ -137,31 +136,30 @@
             </div>
         </div>
 
-        <div class="bg-gray-50 px-8 py-4 border-t border-gray-100 flex justify-between items-center">
-            <a asp-action="Index" class="text-gray-500 hover:text-gray-800 text-sm font-bold flex items-center transition">
+        <div class="bg-slate-50 dark:bg-[#2a2b2e] px-8 py-5 border-t border-slate-100 dark:border-[#4a4b50] flex flex-col md:flex-row justify-between items-center gap-4">
+            <a asp-action="Index" class="text-slate-500 hover:text-slate-800 dark:hover:text-white text-sm font-bold flex items-center transition">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver al listado
             </a>
             
-            <div class="space-x-2">
-                <!-- Botón de suspender modificado para usar POST como en Departments -->
+            <div class="flex items-center space-x-3 w-full md:w-auto">
                 @if (Model.Status == "Active")
                 {
-                    <form asp-action="Delete" asp-route-id="@Model.UserId" method="post" class="inline-block m-0 p-0">
-                        <button type="submit" class="bg-white border border-red-200 text-red-600 hover:bg-red-50 text-sm font-bold py-2 px-4 rounded-lg transition" onclick="return confirm('¿Estás seguro de suspender a este usuario?');">
+                    <form asp-action="Delete" asp-route-id="@Model.UserId" method="post" class="inline-block m-0 p-0 w-full md:w-auto">
+                        <button type="submit" class="w-full md:w-auto bg-white dark:bg-[#323338] border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-bold py-2.5 px-5 rounded-xl transition" onclick="return confirm('¿Estás seguro de suspender a este usuario?');">
                             <i class="fa-solid fa-user-slash mr-1"></i> Suspender
                         </button>
                     </form>
                 }
                 else
                 {
-                    <form asp-action="Reactivate" asp-route-id="@Model.UserId" method="post" class="inline-block m-0 p-0">
-                        <button type="submit" class="bg-white border border-green-200 text-green-600 hover:bg-green-50 text-sm font-bold py-2 px-4 rounded-lg transition" onclick="return confirm('¿Deseas volver a activar a este usuario?');">
+                    <form asp-action="Reactivate" asp-route-id="@Model.UserId" method="post" class="inline-block m-0 p-0 w-full md:w-auto">
+                        <button type="submit" class="w-full md:w-auto bg-white dark:bg-[#323338] border border-green-200 dark:border-green-900/50 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 text-sm font-bold py-2.5 px-5 rounded-xl transition" onclick="return confirm('¿Deseas volver a activar a este usuario?');">
                             <i class="fa-solid fa-user-check mr-1"></i> Reactivar
                         </button>
                     </form>
                 }
 
-                <a asp-action="Edit" asp-route-id="@Model.UserId" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-6 rounded-lg shadow-md transition">
+                <a asp-action="Edit" asp-route-id="@Model.UserId" class="w-full md:w-auto text-center bg-brand hover:bg-brand-hover text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md shadow-brand/20 transition">
                     <i class="fa-solid fa-user-pen mr-1"></i> Editar Perfil
                 </a>
             </div>

@@ -4,78 +4,99 @@
     ViewData["Title"] = "Crear Documento";
 }
 
-<div class="max-w-6xl mx-auto mt-6">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+<div class="max-w-6xl mx-auto space-y-6 mt-4">
+    <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-brand transition-colors">Documentos</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-slate-400 dark:text-slate-500">Nuevo</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
         
-        <!-- Header -->
-        <div class="bg-blue-600 px-6 py-4">
-            <h4 class="text-white text-lg font-semibold flex items-center">
-                <i class="fa-solid fa-file-circle-plus mr-2"></i> Alta de Nuevo Documento
-            </h4>
+        <div class="bg-brand/5 dark:bg-brand/10 border-b border-brand/10 dark:border-brand/20 p-6 flex items-center">
+            <div class="bg-brand text-white h-12 w-12 flex items-center justify-center rounded-xl text-xl mr-4 shadow-sm shadow-brand/20">
+                <i class="fa-solid fa-file-circle-plus"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-brand dark:text-brand-light">Alta de Nuevo Documento</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Registra y clasifica la información documentada.</p>
+            </div>
         </div>
         
-        <div class="p-6 md:p-8">
+        <div class="p-8">
             <form asp-action="Create" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4 text-sm font-medium"></div>
+                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-6 text-sm font-semibold bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-transparent"></div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
-                    <!-- Columna Izquierda: Metadatos -->
-                    <div class="md:border-r md:border-gray-200 md:pr-8">
-                        <h5 class="text-gray-700 font-bold border-b border-gray-200 pb-2 mb-4 uppercase text-sm tracking-wider">Clasificación</h5>
+                    <div class="md:border-r md:border-slate-100 md:dark:border-[#4a4b50] md:pr-10 transition-colors duration-300">
+                        <h5 class="text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5 uppercase text-xs tracking-widest">Clasificación</h5>
                         
-                        <div class="mb-5">
-                            <label asp-for="CategoryId" class="block text-sm font-bold text-gray-700 mb-1">Categoría <span class="text-red-500">*</span></label>
-                            <select asp-for="CategoryId" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" asp-items="ViewBag.Categories" required>
-                                <option value="">-- Seleccione una Categoría --</option>
-                            </select>
-                            <span asp-validation-for="CategoryId" class="text-red-500 text-xs mt-1 block"></span>
+                        <div class="mb-6">
+                            <label asp-for="CategoryId" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Categoría <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select asp-for="CategoryId" class="w-full pl-4 pr-10 rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] py-2.5 text-slate-700 dark:text-white focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none appearance-none" asp-items="ViewBag.Categories" required>
+                                    <option value="">-- Seleccione una Categoría --</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                            <span asp-validation-for="CategoryId" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                         </div>
 
-                        <div class="mb-5">
-                            <label asp-for="DeptId" class="block text-sm font-bold text-gray-700 mb-1">Departamento Dueño <span class="text-red-500">*</span></label>
-                            <select asp-for="DeptId" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" asp-items="ViewBag.Departments" required>
-                                <option value="">-- Seleccione un Departamento --</option>
-                            </select>
-                            <span asp-validation-for="DeptId" class="text-red-500 text-xs mt-1 block"></span>
+                        <div class="mb-6">
+                            <label asp-for="DeptId" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Departamento Dueño <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <select asp-for="DeptId" class="w-full pl-4 pr-10 rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] py-2.5 text-slate-700 dark:text-white focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none appearance-none" asp-items="ViewBag.Departments" required>
+                                    <option value="">-- Seleccione un Departamento --</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                            <span asp-validation-for="DeptId" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                         </div>
 
-                        <h5 class="text-gray-700 font-bold border-b border-gray-200 pb-2 mb-4 mt-8 uppercase text-sm tracking-wider">Detalles</h5>
+                        <h5 class="text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5 mt-10 uppercase text-xs tracking-widest">Detalles</h5>
 
-                        <div class="mb-5">
-                            <label asp-for="DocName" class="block text-sm font-bold text-gray-700 mb-1">Título del Documento <span class="text-red-500">*</span></label>
-                            <input asp-for="DocName" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. Procedimiento de Auditoría Interna" required />
-                            <span asp-validation-for="DocName" class="text-red-500 text-xs mt-1 block"></span>
+                        <div class="mb-6">
+                            <label asp-for="DocName" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Título del Documento <span class="text-red-500">*</span></label>
+                            <input asp-for="DocName" class="w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white placeholder-slate-400 focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none" placeholder="Ej. Procedimiento de Auditoría Interna" required autocomplete="off" />
+                            <span asp-validation-for="DocName" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                         </div>
 
-                        <div class="mb-5">
-                            <label asp-for="Description" class="block text-sm font-bold text-gray-700 mb-1">Descripción / Objetivo</label>
-                            <textarea asp-for="Description" rows="3" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Breve descripción del propósito del documento..."></textarea>
-                            <span asp-validation-for="Description" class="text-red-500 text-xs mt-1 block"></span>
+                        <div class="mb-6">
+                            <label asp-for="Description" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Descripción / Objetivo</label>
+                            <textarea asp-for="Description" rows="3" class="w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white placeholder-slate-400 focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none resize-none" placeholder="Breve descripción del propósito del documento..."></textarea>
+                            <span asp-validation-for="Description" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                         </div>
                         
-                        <div class="mt-4 flex items-start">
+                        <div class="mt-4 flex items-start group">
                             <div class="flex items-center h-5">
-                                <input asp-for="IsExternal" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                <input asp-for="IsExternal" type="checkbox" class="w-5 h-5 rounded border-slate-300 dark:border-slate-500 text-brand focus:ring-brand dark:bg-[#2a2b2e] transition-colors duration-300 cursor-pointer">
                             </div>
                             <div class="ml-3 text-sm">
-                                <label asp-for="IsExternal" class="font-medium text-gray-700">Documento de origen externo</label>
-                                <p class="text-gray-500">Ej. Manual de proveedor, Norma de cliente.</p>
+                                <label asp-for="IsExternal" class="font-bold text-slate-700 dark:text-slate-300 cursor-pointer group-hover:text-brand transition-colors">Documento de origen externo</label>
+                                <p class="text-slate-500 dark:text-slate-400 mt-0.5">Ej. Manual de proveedor, Norma de cliente.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Columna Derecha: Archivo -->
-                    <div class="md:pl-4">
-                        <h5 class="text-gray-700 font-bold border-b border-gray-200 pb-2 mb-4 uppercase text-sm tracking-wider">Archivo (Versión 1.0)</h5>
+                    <div class="md:pl-4 flex flex-col h-full">
+                        <h5 class="text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5 uppercase text-xs tracking-widest">Archivo (Versión 1.0)</h5>
                         
-                        <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-100 transition duration-150 ease-in-out">
-                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
-                            <label for="uploadedFile" class="block text-sm font-bold text-gray-700 mb-2">Seleccionar Archivo PDF/Word <span class="text-red-500">*</span></label>
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] border-2 border-dashed border-slate-300 dark:border-[#4a4b50] rounded-2xl p-8 text-center hover:bg-slate-100 dark:hover:bg-[#323338] transition duration-150 ease-in-out">
+                            <div class="w-16 h-16 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100 dark:border-transparent">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl text-brand/60"></i>
+                            </div>
+                            <label for="uploadedFile" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Seleccionar Archivo PDF/Word <span class="text-red-500">*</span></label>
                             
-                            <input type="file" name="uploadedFile" id="uploadedFile" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mt-2" accept=".pdf,.doc,.docx,.xls,.xlsx" required />
+                            <input type="file" name="uploadedFile" id="uploadedFile" class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand/10 file:text-brand dark:file:bg-brand/20 dark:file:text-brand-light hover:file:bg-brand/20 cursor-pointer transition mt-4" accept=".pdf,.doc,.docx,.xls,.xlsx" required />
                             
-                            <p class="text-xs text-gray-500 mt-3">Tamaño máximo recomendado: 10MB.</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-4 font-medium">Tamaño máximo recomendado: 10MB.</p>
                             
                             @if (ViewData.ModelState["uploadedFile"]?.Errors.Count > 0)
                             {
@@ -83,15 +104,15 @@
                             }
                         </div>
                         
-                        <div class="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+                        <div class="mt-8 bg-brand/5 dark:bg-brand/10 border-l-4 border-brand p-5 rounded-r-xl">
                             <div class="flex">
                                 <div class="flex-shrink-0">
-                                    <i class="fa-solid fa-circle-info text-blue-400"></i>
+                                    <i class="fa-solid fa-circle-info text-brand text-lg"></i>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-blue-800">Flujo Automático</h3>
-                                    <div class="mt-2 text-sm text-blue-700">
-                                        <p>Al guardar, el sistema generará automáticamente el Folio (Ej. <em>PRO-001</em>) y registrará este archivo como la <strong>Versión 1.0</strong> en estatus de Borrador.</p>
+                                    <h3 class="text-sm font-bold text-brand dark:text-brand-light">Generación de Flujo Automático</h3>
+                                    <div class="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                        <p>Al guardar, el sistema generará automáticamente el Folio (Ej. <em class="font-bold">PRO-001</em>) y registrará este archivo como la <strong class="text-slate-800 dark:text-white">Versión 1.0</strong> en estatus de Borrador.</p>
                                     </div>
                                 </div>
                             </div>
@@ -99,15 +120,12 @@
                     </div>
                 </div>
 
-                <hr class="border-gray-200 my-8" />
-
-                <!-- Botones -->
-                <div class="flex justify-end space-x-3">
-                    <a asp-action="Index" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                <div class="mt-10 pt-6 border-t border-slate-100 dark:border-[#4a4b50] flex justify-end space-x-3 transition-colors duration-300">
+                    <a asp-action="Index" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150">
                         Cancelar y Volver
                     </a>
-                    <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
-                        Guardar Documento
+                    <button type="submit" class="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-150">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> Guardar Documento
                     </button>
                 </div>
             </form>

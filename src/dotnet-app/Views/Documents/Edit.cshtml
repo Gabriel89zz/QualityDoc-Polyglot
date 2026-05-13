@@ -4,97 +4,101 @@
     ViewData["Title"] = "Editar Documento";
 }
 
-<div class="max-w-6xl mx-auto mt-6">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+<div class="max-w-6xl mx-auto space-y-6 mt-4">
+    <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-brand transition-colors">Documentos</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-slate-400 dark:text-slate-500">Editar Metadatos</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
         
-        <!-- Header (Mantenemos el color amarillo para indicar que es modo edición) -->
-        <div class="bg-yellow-500 px-6 py-4">
-            <h4 class="text-white text-lg font-semibold flex items-center">
-                <i class="fa-solid fa-pen-to-square mr-2"></i> Editar Documento: @Model.DocCode
-            </h4>
+        <div class="bg-amber-50 dark:bg-amber-900/10 border-b border-amber-100 dark:border-amber-900/20 p-6 flex items-center">
+            <div class="bg-amber-500 text-white h-12 w-12 flex items-center justify-center rounded-xl text-xl mr-4 shadow-sm shadow-amber-500/20">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-amber-900 dark:text-amber-400">Editar Documento: @Model.DocCode</h2>
+                <p class="text-sm text-amber-700 dark:text-amber-500/80">Modifica los detalles o reemplaza el archivo del borrador.</p>
+            </div>
         </div>
         
-        <div class="p-6 md:p-8">
+        <div class="p-8">
             <form asp-action="Edit" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4 text-sm font-medium"></div>
+                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-6 text-sm font-semibold bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-transparent"></div>
                 
-                <!-- 🚀 Campos ocultos para no perder los IDs al guardar -->
                 <input type="hidden" asp-for="DocId" />
                 <input type="hidden" asp-for="CompanyId" />
                 <input type="hidden" asp-for="CategoryId" />
                 <input type="hidden" asp-for="DeptId" /> 
                 <input type="hidden" asp-for="DocCode" />
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
-                    <!-- Columna Izquierda: Metadatos -->
-                    <div class="md:border-r md:border-gray-200 md:pr-8">
-                        <h5 class="text-gray-700 font-bold border-b border-gray-200 pb-2 mb-4 uppercase text-sm tracking-wider">Clasificación</h5>
+                    <div class="md:border-r md:border-slate-100 md:dark:border-[#4a4b50] md:pr-10 transition-colors duration-300">
+                        <h5 class="text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5 uppercase text-xs tracking-widest">Clasificación Fija</h5>
                         
-                        <!-- Categoría (Solo lectura) -->
-                        <div class="mb-5">
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Categoría (No editable)</label>
-                            <input type="text" class="w-full border border-gray-300 bg-gray-100 rounded-md shadow-sm px-4 py-2 text-gray-500 cursor-not-allowed" value="@Model.Category?.CategoryName" disabled />
+                        <div class="mb-6">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Categoría (No editable)</label>
+                            <input type="text" class="w-full rounded-xl bg-slate-50 dark:bg-[#2a2b2e]/50 border border-slate-200 dark:border-[#4a4b50] px-4 py-2.5 text-slate-500 dark:text-slate-400 cursor-not-allowed transition-colors" value="@Model.Category?.CategoryName" disabled />
                         </div>
 
-                        <!-- Departamento (Solo lectura para proteger el folio) -->
-                        <div class="mb-5">
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Departamento Dueño (No editable)</label>
-                            <input type="text" class="w-full border border-gray-300 bg-gray-100 rounded-md shadow-sm px-4 py-2 text-gray-500 cursor-not-allowed" value="@Model.Department?.DeptName" disabled />
-                            <p class="text-xs text-gray-400 mt-1">La categoría y departamento definen el folio y las asignaciones, no se pueden alterar.</p>
+                        <div class="mb-6">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Departamento Dueño (No editable)</label>
+                            <input type="text" class="w-full rounded-xl bg-slate-50 dark:bg-[#2a2b2e]/50 border border-slate-200 dark:border-[#4a4b50] px-4 py-2.5 text-slate-500 dark:text-slate-400 cursor-not-allowed transition-colors" value="@Model.Department?.DeptName" disabled />
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-2 font-medium"><i class="fa-solid fa-lock text-[10px] mr-1"></i> La categoría y el departamento definen el folio; no se pueden alterar.</p>
                         </div>
 
-                        <h5 class="text-gray-700 font-bold border-b border-gray-200 pb-2 mb-4 mt-8 uppercase text-sm tracking-wider">Detalles</h5>
+                        <h5 class="text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5 mt-10 uppercase text-xs tracking-widest">Detalles Editables</h5>
 
-                        <!-- Título -->
-                        <div class="mb-5">
-                            <label asp-for="DocName" class="block text-sm font-bold text-gray-700 mb-1">Título del Documento <span class="text-red-500">*</span></label>
-                            <input asp-for="DocName" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" required />
-                            <span asp-validation-for="DocName" class="text-red-500 text-xs mt-1 block"></span>
+                        <div class="mb-6">
+                            <label asp-for="DocName" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Título del Documento <span class="text-red-500">*</span></label>
+                            <input asp-for="DocName" class="w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none" required />
+                            <span asp-validation-for="DocName" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                         </div>
 
-                        <!-- Descripción -->
-                        <div class="mb-5">
-                            <label asp-for="Description" class="block text-sm font-bold text-gray-700 mb-1">Descripción / Objetivo</label>
-                            <textarea asp-for="Description" rows="3" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"></textarea>
-                            <span asp-validation-for="Description" class="text-red-500 text-xs mt-1 block"></span>
+                        <div class="mb-6">
+                            <label asp-for="Description" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Descripción / Objetivo</label>
+                            <textarea asp-for="Description" rows="3" class="w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none resize-none"></textarea>
+                            <span asp-validation-for="Description" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                         </div>
                         
-                        <!-- Origen Externo -->
-                        <div class="mt-4 flex items-start">
+                        <div class="mt-4 flex items-start group">
                             <div class="flex items-center h-5">
-                                <input asp-for="IsExternal" type="checkbox" class="focus:ring-yellow-500 h-4 w-4 text-yellow-600 border-gray-300 rounded">
+                                <input asp-for="IsExternal" type="checkbox" class="w-5 h-5 rounded border-slate-300 dark:border-slate-500 text-amber-500 focus:ring-amber-500 dark:bg-[#2a2b2e] transition-colors duration-300 cursor-pointer">
                             </div>
                             <div class="ml-3 text-sm">
-                                <label asp-for="IsExternal" class="font-medium text-gray-700">Documento de origen externo</label>
-                                <p class="text-gray-500">Ej. Manual de proveedor, Norma de cliente.</p>
+                                <label asp-for="IsExternal" class="font-bold text-slate-700 dark:text-slate-300 cursor-pointer group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">Documento de origen externo</label>
+                                <p class="text-slate-500 dark:text-slate-400 mt-0.5">Ej. Manual de proveedor, Norma de cliente.</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Columna Derecha: Archivo OPCIONAL -->
-                    <div class="md:pl-4">
-                        <h5 class="text-gray-700 font-bold border-b border-gray-200 pb-2 mb-4 uppercase text-sm tracking-wider">Reemplazar Archivo (Opcional)</h5>
+                    <div class="md:pl-4 flex flex-col h-full">
+                        <h5 class="text-slate-400 dark:text-slate-500 font-bold border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5 uppercase text-xs tracking-widest">Reemplazar Archivo (Opcional)</h5>
                         
-                        <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-100 transition duration-150 ease-in-out">
-                            <i class="fa-solid fa-file-pdf text-4xl text-gray-400 mb-3"></i>
-                            <label for="newFile" class="block text-sm font-bold text-gray-700 mb-2">Seleccionar Nuevo PDF</label>
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] border-2 border-dashed border-slate-300 dark:border-[#4a4b50] rounded-2xl p-8 text-center hover:bg-slate-100 dark:hover:bg-[#323338] transition duration-150 ease-in-out">
+                            <div class="w-16 h-16 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100 dark:border-transparent">
+                                <i class="fa-solid fa-file-pdf text-2xl text-amber-500/60"></i>
+                            </div>
+                            <label for="newFile" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Seleccionar Nuevo PDF</label>
                             
-                            <!-- 🚀 NOTA: Le quitamos el "required" porque es opcional -->
-                            <input type="file" name="newFile" id="newFile" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 mt-2" accept=".pdf" />
+                            <input type="file" name="newFile" id="newFile" class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-amber-50 file:text-amber-700 dark:file:bg-amber-900/20 dark:file:text-amber-500 hover:file:bg-amber-100 dark:hover:file:bg-amber-900/40 cursor-pointer transition mt-4" accept=".pdf" />
                             
-                            <p class="text-xs text-gray-500 mt-3">Deja este campo vacío si solo quieres corregir el título o la descripción.</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-4 font-medium">Deja este campo vacío si solo quieres corregir el título o la descripción.</p>
                         </div>
                         
-                        <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
+                        <div class="mt-8 bg-amber-50 dark:bg-amber-900/10 border-l-4 border-amber-500 p-5 rounded-r-xl">
                             <div class="flex">
                                 <div class="flex-shrink-0">
-                                    <i class="fa-solid fa-triangle-exclamation text-yellow-500"></i>
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-yellow-800">Modificación de Borrador</h3>
-                                    <div class="mt-2 text-sm text-yellow-700">
-                                        <p>Cualquier archivo nuevo que subas <strong>reemplazará</strong> de forma permanente al PDF actual de este borrador.</p>
+                                    <h3 class="text-sm font-bold text-amber-800 dark:text-amber-400">Modificación de Borrador</h3>
+                                    <div class="mt-2 text-sm text-amber-700 dark:text-amber-500/80 leading-relaxed">
+                                        <p>Cualquier archivo nuevo que subas <strong class="text-amber-900 dark:text-amber-300">reemplazará</strong> de forma permanente al PDF actual de este borrador.</p>
                                     </div>
                                 </div>
                             </div>
@@ -102,14 +106,11 @@
                     </div>
                 </div>
 
-                <hr class="border-gray-200 my-8" />
-
-                <!-- Botones -->
-                <div class="flex justify-end space-x-3">
-                    <a asp-action="Index" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+                <div class="mt-10 pt-6 border-t border-slate-100 dark:border-[#4a4b50] flex justify-end space-x-3 transition-colors duration-300">
+                    <a asp-action="Index" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150">
                         Cancelar y Volver
                     </a>
-                    <button type="submit" class="bg-yellow-500 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition">
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md shadow-amber-500/20 flex items-center transition duration-150">
                         <i class="fa-solid fa-save mr-2"></i> Guardar Cambios
                     </button>
                 </div>

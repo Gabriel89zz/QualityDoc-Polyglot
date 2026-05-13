@@ -4,59 +4,71 @@
     ViewData["Title"] = "Subir Nueva Versión";
 }
 
-<div class="max-w-4xl mx-auto mt-6">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+<div class="max-w-4xl mx-auto space-y-6 mt-4">
+    <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-brand transition-colors">Documentos</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li><a asp-action="Details" asp-route-id="@Model.DocId" class="hover:text-brand transition-colors">Expediente</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-slate-400 dark:text-slate-500">Nueva Versión</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
         
-        <!-- Header -->
-        <div class="bg-blue-600 px-6 py-4">
-            <h4 class="text-white text-lg font-semibold flex items-center">
-                <i class="fa-solid fa-upload mr-2"></i> Subir Nueva Versión
-            </h4>
+        <div class="bg-brand/5 dark:bg-brand/10 border-b border-brand/10 dark:border-brand/20 p-6 flex items-center">
+            <div class="bg-brand text-white h-12 w-12 flex items-center justify-center rounded-xl text-xl mr-4 shadow-sm shadow-brand/20">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-brand dark:text-brand-light">Subir Nueva Versión</h2>
+                <p class="text-sm text-slate-600 dark:text-slate-400">Actualiza el archivo PDF y documenta el motivo del cambio.</p>
+            </div>
         </div>
 
         <div class="p-6 md:p-8">
-            <!-- 🚀 OJO AQUÍ: enctype="multipart/form-data" es obligatorio para subir archivos -->
             <form asp-action="NewVersion" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4 text-sm font-medium"></div>
+                <div asp-validation-summary="ModelOnly" class="text-red-500 mb-6 text-sm font-semibold bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-transparent"></div>
 
-                <!-- 🚀 CAMPO OCULTO VITAL: Para saber a qué documento le pertenece esta versión -->
                 <input type="hidden" asp-for="DocId" />
 
-                <!-- Información de solo lectura para orientar al usuario -->
-                <div class="bg-gray-50 border border-gray-200 rounded-md p-4 mb-6 flex items-center">
-                    <i class="fa-solid fa-file-circle-check text-3xl text-gray-400 mr-4"></i>
+                <div class="bg-slate-50 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] rounded-xl p-5 mb-8 flex items-center shadow-sm transition-colors">
+                    <div class="w-12 h-12 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center border border-slate-200 dark:border-[#4a4b50] mr-4 shadow-sm">
+                        <i class="fa-solid fa-file-circle-check text-2xl text-brand/60"></i>
+                    </div>
                     <div>
-                        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Actualizando Documento</p>
-                        <p class="text-lg font-bold text-gray-900">@Model.DocCode - @Model.DocName</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Actualizando Documento</p>
+                        <p class="text-lg font-black text-slate-800 dark:text-white">@Model.DocCode <span class="font-medium text-slate-500 dark:text-slate-400 ml-1">- @Model.DocName</span></p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6">
+                <div class="grid grid-cols-1 gap-8">
                     
-                    <!-- Motivo del Cambio -->
                     <div>
-                        <label asp-for="ChangeDescription" class="block text-sm font-bold text-gray-700 mb-1">
+                        <label asp-for="ChangeDescription" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
                             Motivo del Cambio (Justificación) <span class="text-red-500">*</span>
                         </label>
-                        <textarea asp-for="ChangeDescription" rows="3" class="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej. Se actualizó el diagrama de flujo debido a la compra de la nueva máquina CNC..." required></textarea>
-                        <span asp-validation-for="ChangeDescription" class="text-red-500 text-xs mt-1 block"></span>
-                        <p class="text-xs text-gray-500 mt-1">
-                            <i class="fa-solid fa-circle-info mr-1"></i> Este campo es auditable por ISO 9001 y obligatorio.
+                        <textarea asp-for="ChangeDescription" rows="3" class="w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-3 text-slate-700 dark:text-white placeholder-slate-400 focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none resize-none" placeholder="Ej. Se actualizó el diagrama de flujo debido a la compra de la nueva máquina CNC..." required></textarea>
+                        <span asp-validation-for="ChangeDescription" class="text-red-500 text-xs mt-1 block font-semibold"></span>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">
+                            <i class="fa-solid fa-circle-info mr-1 text-brand/70"></i> Este campo es auditable por ISO 9001 y se guardará permanentemente en la bitácora.
                         </p>
                     </div>
 
-                    <!-- Archivo Nuevo -->
                     <div>
-                        <label asp-for="NewFile" class="block text-sm font-bold text-gray-700 mb-1">
+                        <label asp-for="NewFile" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
                             Nuevo Archivo (PDF/Word) <span class="text-red-500">*</span>
                         </label>
-                        <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-100 transition duration-150 ease-in-out">
-                            <i class="fa-solid fa-file-arrow-up text-4xl text-gray-400 mb-3"></i>
+                        
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] border-2 border-dashed border-slate-300 dark:border-[#4a4b50] rounded-2xl p-8 text-center hover:bg-slate-100 dark:hover:bg-[#323338] transition duration-150 ease-in-out">
+                            <div class="w-16 h-16 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100 dark:border-transparent">
+                                <i class="fa-solid fa-file-arrow-up text-2xl text-brand/60"></i>
+                            </div>
                             
-                            <!-- El 'name' debe coincidir con la propiedad del ViewModel -->
-                            <input type="file" name="NewFile" id="NewFile" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mx-auto mt-2" accept=".pdf,.doc,.docx,.xls,.xlsx" required />
+                            <input type="file" name="NewFile" id="NewFile" class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand/10 file:text-brand dark:file:bg-brand/20 dark:file:text-brand-light hover:file:bg-brand/20 cursor-pointer transition mt-4 mx-auto" accept=".pdf,.doc,.docx,.xls,.xlsx" required />
                             
-                            <p class="text-xs text-gray-500 mt-3">Tamaño máximo recomendado: 10MB.</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-4 font-medium">Tamaño máximo recomendado: 10MB.</p>
                             
                             @if (ViewData.ModelState["NewFile"]?.Errors.Count > 0)
                             {
@@ -66,15 +78,12 @@
                     </div>
                 </div>
 
-                <hr class="border-gray-200 my-6" />
-
-                <!-- Botones -->
-                <div class="flex justify-end space-x-3">
-                    <a asp-action="Details" asp-route-id="@Model.DocId" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+                <div class="mt-10 pt-6 border-t border-slate-100 dark:border-[#4a4b50] flex justify-end space-x-3 transition-colors duration-300">
+                    <a asp-action="Details" asp-route-id="@Model.DocId" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150">
                         Cancelar
                     </a>
-                    <button type="submit" class="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
-                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Guardar Nueva Versión
+                    <button type="submit" class="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-150">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2 text-lg"></i> Guardar Nueva Versión
                     </button>
                 </div>
             </form>

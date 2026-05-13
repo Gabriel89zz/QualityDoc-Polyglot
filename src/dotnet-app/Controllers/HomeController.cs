@@ -5,6 +5,7 @@ using QualityDoc.API.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System;
 
 namespace QualityDoc.API.Controllers
 {
@@ -22,6 +23,14 @@ namespace QualityDoc.API.Controllers
         {
             // Extraemos datos de la sesión actual
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            // 🚀 1. LA TRAMPA: Si tiene sesión viva y es Operario o Lector, lo expulsamos hacia el controlador Auth
+            if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
+                                 role.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase)))
+            {
+                return RedirectToAction("GoToPhpPortal", "Auth");
+            }
+
             var companyIdClaim = User.FindFirst("CompanyId")?.Value;
             int currentCompanyId = string.IsNullOrEmpty(companyIdClaim) ? 0 : int.Parse(companyIdClaim);
             
@@ -39,9 +48,7 @@ namespace QualityDoc.API.Controllers
             {
                 ViewBag.DocsAprobados = await _context.DocumentVersions.CountAsync(v => v.Document.CompanyId == currentCompanyId && v.StatusId == 3);
                 ViewBag.FlujosActivos = await _context.DocumentApprovals.CountAsync(a => a.DocumentVersion.Document.CompanyId == currentCompanyId && a.ApprovalStatus == "Pending" && a.DocumentVersion.StatusId == 2);
-                
                 ViewBag.Borradores = await _context.DocumentVersions.CountAsync(v => v.Document.CompanyId == currentCompanyId && v.StatusId == 1);
-
                 ViewBag.FirmasRecientes = await _context.DocumentApprovals
                     .Include(a => a.DocumentVersion)
                         .ThenInclude(v => v.Document)

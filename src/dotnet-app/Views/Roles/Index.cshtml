@@ -6,29 +6,34 @@
     var systemRoles = new[] { "Super Admin", "Admin de Empresa", "Creador de Doc", "Revisor", "Aprobador", "Lector" };
 }
 
-<div class="space-y-6">
-    <div class="flex justify-between items-end border-b border-gray-200 pb-4">
+<div class="max-w-7xl mx-auto space-y-6 mt-4">
+    
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">Roles del Sistema</h1>
-            <p class="text-gray-500 text-sm">Gestión de permisos y niveles de acceso en la plataforma</p>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center">
+                <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center mr-3 border border-brand/20">
+                    <i class="fa-solid fa-user-tag text-brand"></i>
+                </div>
+                Roles del Sistema
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestión de permisos y niveles de acceso en la plataforma</p>
         </div>
-        <div>
-            <a asp-action="Create" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm flex items-center transition duration-150">
+        <div class="mt-4 sm:mt-0">
+            <a asp-action="Create" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-5 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-200">
                 <i class="fa-solid fa-plus mr-2"></i> Nuevo Rol
             </a>
         </div>
     </div>
 
-    <!-- 🚀 ALERTA DE ERROR DE SEGURIDAD (Si intentan borrar un rol maestro) -->
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-r-lg shadow-sm">
+        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm border border-y-red-100 border-r-red-100 dark:border-transparent transition-colors duration-300">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
                     <i class="fa-solid fa-shield-halved text-red-500 text-xl"></i>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm text-red-700 font-bold">
+                    <p class="text-sm text-red-700 dark:text-red-400 font-bold">
                         @TempData["ErrorMessage"]
                     </p>
                 </div>
@@ -36,23 +41,26 @@
         </div>
     }
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                <thead class="bg-slate-50 dark:bg-[#2a2b2e] text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider transition-colors duration-300">
                     <tr>
-                        <th class="p-4">Nombre del Rol</th>
-                        <th class="p-4 text-center">Estado</th>
-                        <th class="p-4 text-center">Acciones</th>
+                        <th class="p-4 font-semibold">Nombre del Rol</th>
+                        <th class="p-4 font-semibold text-center">Estado</th>
+                        <th class="p-4 font-semibold text-center">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 text-sm">
+                <tbody class="divide-y divide-slate-100 dark:divide-[#4a4b50] text-sm">
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="4" class="p-8 text-center text-gray-400">
-                                <i class="fa-solid fa-users-slash text-3xl mb-2"></i>
-                                <p>No hay roles registrados en el sistema.</p>
+                            <td colspan="3" class="p-12 text-center text-slate-500 dark:text-slate-400">
+                                <div class="w-16 h-16 bg-slate-50 dark:bg-[#2a2b2e] rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-[#4a4b50]">
+                                    <i class="fa-solid fa-users-slash text-2xl text-slate-300 dark:text-slate-600"></i>
+                                </div>
+                                <h5 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">Sin Roles</h5>
+                                <p class="text-sm">No hay roles registrados en el sistema.</p>
                             </td>
                         </tr>
                     }
@@ -61,16 +69,15 @@
                         @foreach (var item in Model)
                         {
                             var isSystemRole = systemRoles.Contains(item.RoleName);
-
-                            <tr class="hover:bg-gray-50 transition duration-150">
-                                <td class="p-4 font-bold text-gray-800">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition duration-150">
+                                <td class="p-4 font-bold text-slate-800 dark:text-white">
                                     <div class="flex items-center">
-                                        <i class="fa-solid fa-user-tag text-purple-400 mr-2"></i> 
+                                        <i class="fa-solid fa-user-tag text-brand dark:text-brand-light mr-2"></i> 
                                         @item.RoleName
                                         
                                         @if (isSystemRole)
                                         {
-                                            <span class="ml-2 bg-blue-100 text-blue-700 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-blue-200" title="Rol crítico para el funcionamiento del sistema">
+                                            <span class="ml-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-[10px] uppercase font-bold px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-800/30" title="Rol crítico para el funcionamiento del sistema">
                                                 <i class="fa-solid fa-shield-cat mr-1"></i> Sistema
                                             </span>
                                         }
@@ -80,61 +87,55 @@
                                 <td class="p-4 text-center">
                                     @if (item.Status == "Active")
                                     {
-                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold inline-flex items-center">
-                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span> Activo
+                                        <span class="inline-flex items-center bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-full text-xs font-bold border border-green-200 dark:border-green-800/30 w-max mx-auto">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span> Activo
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold inline-flex items-center">
-                                            <span class="w-2 h-2 bg-red-500 rounded-full mr-1.5"></span> Inactivo
+                                        <span class="inline-flex items-center bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full text-xs font-bold border border-red-200 dark:border-red-800/30 w-max mx-auto">
+                                            <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span> Inactivo
                                         </span>
                                     }
                                 </td>
                                 
                                 <td class="p-4 text-center flex justify-center items-center space-x-4">
                                     
-                                    <!-- Ver Detalles (Siempre Activo) -->
-                                    <a asp-action="Details" asp-route-id="@item.RoleId" class="text-gray-400 hover:text-teal-600 transition" title="Ver Detalles">
+                                    <a asp-action="Details" asp-route-id="@item.RoleId" class="text-slate-400 hover:text-brand dark:hover:text-brand transition" title="Ver Detalles">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     @if (item.Status == "Active")
                                     {
-                                        <!-- Editar (Activo) -->
-                                        <a asp-action="Edit" asp-route-id="@item.RoleId" class="text-gray-400 hover:text-blue-600 transition" title="Editar Rol">
+                                        <a asp-action="Edit" asp-route-id="@item.RoleId" class="text-slate-400 hover:text-amber-500 transition" title="Editar Rol">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                     }
                                     else
                                     {
-                                        <!-- Editar (Bloqueado) -->
-                                        <span class="text-gray-300 cursor-not-allowed" title="Restaura el rol para poder editarlo">
+                                        <span class="text-slate-300 dark:text-slate-600 cursor-not-allowed" title="Restaura el rol para poder editarlo">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </span>
                                     }
                                     
                                     @if (isSystemRole)
                                     {
-                                        <!-- 🛡️ CANDADO PARA ROLES MAESTROS -->
-                                        <span class="text-gray-300 cursor-not-allowed" title="Rol de sistema protegido (No se puede suspender)">
+                                        <span class="text-slate-300 dark:text-slate-600 cursor-not-allowed" title="Rol de sistema protegido (No se puede suspender)">
                                             <i class="fa-solid fa-lock"></i>
                                         </span>
                                     }
                                     else if (item.Status == "Active")
                                     {
-                                        <!-- Suspender (POST) -->
                                         <form asp-action="Delete" asp-route-id="@item.RoleId" method="post" class="inline-block m-0 p-0">
-                                            <button type="submit" class="text-gray-400 hover:text-red-600 transition bg-transparent border-none p-0 cursor-pointer" title="Suspender Rol" onclick="return confirm('¿Estás seguro de suspender este rol?');">
+                                            <button type="submit" class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition bg-transparent border-none p-0 cursor-pointer" title="Suspender Rol" onclick="return confirm('¿Estás seguro de suspender este rol?');">
                                                 <i class="fa-solid fa-power-off"></i>
                                             </button>
                                         </form>
                                     }
                                     else
                                     {
-                                        <!-- 🚀 BOTÓN REACTIVAR (POST) -->
                                         <form asp-action="Reactivate" asp-route-id="@item.RoleId" method="post" class="inline-block m-0 p-0">
-                                            <button type="submit" class="text-gray-400 hover:text-green-600 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar Rol" onclick="return confirm('¿Estás seguro de que deseas reactivar este rol?');">
+                                            <button type="submit" class="text-slate-400 hover:text-green-500 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar Rol" onclick="return confirm('¿Estás seguro de que deseas reactivar este rol?');">
                                                 <i class="fa-solid fa-rotate-left"></i>
                                             </button>
                                         </form>
@@ -145,6 +146,12 @@
                     }
                 </tbody>
             </table>
+        </div>
+        
+        <div class="bg-slate-50 dark:bg-[#2a2b2e] px-4 py-3 border-t border-slate-200 dark:border-[#4a4b50] flex items-center justify-between sm:px-6 transition-colors duration-300">
+            <div class="text-sm text-slate-500 dark:text-slate-400">
+                Mostrando <span class="font-bold text-slate-800 dark:text-white">@Model.Count()</span> roles registrados
+            </div>
         </div>
     </div>
 </div>

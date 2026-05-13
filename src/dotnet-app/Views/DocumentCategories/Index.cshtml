@@ -4,165 +4,142 @@
     ViewData["Title"] = "Categorías Documentales";
 }
 
-<div class="max-w-6xl mx-auto space-y-6">
-    <!-- Cabecera de la sección -->
-    <div class="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <div class="mb-4 md:mb-0">
-            <h2 class="text-2xl font-bold text-gray-800">Categorías Documentales</h2>
-            <p class="text-sm text-gray-500 mt-1">
-                Estructura de la pirámide documental para el control ISO 9001
-            </p>
+<div class="max-w-7xl mx-auto space-y-6 mt-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center">
+                <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center mr-3 border border-brand/20">
+                    <i class="fa-solid fa-folder-tree text-brand"></i>
+                </div>
+                Categorías Documentales
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Estructura de la pirámide documental (ISO 9001)</p>
         </div>
-        <a asp-action="Create" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition flex items-center">
-            <i class="fa-solid fa-folder-plus mr-2"></i> Nueva Categoría
-        </a>
+        <div class="mt-4 sm:mt-0">
+            <a asp-action="Create" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-5 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-200">
+                <i class="fa-solid fa-folder-plus mr-2"></i> Nueva Categoría
+            </a>
+        </div>
     </div>
 
-    <!-- 🚨 Lector de Errores TempData -->
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
+        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm border border-y-red-100 border-r-red-100 dark:border-transparent transition-colors duration-300">
             <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-700 font-bold">
-                        @TempData["ErrorMessage"]
-                    </p>
-                </div>
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg mr-3"></i>
+                <p class="text-sm text-red-700 dark:text-red-400 font-bold">@TempData["ErrorMessage"]</p>
             </div>
         </div>
     }
 
-    <!-- Tabla de datos -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
-                        <th class="p-4 font-bold text-center w-24">Nivel</th>
-                        <th class="p-4 font-bold w-28">Prefijo</th>
-                        <th class="p-4 font-bold">Nombre y Descripción</th>
-                        <th class="p-4 font-bold w-40">Norma</th>
-                        <th class="p-4 font-bold text-center w-28">Estado</th>
-                        <th class="p-4 font-bold text-center w-36">Acciones</th>
+                <thead class="bg-slate-50 dark:bg-[#2a2b2e] text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider transition-colors duration-300">
+                    <tr>
+                        <th class="p-4 font-semibold">Prefijo</th>
+                        <th class="p-4 font-semibold">Categoría</th>
+                        <th class="p-4 font-semibold text-center">Nivel ISO</th>
+                        <th class="p-4 font-semibold">Estado</th>
+                        <th class="p-4 font-semibold">Fecha de Alta</th>
+                        <th class="p-4 font-semibold text-center">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 text-sm">
-                    @foreach (var item in Model)
-                    {
-                        <!-- Si está inactivo, bajamos un poco la opacidad de la fila para dar efecto visual -->
-                        <tr class="hover:bg-gray-50 transition @(item.Status == "Inactive" ? "opacity-75 bg-gray-50/50" : "")">
-                            
-                            <!-- Nivel Jerárquico -->
-                            <td class="p-4 text-center">
-                                <div class="inline-flex flex-col items-center justify-center @(item.Status == "Active" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-gray-100 text-gray-500 border-gray-200") border rounded-lg w-14 py-1 shadow-sm">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Nivel</span>
-                                    <span class="text-base font-black">@item.HierarchyLevel</span>
-                                </div>
-                            </td>
-                            
-                            <!-- Prefijo Técnico -->
-                            <td class="p-4">
-                                <span class="font-mono font-bold px-2 py-1 rounded border @(item.Status == "Active" ? "text-gray-700 bg-gray-100 border-gray-200" : "text-gray-400 bg-gray-50 border-gray-100")">
-                                    @item.Prefix
-                                </span>
-                            </td>
-                            
-                            <!-- Nombre y Descripción -->
-                            <td class="p-4">
-                                <p class="font-bold text-base @(item.Status == "Active" ? "text-gray-800" : "text-gray-500")">@item.CategoryName</p>
-                                @if (!string.IsNullOrEmpty(item.Description))
-                                {
-                                    <p class="text-xs text-gray-500 mt-1">@item.Description</p>
-                                }
-                                else
-                                {
-                                    <p class="text-xs text-gray-400 italic mt-1">Sin descripción adicional</p>
-                                }
-                            </td>
-                            
-                            <!-- Norma (Opcional) -->
-                            <td class="p-4">
-                                @if (item.Norm != null)
-                                {
-                                    <span class="text-gray-500 font-semibold text-xs">
-                                        <i class="fa-solid fa-book-bookmark mr-1"></i> @item.Norm.NormName
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-gray-400 text-xs italic">Genérica</span>
-                                }
-                            </td>
-
-                            <!-- ESTADO (Badge) -->
-                            <td class="p-4 text-center">
-                                @if (item.Status == "Active")
-                                {
-                                    <span class="bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Activo</span>
-                                }
-                                else
-                                {
-                                    <span class="bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Inactivo</span>
-                                }
-                            </td>
-                            
-                            <!-- Botones de Acción -->
-                            <td class="p-4 text-center flex justify-center items-center space-x-4 h-full">
-                                
-                                <!-- Detalles siempre activo -->
-                                <a asp-action="Details" asp-route-id="@item.CategoryId" class="text-gray-400 hover:text-teal-600 transition mt-2" title="Ver Detalles">
-                                    <i class="fa-solid fa-eye text-lg"></i>
-                                </a>
-                                
-                                @if (item.Status == "Active")
-                                {
-                                    <!-- Editar (Activo) -->
-                                    <a asp-action="Edit" asp-route-id="@item.CategoryId" class="text-gray-400 hover:text-blue-600 transition mt-2" title="Editar">
-                                        <i class="fa-solid fa-pen-to-square text-lg"></i>
-                                    </a>
-
-                                    <!-- Botón de Desactivar (POST) -->
-                                    <form asp-action="Delete" asp-route-id="@item.CategoryId" method="post" class="inline-block m-0 p-0 mt-2">
-                                        <button type="submit" class="text-gray-400 hover:text-red-600 transition bg-transparent border-none p-0 cursor-pointer" title="Suspender Categoría" onclick="return confirm('¿Estás seguro de suspender esta categoría documental?');">
-                                            <i class="fa-solid fa-power-off text-lg"></i>
-                                        </button>
-                                    </form>
-                                }
-                                else
-                                {
-                                    <!-- Editar (Bloqueado) -->
-                                    <span class="text-gray-300 cursor-not-allowed mt-2" title="Restaura la categoría para poder editarla">
-                                        <i class="fa-solid fa-pen-to-square text-lg"></i>
-                                    </span>
-
-                                    <!-- Botón de Reactivar (POST) -->
-                                    <form asp-action="Reactivate" asp-route-id="@item.CategoryId" method="post" class="inline-block m-0 p-0 mt-2">
-                                        <button type="submit" class="text-gray-400 hover:text-green-600 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar Categoría" onclick="return confirm('¿Deseas volver a activar esta categoría documental?');">
-                                            <i class="fa-solid fa-arrow-rotate-left text-lg"></i>
-                                        </button>
-                                    </form>
-                                }
-                            </td>
-                        </tr>
-                    }
-
+                
+                <tbody class="divide-y divide-slate-100 dark:divide-[#4a4b50] text-sm">
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="6" class="p-12 text-center text-gray-500">
-                                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
-                                    <i class="fa-solid fa-folder-open text-2xl text-gray-400"></i>
+                            <td colspan="6" class="p-12 text-center text-slate-500 dark:text-slate-400">
+                                <div class="w-16 h-16 bg-slate-50 dark:bg-[#2a2b2e] rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-[#4a4b50]">
+                                    <i class="fa-solid fa-folder-open text-2xl text-slate-300 dark:text-slate-600"></i>
                                 </div>
-                                <p class="font-bold text-gray-700 text-lg mb-1">Estructura Vacía</p>
-                                <p class="text-sm">Aún no hay categorías registradas.</p>
+                                <h5 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">Estructura Vacía</h5>
+                                <p class="text-sm">Aún no hay categorías registradas para el control documental.</p>
                             </td>
                         </tr>
                     }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr class="hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition duration-150">
+                                <td class="p-4 font-mono font-black text-brand dark:text-brand-light">
+                                    <span class="bg-brand/5 dark:bg-brand/20 px-3 py-1 rounded-lg border border-brand/10 dark:border-brand/30">
+                                        @item.Prefix-
+                                    </span>
+                                </td>
+                                
+                                <td class="p-4 font-bold text-slate-800 dark:text-white">
+                                    @item.CategoryName
+                                </td>
+
+                                <td class="p-4 text-center">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30 font-bold text-xs">
+                                         @item.HierarchyLevel
+                                    </span>
+                                </td>
+                                
+                                <td class="p-4">
+                                    @if (item.Status == "Active")
+                                    {
+                                        <span class="inline-flex items-center bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-full text-xs font-bold border border-green-200 dark:border-green-800/30 w-max">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span> Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full text-xs font-bold border border-red-200 dark:border-red-800/30 w-max">
+                                            <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span> Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                
+                                <td class="p-4 text-slate-500 dark:text-slate-400 font-medium">
+                                    @item.CreatedAt.ToString("dd MMM yyyy")
+                                </td>
+                                
+                                <td class="p-4 text-center flex justify-center items-center space-x-4">
+                                    
+                                    <a asp-action="Details" asp-route-id="@item.CategoryId" class="text-slate-400 hover:text-brand dark:hover:text-brand transition" title="Ver Detalles">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+
+                                    @if (item.Status == "Active")
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.CategoryId" class="text-slate-400 hover:text-amber-500 transition" title="Editar Categoría">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+
+                                        <form asp-action="Delete" asp-route-id="@item.CategoryId" method="post" class="inline-block m-0 p-0">
+                                            <button type="submit" class="text-slate-400 hover:text-red-500 transition bg-transparent border-none p-0 cursor-pointer" title="Desactivar" onclick="return confirm('¿Estás seguro de desactivar esta categoría?');">
+                                                <i class="fa-solid fa-power-off"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Reactivate" asp-route-id="@item.CategoryId" method="post" class="inline-block m-0 p-0">
+                                            <button type="submit" class="text-slate-400 hover:text-green-500 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar" onclick="return confirm('¿Deseas volver a activar esta categoría?');">
+                                                <i class="fa-solid fa-arrow-rotate-left"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
+        </div>
+        
+        <div class="bg-slate-50 dark:bg-[#2a2b2e] px-4 py-3 border-t border-slate-200 dark:border-[#4a4b50] flex items-center justify-between sm:px-6 transition-colors duration-300">
+            <div class="text-sm text-slate-500 dark:text-slate-400">
+                Estructura de <span class="font-bold text-slate-800 dark:text-white">@Model.Count()</span> categorías registradas
+            </div>
+            <div class="hidden sm:block text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold">
+                Control Documental ISO 9001
+            </div>
         </div>
     </div>
 </div>

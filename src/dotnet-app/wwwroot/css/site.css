@@ -1,19 +1,30 @@
 :root {
-    /* Paleta de colores extraída de tu diseño de login */
-    --color-primary: #754ee5; /* [cite: 148, 149] */
-    --color-primary-hover: #5e3ab8; /* [cite: 150] */
-    --color-bg-light: #FAFAFA; /* [cite: 150] */
-    --color-bg-dark: #2a2b2e; /* [cite: 151] */
-    --color-surface-light: #ffffff; /* [cite: 151] */
-    --color-surface-dark: #1e293b; /* [cite: 151] */
-    --color-text-light: #0f172a; /* [cite: 151] */
-    --color-text-dark: #f8fafc; /* [cite: 151] */
+    /* Paleta de colores base de QualityDoc */
+    --color-primary: #754ee5; 
+    --color-primary-hover: #5e3ab8; 
+    --color-bg-light: #FAFAFA; 
+    --color-bg-dark: #2a2b2e; 
+    --color-surface-light: #ffffff; 
+    --color-surface-dark: #1e293b; 
+    --color-text-light: #0f172a; 
+    --color-text-dark: #f8fafc; 
 }
 
-/* Ajuste para modo oscuro global */
 html.dark {
-    --color-primary: #baa5ff; /* [cite: 153, 154] */
-    --color-primary-hover: #a48aed; /* [cite: 154] */
+    --color-primary: #baa5ff; 
+    --color-primary-hover: #a48aed; 
+}
+
+/* El fondo base de la aplicación */
+body {
+    background-color: var(--color-bg-light);
+    color: var(--color-text-light);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
 }
 
 html {
@@ -37,13 +48,4 @@ html {
 
 body {
   margin-bottom: 60px;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
 }

@@ -6,21 +6,20 @@
     bool isSystemRole = systemRoles.Contains(Model.RoleName);
 }
 
-<div class="max-w-4xl mx-auto">
-    <!-- Breadcrumb de navegación -->
-    <nav class="flex mb-4 text-gray-500 text-xs uppercase tracking-wider">
+<div class="max-w-4xl mx-auto space-y-6 mt-4">
+    <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
         <ol class="inline-flex items-center space-x-2">
-            <li><a asp-action="Index" class="hover:text-blue-600 transition">Roles del Sistema</a></li>
+            <li><a asp-action="Index" class="hover:text-brand transition-colors">Roles del Sistema</a></li>
             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
-            <li class="text-gray-400">Ficha Técnica</li>
+            <li class="text-slate-400 dark:text-slate-500">Ficha Técnica</li>
         </ol>
     </nav>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- Encabezado con Insignia Dinámica -->
-        <div class="bg-blue-50 border-b border-blue-100 p-6 flex justify-between items-center">
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
+        
+        <div class="bg-brand/5 dark:bg-brand/10 border-b border-brand/10 dark:border-brand/20 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center">
-                <div class="bg-blue-600 text-white h-12 w-12 flex items-center justify-center rounded-lg text-xl mr-4 shadow-sm">
+                <div class="bg-brand text-white h-12 w-12 flex items-center justify-center rounded-xl text-xl mr-4 shadow-sm shadow-brand/20">
                     @if (isSystemRole)
                     {
                         <i class="fa-solid fa-shield-halved"></i>
@@ -31,93 +30,90 @@
                     }
                 </div>
                 <div>
-                    <div class="flex items-center">
-                        <h2 class="text-xl font-bold text-blue-900 mr-2">@Model.RoleName</h2>
+                    <div class="flex items-center mb-1">
+                        <h2 class="text-xl font-bold text-brand dark:text-brand-light mr-3">@Model.RoleName</h2>
                         @if (isSystemRole)
                         {
-                            <span class="bg-blue-100 text-blue-700 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border border-blue-200" title="Rol crítico para el funcionamiento del sistema">
+                            <span class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-[10px] uppercase font-bold px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-800/30" title="Rol crítico para el funcionamiento del sistema">
                                 <i class="fa-solid fa-shield-cat mr-1"></i> Sistema
                             </span>
                         }
                     </div>
-                    <p class="text-sm text-blue-700">Ficha técnica de configuración de acceso.</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Ficha técnica de configuración de acceso.</p>
                 </div>
             </div>
             <div>
                 @if (Model.Status == "Active")
                 {
-                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200 shadow-sm">
-                        Rol Activo
+                    <span class="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-full text-xs font-bold border border-green-200 dark:border-green-800/30 shadow-sm flex items-center">
+                        <i class="fa-solid fa-circle-check mr-1.5"></i> Rol Activo
                     </span>
                 }
                 else
                 {
-                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold border border-red-200 shadow-sm">
-                        Rol Inactivo
+                    <span class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 px-4 py-2 rounded-full text-xs font-bold border border-red-200 dark:border-red-800/30 shadow-sm flex items-center">
+                        <i class="fa-solid fa-circle-xmark mr-1.5"></i> Rol Inactivo
                     </span>
                 }
             </div>
         </div>
 
-        <!-- Sección de Detalles Generales -->
-        <div class="p-8 border-b border-gray-100 bg-white grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            <!-- 🚀 ESTADÍSTICA DE USUARIOS ASIGNADOS -->
-            <div>
-                <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center">
-                    <i class="fa-solid fa-users text-purple-500 mr-2"></i> Usuarios Asignados
-                </h3>
-                <div class="bg-purple-50 p-5 rounded-lg border border-purple-100 text-center flex flex-col justify-center min-h-[100px]">
-                    <span class="text-3xl font-bold text-purple-700">
-                        @(Model.Users?.Count() ?? 0)
-                    </span>
-                    <span class="text-xs text-purple-600 font-semibold uppercase mt-1">Cuentas con este rol</span>
-                </div>
+        <div class="p-6 md:p-8 border-b border-slate-100 dark:border-[#4a4b50] bg-white dark:bg-[#323338] transition-colors">
+            <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">
+                <i class="fa-solid fa-users text-brand mr-2"></i> Usuarios Asignados
+            </h3>
+            
+            <div class="bg-slate-50 dark:bg-[#2a2b2e] p-5 rounded-2xl border border-slate-100 dark:border-[#4a4b50] text-center flex flex-col justify-center min-h-[100px] max-w-xs transition-colors shadow-sm">
+                <span class="text-4xl font-black text-brand dark:text-brand-light">
+                    @(Model.Users?.Count() ?? 0)
+                </span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase mt-2 tracking-wider">Cuentas con este rol</span>
             </div>
-
         </div>
 
-        <!-- Trazabilidad de Auditoría -->
-        <div class="p-8">
-            <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 mb-4">Trazabilidad del Sistema</h3>
+        <div class="p-6 md:p-8">
+            <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5">Trazabilidad del Sistema</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <!-- Tarjeta: Creación -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
-                    <p class="text-xs text-gray-400 font-semibold uppercase mb-1">Registro Inicial</p>
-                    <p class="text-sm text-gray-800"><i class="fa-regular fa-calendar mr-2 text-gray-400"></i> @Model.CreatedAt.ToString("dd MMMM, yyyy - HH:mm") UTC</p>
+                <div class="bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-100 dark:border-transparent transition-colors">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Registro Inicial</p>
+                    <p class="text-sm text-slate-800 dark:text-slate-300">
+                        <i class="fa-regular fa-calendar mr-2 text-slate-400"></i> @Model.CreatedAt.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")
+                    </p>
                     
-                    <p class="text-sm text-gray-800 mt-2">
-                        <i class="fa-solid fa-user-shield mr-2 text-gray-400"></i> Creado por: <span class="font-semibold">@(Model.CreatedByNavigation?.FullName ?? "Sistema")</span>
+                    <p class="text-sm text-slate-800 dark:text-slate-300 mt-2">
+                        <i class="fa-solid fa-user-shield mr-2 text-slate-400"></i> Creado por: <span class="font-semibold text-slate-800 dark:text-white">@(Model.CreatedByNavigation?.FullName ?? "Sistema")</span>
                     </p>
                 </div>
 
-                <!-- Tarjeta: Modificación -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
-                    <p class="text-xs text-gray-400 font-semibold uppercase mb-1">Última Modificación</p>
+                <div class="bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-100 dark:border-transparent transition-colors">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Última Modificación</p>
                     @if (Model.UpdatedAt.HasValue)
                     {
-                        <p class="text-sm text-gray-800"><i class="fa-regular fa-clock mr-2 text-gray-400"></i> @Model.UpdatedAt.Value.ToString("dd MMMM, yyyy - HH:mm") UTC</p>
+                        <p class="text-sm text-slate-800 dark:text-slate-300">
+                            <i class="fa-regular fa-clock mr-2 text-slate-400"></i> @Model.UpdatedAt.Value.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm")
+                        </p>
                         
-                        <p class="text-sm text-gray-800 mt-2">
-                            <i class="fa-solid fa-user-pen mr-2 text-gray-400"></i> Actualizado por: <span class="font-semibold">@(Model.UpdatedByNavigation?.FullName ?? "Sistema")</span>
+                        <p class="text-sm text-slate-800 dark:text-slate-300 mt-2">
+                            <i class="fa-solid fa-user-pen mr-2 text-slate-400"></i> Actualizado por: <span class="font-semibold text-slate-800 dark:text-white">@(Model.UpdatedByNavigation?.FullName ?? "Sistema")</span>
                         </p>
                     }
                     else
                     {
-                        <p class="text-sm text-gray-500 italic mt-2 flex items-center h-full">No registra modificaciones posteriores.</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 italic mt-2 flex items-center h-full">No registra modificaciones posteriores.</p>
                     }
                 </div>
 
-                <!-- Tarjeta Condicional: Suspensión -->
                 @if (Model.Status == "Inactive" || Model.Status == "Deleted")
                 {
-                    <div class="bg-red-50 p-4 rounded-lg border border-red-100 md:col-span-2 mt-2 shadow-sm">
-                        <p class="text-xs text-red-500 font-semibold uppercase mb-1">Detalles de Suspensión</p>
-                        <p class="text-sm text-red-800"><i class="fa-solid fa-calendar-xmark mr-2 text-red-400"></i> @(Model.DeletedAt?.ToString("dd MMMM, yyyy - HH:mm") ?? "Fecha desconocida") UTC</p>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-transparent md:col-span-2 mt-2 transition-colors">
+                        <p class="text-xs text-red-500 dark:text-red-400 font-bold uppercase tracking-wider mb-1">Detalles de Suspensión</p>
+                        <p class="text-sm text-red-800 dark:text-red-300">
+                            <i class="fa-solid fa-calendar-xmark mr-2 text-red-400"></i> @(Model.DeletedAt?.ToLocalTime().ToString("dd MMMM, yyyy - HH:mm") ?? "Fecha desconocida")
+                        </p>
                         
-                        <p class="text-sm text-red-800 mt-2">
-                            <i class="fa-solid fa-user-slash mr-2 text-red-400"></i> Suspendido por: <span class="font-semibold">@(Model.DeletedByNavigation?.FullName ?? "Sistema")</span>
+                        <p class="text-sm text-red-800 dark:text-red-300 mt-2">
+                            <i class="fa-solid fa-user-slash mr-2 text-red-400"></i> Suspendido por: <span class="font-semibold text-slate-800 dark:text-white">@(Model.DeletedByNavigation?.FullName ?? "Sistema")</span>
                         </p>
                     </div>
                 }
@@ -125,14 +121,13 @@
             </div>
         </div>
 
-        <!-- Botones de Acción Footer -->
-        <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-between items-center">
-            <a asp-action="Index" class="text-gray-500 hover:text-gray-700 text-sm font-medium py-2 px-4 transition flex items-center">
+        <div class="bg-slate-50 dark:bg-[#2a2b2e] p-6 border-t border-slate-100 dark:border-[#4a4b50] flex flex-col sm:flex-row justify-between items-center transition-colors duration-300 gap-4">
+            <a asp-action="Index" class="text-slate-500 hover:text-slate-800 dark:hover:text-white text-sm font-bold flex items-center transition">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a Roles
             </a>
             
-            <div class="space-x-2">
-                <a asp-action="Edit" asp-route-id="@Model.RoleId" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-bold py-2 px-4 rounded-lg transition duration-150 inline-flex items-center">
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+                <a asp-action="Edit" asp-route-id="@Model.RoleId" class="w-full sm:w-auto bg-brand/10 hover:bg-brand/20 dark:bg-brand/20 dark:hover:bg-brand/30 text-brand dark:text-brand-light text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150 flex items-center justify-center">
                     <i class="fa-solid fa-pen-to-square mr-2"></i> Editar Configuración
                 </a>
             </div>

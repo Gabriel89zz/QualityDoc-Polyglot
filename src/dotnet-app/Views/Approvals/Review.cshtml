@@ -5,89 +5,111 @@
     var doc = Model.DocumentVersion?.Document;
 }
 
-<div class="max-w-7xl mx-auto mt-6">
+<div class="max-w-7xl mx-auto space-y-6 mt-4">
 
-    <!-- HEADER Y BOTÓN VOLVER -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <div>
-            <h2 class="text-3xl font-black text-gray-800 tracking-tight flex items-center">
-                <i class="fa-solid fa-file-signature text-blue-600 mr-3"></i> Evaluar Documento
-            </h2>
-            <p class="text-gray-600 font-medium text-lg mt-1">
-                @doc?.DocCode - @doc?.DocName (Versión @Model.DocumentVersion?.VersionNum)
-            </p>
+    <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+        <ol class="inline-flex items-center space-x-2">
+            <li><a asp-action="Index" class="hover:text-brand transition-colors">Centro de Tareas</a></li>
+            <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+            <li class="text-slate-400 dark:text-slate-500">Evaluar Documento</li>
+        </ol>
+    </nav>
+
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
+        <div class="flex items-center">
+            <div class="bg-brand/10 text-brand h-12 w-12 flex items-center justify-center rounded-xl text-xl mr-4 border border-brand/20 shadow-sm">
+                <i class="fa-solid fa-file-signature"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white">Panel de Firma Electrónica</h2>
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                    <span class="text-brand dark:text-brand-light font-black">@doc?.DocCode</span> - @doc?.DocName (Versión @Model.DocumentVersion?.VersionNum)
+                </p>
+            </div>
         </div>
-        <div class="mt-4 sm:mt-0">
-            <a asp-action="Index" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium py-2 px-4 rounded shadow-sm transition inline-flex items-center text-sm">
+        <div class="mt-4 sm:mt-0 w-full sm:w-auto">
+            <a asp-action="Index" class="w-full sm:w-auto bg-slate-50 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold py-2.5 px-5 rounded-xl shadow-sm transition inline-flex items-center justify-center text-sm">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a la Bandeja
             </a>
         </div>
     </div>
 
-    <!-- GRID PRINCIPAL A 2 COLUMNAS -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- COLUMNA IZQUIERDA: VISOR DEL PDF (Ocupa 2/3 del espacio) -->
-        <div class="lg:col-span-2 bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden flex flex-col">
-            <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-                <span class="text-xs font-bold text-gray-500 uppercase"><i class="fa-solid fa-eye mr-2"></i> Vista Previa del Documento</span>
-                <a href="@Model.DocumentVersion?.FilePath" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs font-bold">
-                    <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Abrir en otra pestaña
+        <div class="lg:col-span-2 bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] overflow-hidden flex flex-col transition-colors duration-300">
+            <div class="px-5 py-4 bg-slate-50 dark:bg-[#2a2b2e] border-b border-slate-200 dark:border-[#4a4b50] flex justify-between items-center transition-colors">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-eye mr-2"></i> Vista Previa del Documento</span>
+                <a href="@Model.DocumentVersion?.FilePath" target="_blank" class="text-brand dark:text-brand-light hover:text-brand-hover text-xs font-bold flex items-center transition-colors">
+                    Abrir en otra pestaña <i class="fa-solid fa-arrow-up-right-from-square ml-1.5"></i>
                 </a>
             </div>
-            <!-- Contenedor del Iframe -->
-            <div class="w-full h-[600px] bg-gray-100">
-                <iframe src="@Model.DocumentVersion?.FilePath" class="w-full h-full border-0"></iframe>
+            <div class="w-full h-[600px] md:h-[700px] bg-slate-100 dark:bg-[#1a1b1e] relative">
+                @if (string.IsNullOrEmpty(Model.DocumentVersion?.FilePath))
+                {
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                        <i class="fa-solid fa-file-circle-xmark text-4xl mb-3"></i>
+                        <p class="font-bold">No se encontró el archivo PDF.</p>
+                    </div>
+                }
+                else
+                {
+                    <iframe src="@Model.DocumentVersion?.FilePath" class="w-full h-full border-0"></iframe>
+                }
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: METADATOS Y FORMULARIO DE FIRMA (Ocupa 1/3) -->
         <div class="flex flex-col space-y-6">
             
-            <!-- TARJETA DE METADATOS -->
-            <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-5">
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b pb-2">Contexto</h3>
+            <div class="bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] p-6 transition-colors duration-300">
+                <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 border-b border-slate-100 dark:border-[#4a4b50] pb-2">Contexto del Documento</h3>
                 
-                <div class="space-y-3">
+                <div class="space-y-4">
                     <div>
-                        <p class="text-xs text-gray-500 font-medium">Departamento</p>
-                        <p class="text-sm font-bold text-gray-900">@doc?.Department?.DeptName</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Departamento Dueño</p>
+                        <p class="text-sm font-bold text-slate-800 dark:text-white mt-0.5"><i class="fa-solid fa-building-user text-slate-400 mr-1.5"></i> @doc?.Department?.DeptName</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 font-medium">Categoría ISO</p>
-                        <p class="text-sm font-bold text-gray-900">@doc?.Category?.CategoryName</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Categoría ISO</p>
+                        <p class="text-sm font-bold text-slate-800 dark:text-white mt-0.5"><i class="fa-solid fa-folder-tree text-slate-400 mr-1.5"></i> @doc?.Category?.CategoryName</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 font-medium">Motivo del Cambio (Versión @Model.DocumentVersion?.VersionNum)</p>
-                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-2 mt-1 text-xs text-gray-700 italic">
-                            "@Model.DocumentVersion?.ChangeDescription"
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Motivo del Cambio (v @Model.DocumentVersion?.VersionNum)</p>
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-3 mt-1.5 rounded-r-lg shadow-sm">
+                            <p class="text-sm text-amber-800 dark:text-amber-400 italic font-medium">
+                                "@Model.DocumentVersion?.ChangeDescription"
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TARJETA DE DECISIÓN (EL FORMULARIO) -->
-            <div class="bg-white shadow-sm rounded-lg border border-gray-200 p-5 border-t-4 border-t-purple-500">
-                <h3 class="text-sm font-black text-gray-800 mb-2">Tu Decisión: @Model.StepType</h3>
-                <p class="text-xs text-gray-500 mb-4">Revisa el documento detalladamente antes de emitir tu fallo. Esta acción quedará registrada en la bitácora de auditoría.</p>
+            <div class="bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] p-6 border-t-4 border-t-brand transition-colors duration-300 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-gavel text-6xl text-brand"></i>
+                </div>
 
-                <form asp-action="Sign" method="post" id="signForm">
+                <h3 class="text-base font-black text-slate-800 dark:text-white mb-1 relative z-10">Tu Decisión: @Model.StepType</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-5 relative z-10 leading-relaxed">
+                    Revisa el documento detalladamente antes de emitir tu fallo. Esta acción quedará registrada permanentemente en la bitácora de auditoría.
+                </p>
+
+                <form asp-action="Sign" method="post" id="signForm" class="relative z-10">
                     <input type="hidden" name="approvalId" value="@Model.ApprovalId" />
                     
-                    <div class="mb-4">
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Comentarios (Opcional si apruebas, Obligatorio si rechazas)</label>
-                        <textarea name="comments" id="commentsBox" rows="3" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Escribe aquí tus observaciones..."></textarea>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            Comentarios <span class="text-slate-400 dark:text-slate-500 font-normal">(Obligatorio si rechazas)</span>
+                        </label>
+                        <textarea name="comments" id="commentsBox" rows="4" class="w-full rounded-xl bg-slate-50 dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] text-slate-700 dark:text-white focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition px-4 py-3 resize-none" placeholder="Escribe aquí tus observaciones, correcciones o felicitaciones..."></textarea>
                     </div>
 
-                    <div class="flex flex-col space-y-2">
-                        <!-- Botón Aprobar -->
-                        <button type="submit" name="decision" value="Approve" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded shadow-sm transition flex items-center justify-center" onclick="return confirm('¿Estás seguro de APROBAR este documento? Se aplicará tu firma electrónica.');">
-                            <i class="fa-solid fa-check-double mr-2"></i> Aprobar Documento
+                    <div class="flex flex-col space-y-3">
+                        <button type="submit" name="decision" value="Approve" class="w-full bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl shadow-md shadow-green-500/20 hover:shadow-lg transition-all duration-200 flex items-center justify-center text-sm" onclick="return confirm('¿Estás seguro de APROBAR este documento? Se aplicará tu firma electrónica.');">
+                            <i class="fa-solid fa-check-double text-lg mr-2"></i> Aprobar Documento
                         </button>
 
-                        <!-- Botón Rechazar -->
-                        <button type="submit" name="decision" value="Reject" class="w-full bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2.5 px-4 rounded transition flex items-center justify-center" onclick="return validateRejection();">
-                            <i class="fa-solid fa-ban mr-2"></i> Rechazar
+                        <button type="submit" name="decision" value="Reject" class="w-full bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/30 font-bold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center text-sm" onclick="return validateRejection();">
+                            <i class="fa-solid fa-ban text-lg mr-2"></i> Rechazar y Devolver
                         </button>
                     </div>
                 </form>
@@ -103,11 +125,12 @@
         function validateRejection() {
             var comments = document.getElementById('commentsBox').value.trim();
             if (comments === '') {
-                alert('Por favor, ingresa un comentario explicando por qué rechazas el documento.');
+                // Podemos mejorar este alert nativo más adelante con SweetAlert o Toastr si lo deseas
+                alert('Por favor, ingresa un comentario explicando por qué rechazas el documento para que el autor pueda corregirlo.');
                 document.getElementById('commentsBox').focus();
                 return false; // Detiene el envío del formulario
             }
-            return confirm('¿Estás seguro de RECHAZAR este documento? Se regresará a estatus de Borrador.');
+            return confirm('¿Estás seguro de RECHAZAR este documento? Se regresará a estatus de Borrador y se notificará al autor.');
         }
     </script>
 }

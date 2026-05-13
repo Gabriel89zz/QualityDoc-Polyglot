@@ -5,7 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - QualityDoc</title>
     
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
     tailwind.config = {
         darkMode: 'class', 
@@ -23,24 +35,11 @@
             }
         }
     }
-</script>
-
-<script>
-    // Bloque de ejecución inmediata para evitar el flash blanco
-    (function() {
-        const theme = localStorage.getItem('theme'); // [cite: 195, 296]
-        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark'); // [cite: 195, 296]
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    })();
-</script>
+    </script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
-        /* Ajuste para que el contenido no quede debajo del sidebar */
         .main-content {
             margin-left: 16rem; /* 256px */
         }
@@ -49,133 +48,137 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<body class="antialiased font-sans leading-normal tracking-normal bg-[#FAFAFA] dark:bg-[#2a2b2e] transition-colors duration-300">
 
     @{
-        // Centralizamos la lógica de roles al inicio del Layout
-        var esSuper = User.IsInRole("Super Admin");
+        // Roles
+        var esSuper = User.IsInRole("Super Admin") || User.IsInRole("Super Administrador");
         var esAdminEmpresa = User.IsInRole("Admin de Empresa");
         var esLector = User.IsInRole("Lector");
         var esPersonalWorkflow = User.IsInRole("Creador de Doc") || User.IsInRole("Revisor") || User.IsInRole("Aprobador");
+
+        // 🧠 HELPER C#: Detecta la página actual para pintar el botón del menú
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+        string GetActiveClass(string c, string a = "Index") {
+            return (currentController == c && currentAction == a) 
+                ? "text-brand dark:text-brand bg-brand/5 dark:bg-brand/10 font-medium border-r-4 border-brand" 
+                : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] hover:text-brand dark:hover:text-brand border-r-4 border-transparent hover:border-brand/50 transition-colors";
+        }
     }
 
-    <nav class="fixed w-full z-10 top-0 bg-white border-b border-gray-200 py-3 px-6 flex justify-between items-center">
+    <nav class="fixed w-full z-20 top-0 bg-white dark:bg-[#323338] border-b border-slate-200 dark:border-[#4a4b50] py-3 px-6 flex justify-between items-center transition-colors duration-300">
         <div class="flex items-center">
-            <span class="text-blue-600 font-bold text-xl mr-2">QualityDoc</span>
-            <span class="text-gray-400 text-sm hidden md:inline">| @User.FindFirst("CompanyName")?.Value</span>
+            <div class="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center mr-3 border border-brand/20">
+                <i class="fa-solid fa-file-circle-check text-brand text-sm"></i>
+            </div>
+            <span class="text-brand font-bold text-xl mr-2">QualityDoc</span>
+            <span class="text-slate-400 dark:text-slate-500 text-sm hidden md:inline">| @User.FindFirst("CompanyName")?.Value</span>
         </div>
 
         <div class="flex items-center space-x-4">
-            <div class="text-right hidden md:block">
-                <p class="text-sm font-medium text-gray-700">@User.Identity?.Name</p>
-                <p class="text-xs text-gray-500 uppercase">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</p>
+            <button id="themeToggleGlobal" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-[#4a4b50] transition-colors focus:outline-none text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-moon text-lg" id="moonIconGlobal"></i>
+                <i class="fa-solid fa-sun text-lg hidden" id="sunIconGlobal"></i>
+            </button>
+
+            <div class="text-right hidden md:block border-l border-slate-200 dark:border-[#4a4b50] pl-4">
+                <p class="text-sm font-semibold text-slate-800 dark:text-white">@User.Identity?.Name</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</p>
             </div>
             
             <form asp-controller="Auth" asp-action="Logout" method="post">
-                <button type="submit" class="bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 p-2 rounded-full transition" title="Cerrar Sesión">
+                <button type="submit" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 p-2.5 rounded-full transition-colors border border-transparent dark:border-[#4a4b50]" title="Cerrar Sesión">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </form>
         </div>
     </nav>
 
-    <aside class="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-gray-300 pt-20 hidden md:block border-r border-gray-800 overflow-y-auto">
-        <div class="px-6 mb-8">
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Menú Principal</p>
+    <aside class="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-[#323338] text-slate-600 dark:text-slate-300 pt-20 hidden md:block border-r border-slate-200 dark:border-[#4a4b50] overflow-y-auto z-10 transition-colors duration-300 shadow-sm">
+        <div class="px-6 mb-6 mt-4">
+            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Menú Principal</p>
         </div>
         
         <nav class="space-y-1">
-            <a asp-controller="Home" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+            <a asp-controller="Home" asp-action="Index" class="flex items-center px-6 py-3.5 @GetActiveClass("Home", "Index")">
                 <i class="fa-solid fa-chart-line w-6"></i>
                 <span class="ml-3">Dashboard</span>
             </a>
 
             @if (esSuper)
             {
-                <!-- MENÚ SUPER ADMIN -->
-                <div class="px-6 mt-6 mb-2">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Administración Global</p>
+                <div class="px-6 mt-8 mb-3">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Admin Global</p>
                 </div>
-                <a asp-controller="Companies" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Companies" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Companies")">
                     <i class="fa-solid fa-building w-6"></i>
                     <span class="ml-3">Empresas Clientes</span>
                 </a>
-                <a asp-controller="Norms" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Norms" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Norms")">
                     <i class="fa-solid fa-scale-balanced w-6"></i>
                     <span class="ml-3">Normativas ISO</span>
                 </a>
-                <a asp-controller="Roles" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Roles" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Roles")">
                     <i class="fa-solid fa-user-shield w-6"></i>
                     <span class="ml-3">Roles del Sistema</span>
                 </a>
             }
             else if (esAdminEmpresa)
             {
-                <!-- MENÚ ADMIN DE EMPRESA (QA Manager) -->
-                <div class="px-6 mt-6 mb-2">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Configuración ISO</p>
+                <div class="px-6 mt-8 mb-3">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Configuración ISO</p>
                 </div>
-                <a asp-controller="Departments" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Departments" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Departments")">
                     <i class="fa-solid fa-sitemap w-6"></i>
                     <span class="ml-3">Departamentos</span>
                 </a>
-                <a asp-controller="Users" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Users" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Users")">
                     <i class="fa-solid fa-users w-6"></i>
                     <span class="ml-3">Personal</span>
                 </a>
-                <a asp-controller="DocumentCategories" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="DocumentCategories" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("DocumentCategories")">
                     <i class="fa-solid fa-folder-tree w-6"></i>
                     <span class="ml-3">Estructura ISO</span>
                 </a>
 
-                <div class="px-6 mt-6 mb-2">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Gestión Documental</p>
+                <div class="px-6 mt-8 mb-3">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Gestión Documental</p>
                 </div>
-                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Documents")">
                     <i class="fa-solid fa-file-signature w-6"></i>
                     <span class="ml-3">Master de Docs</span>
                 </a>
-                
-                @* <!-- 🚀 NUEVO BOTÓN: Mis Firmas para el Admin de Empresa -->
-                <a asp-controller="Approvals" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
-                    <i class="fa-solid fa-inbox w-6 text-purple-400"></i>
-                    <span class="ml-3 font-bold text-purple-400">Mis Firmas</span>
-                </a> *@
-
-                <a asp-controller="DocumentApprovals" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="DocumentApprovals" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("DocumentApprovals")">
                     <i class="fa-solid fa-bars-progress w-6"></i>
                     <span class="ml-3">Flujos Activos</span>
                 </a>
             }
             else if (esPersonalWorkflow)
             {
-                <!-- MENÚ INGENIEROS (Creadores, Revisores, Aprobadores) -->
-                <div class="px-6 mt-6 mb-2">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Operación</p>
+                <div class="px-6 mt-8 mb-3">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Operación</p>
                 </div>
-                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Documents")">
                     <i class="fa-solid fa-file-signature w-6"></i>
                     <span class="ml-3">Redactar Docs</span>
                 </a>
-                
-                <!-- 🚀 RUTA ACTUALIZADA: Mis Firmas para Personal -->
-                <a asp-controller="Approvals" asp-action="Index" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
-                    <i class="fa-solid fa-inbox w-6 text-purple-400"></i>
-                    <span class="ml-3 font-bold text-purple-400">Mis Firmas</span>
+                <a asp-controller="Approvals" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Approvals")">
+                    <i class="fa-solid fa-inbox w-6 text-brand"></i>
+                    <span class="ml-3 font-bold">Mis Firmas</span>
                 </a>
-
-                <a asp-controller="Documents" asp-action="Library" class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition border-l-4 border-transparent hover:border-blue-500">
+                <a asp-controller="Documents" asp-action="Library" class="flex items-center px-6 py-3 @GetActiveClass("Documents", "Library")">
                     <i class="fa-solid fa-book-open-reader w-6"></i>
                     <span class="ml-3">Biblioteca ISO</span>
                 </a>
             }
             else if (esLector)
             {
-                <!-- MENÚ OPERARIO (Solo enlace externo) -->
-                <div class="px-6 mt-6 mb-2">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Piso de Producción</p>
+                <div class="px-6 mt-8 mb-3">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Piso de Producción</p>
                 </div>
-                <a href="http://tuservidor-php.com/portal" class="flex items-center px-6 py-3 text-blue-400 hover:bg-gray-800 hover:text-blue-300 transition border-l-4 border-transparent hover:border-blue-500">
+                <a href="http://tuservidor-php.com/portal" class="flex items-center px-6 py-3 text-brand dark:text-brand hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition-colors border-r-4 border-transparent hover:border-brand/50">
                     <i class="fa-solid fa-arrow-up-right-from-square w-6"></i>
                     <span class="ml-3">Portal Operativo</span>
                 </a>
@@ -183,16 +186,44 @@
         </nav>
     </aside>
 
-    <main class="main-content pt-20 p-8">
+    <main class="main-content pt-20 p-8 min-h-[calc(100vh-3rem)]">
         <div class="max-w-7xl mx-auto">
             @RenderBody()
         </div>
     </main>
 
-    <footer class="main-content px-8 py-4 border-t border-gray-200 text-gray-500 text-xs text-center">
-        &copy; @DateTime.Now.Year - QualityDoc - Sistema de Trazabilidad IATF 16949 / ISO 9001
+    <footer class="main-content px-8 py-5 border-t border-slate-200 dark:border-[#4a4b50] text-slate-500 dark:text-slate-400 text-xs text-center transition-colors duration-300 bg-white dark:bg-[#323338]">
+        &copy; @DateTime.Now.Year - <span class="font-semibold text-brand">QualityDoc</span> - Sistema de Trazabilidad IATF 16949 / ISO 9001
     </footer>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const htmlNode = document.documentElement;
+            const themeToggleBtn = document.getElementById('themeToggleGlobal');
+            const sunIcon = document.getElementById('sunIconGlobal');
+            const moonIcon = document.getElementById('moonIconGlobal');
+
+            if (htmlNode.classList.contains('dark')) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                htmlNode.classList.toggle('dark');
+                
+                if (htmlNode.classList.contains('dark')) {
+                    localStorage.setItem('theme', 'dark');
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

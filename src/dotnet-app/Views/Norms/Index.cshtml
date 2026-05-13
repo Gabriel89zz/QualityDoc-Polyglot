@@ -4,54 +4,56 @@
     ViewData["Title"] = "Catálogo de Normativas ISO";
 }
 
-<div class="space-y-6">
-    <div class="flex justify-between items-end border-b border-gray-200 pb-4">
+<div class="max-w-7xl mx-auto space-y-6 mt-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">Catálogo de Normativas</h1>
-            <p class="text-gray-500 text-sm">Gestión de estándares de calidad (Ej. ISO 9001, IATF 16949)</p>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center">
+                <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center mr-3 border border-brand/20">
+                    <i class="fa-solid fa-book-bookmark text-brand"></i>
+                </div>
+                Catálogo de Normativas
+            </h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestión de estándares de calidad (Ej. ISO 9001, IATF 16949)</p>
         </div>
-        <div>
-            <a asp-action="Create" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm flex items-center transition duration-150">
+        <div class="mt-4 sm:mt-0">
+            <a asp-action="Create" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-5 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-200">
                 <i class="fa-solid fa-plus mr-2"></i> Nueva Normativa
             </a>
         </div>
     </div>
 
-    <!-- 🚨 Lector de Errores TempData -->
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm">
+        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm border border-y-red-100 border-r-red-100 dark:border-transparent transition-colors duration-300">
             <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm text-red-700 font-bold">
-                        @TempData["ErrorMessage"]
-                    </p>
-                </div>
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg mr-3"></i>
+                <p class="text-sm text-red-700 dark:text-red-400 font-bold">@TempData["ErrorMessage"]</p>
             </div>
         </div>
     }
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                <thead class="bg-slate-50 dark:bg-[#2a2b2e] text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider transition-colors duration-300">
                     <tr>
-                        <th class="p-4">Norma</th>
-                        <th class="p-4">Año / Versión</th>
-                        <th class="p-4">Estado</th>
-                        <th class="p-4 text-center">Acciones</th>
+                        <th class="p-4 font-semibold">Norma</th>
+                        <th class="p-4 font-semibold text-center">Año / Versión</th>
+                        <th class="p-4 font-semibold text-center">Estado</th>
+                        <th class="p-4 font-semibold text-center">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 text-sm">
+                
+                <tbody class="divide-y divide-slate-100 dark:divide-[#4a4b50] text-sm">
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-gray-400">
-                                <i class="fa-solid fa-scale-balanced text-3xl mb-2"></i>
-                                <p>No hay normativas registradas en el catálogo.</p>
+                            <td colspan="4" class="p-12 text-center text-slate-500 dark:text-slate-400">
+                                <div class="w-16 h-16 bg-slate-50 dark:bg-[#2a2b2e] rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-[#4a4b50]">
+                                    <i class="fa-solid fa-scale-balanced text-2xl text-slate-300 dark:text-slate-600"></i>
+                                </div>
+                                <h5 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">Catálogo Vacío</h5>
+                                <p class="text-sm">No hay normativas registradas en el catálogo actual.</p>
                             </td>
                         </tr>
                     }
@@ -59,61 +61,58 @@
                     {
                         @foreach (var item in Model)
                         {
-                            <tr class="hover:bg-gray-50 transition duration-150">
-                                <td class="p-4 font-bold text-gray-800">
-                                    <i class="fa-solid fa-book-bookmark text-purple-400 mr-2"></i> @item.NormName
+                            <tr class="hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition duration-150">
+                                <td class="p-4 font-bold text-slate-800 dark:text-white">
+                                    <i class="fa-solid fa-book-bookmark text-brand dark:text-brand-light mr-2"></i> @item.NormName
                                 </td>
                                 
-                                <td class="p-4 text-gray-600 font-mono font-bold">
-                                    @item.ReleaseYear
+                                <td class="p-4 text-center">
+                                    <span class="bg-slate-100 dark:bg-[#2a2b2e] text-slate-700 dark:text-slate-300 px-3 py-1 rounded-lg border border-slate-200 dark:border-[#4a4b50] font-mono font-bold text-xs shadow-sm">
+                                        @item.ReleaseYear
+                                    </span>
                                 </td>
                                 
-                                <td class="p-4">
+                                <td class="p-4 text-center">
                                     @if (item.Status == "Active")
                                     {
-                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold flex w-max items-center">
-                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span> Vigente
+                                        <span class="inline-flex items-center bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-full text-xs font-bold border border-green-200 dark:border-green-800/30 w-max mx-auto">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span> Vigente
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-bold flex w-max items-center">
-                                            <span class="w-2 h-2 bg-red-500 rounded-full mr-1.5"></span> Obsoleta
+                                        <span class="inline-flex items-center bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full text-xs font-bold border border-red-200 dark:border-red-800/30 w-max mx-auto">
+                                            <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span> Obsoleta
                                         </span>
                                     }
                                 </td>
                                 
-                                <td class="p-4 text-center space-x-4 flex justify-center items-center">
+                                <td class="p-4 text-center flex justify-center items-center space-x-4">
                                     
-                                    <!-- Ver Detalles siempre está activo -->
-                                    <a asp-action="Details" asp-route-id="@item.NormId" class="text-gray-400 hover:text-teal-600 transition" title="Ver Detalles">
+                                    <a asp-action="Details" asp-route-id="@item.NormId" class="text-slate-400 hover:text-brand dark:hover:text-brand transition" title="Ver Detalles">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     @if (item.Status == "Active")
                                     {
-                                        <!-- Botón Editar (Activo) -->
-                                        <a asp-action="Edit" asp-route-id="@item.NormId" class="text-gray-400 hover:text-blue-600 transition" title="Editar Normativa">
+                                        <a asp-action="Edit" asp-route-id="@item.NormId" class="text-slate-400 hover:text-amber-500 transition" title="Editar Normativa">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                         
-                                        <!-- Botón de Desactivar / Obsoleta (POST) -->
                                         <form asp-action="Delete" asp-route-id="@item.NormId" method="post" class="inline-block m-0 p-0">
-                                            <button type="submit" class="text-gray-400 hover:text-red-600 transition bg-transparent border-none p-0 cursor-pointer" title="Marcar como Obsoleta" onclick="return confirm('¿Estás seguro de marcar esta normativa como obsoleta?');">
+                                            <button type="submit" class="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition bg-transparent border-none p-0 cursor-pointer" title="Marcar como Obsoleta" onclick="return confirm('¿Estás seguro de marcar esta normativa como obsoleta?');">
                                                 <i class="fa-solid fa-power-off"></i>
                                             </button>
                                         </form>
                                     }
                                     else
                                     {
-                                        <!-- Botón Editar (Bloqueado) -->
-                                        <span class="text-gray-300 cursor-not-allowed" title="Restaura la normativa para poder editarla">
+                                        <span class="text-slate-300 dark:text-slate-600 cursor-not-allowed" title="Restaura la normativa para poder editarla">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </span>
 
-                                        <!-- Botón de Reactivar (POST) -->
                                         <form asp-action="Reactivate" asp-route-id="@item.NormId" method="post" class="inline-block m-0 p-0">
-                                            <button type="submit" class="text-gray-400 hover:text-green-600 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar Normativa" onclick="return confirm('¿Estás seguro de que deseas reactivar esta normativa y marcarla como vigente?');">
+                                            <button type="submit" class="text-slate-400 hover:text-green-500 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar Normativa" onclick="return confirm('¿Estás seguro de que deseas reactivar esta normativa y marcarla como vigente?');">
                                                 <i class="fa-solid fa-arrow-rotate-left"></i>
                                             </button>
                                         </form>
@@ -124,6 +123,12 @@
                     }
                 </tbody>
             </table>
+        </div>
+        
+        <div class="bg-slate-50 dark:bg-[#2a2b2e] px-4 py-3 border-t border-slate-200 dark:border-[#4a4b50] flex items-center justify-between sm:px-6 transition-colors duration-300">
+            <div class="text-sm text-slate-500 dark:text-slate-400">
+                Mostrando <span class="font-bold text-slate-800 dark:text-white">@Model.Count()</span> normativas registradas
+            </div>
         </div>
     </div>
 </div>
