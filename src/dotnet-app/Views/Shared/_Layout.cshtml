@@ -160,15 +160,18 @@
                 <div class="px-6 mt-8 mb-3">
                     <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Operación</p>
                 </div>
-                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Documents")">
+                
+                <a asp-controller="Documents" asp-action="Create" class="flex items-center px-6 py-3 @GetActiveClass("Documents", "Create")">
                     <i class="fa-solid fa-file-signature w-6"></i>
                     <span class="ml-3">Redactar Docs</span>
                 </a>
+                
                 <a asp-controller="Approvals" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Approvals")">
                     <i class="fa-solid fa-inbox w-6 text-brand"></i>
                     <span class="ml-3 font-bold">Mis Firmas</span>
                 </a>
-                <a asp-controller="Documents" asp-action="Library" class="flex items-center px-6 py-3 @GetActiveClass("Documents", "Library")">
+                
+                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Documents", "Index")">
                     <i class="fa-solid fa-book-open-reader w-6"></i>
                     <span class="ml-3">Biblioteca ISO</span>
                 </a>

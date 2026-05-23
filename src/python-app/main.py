@@ -15,15 +15,18 @@ client = AsyncIOMotorClient(MONGO_URL)
 db = client.qualitydoc_metadata
 coleccion_docs = db.documentos_aprobados # Así se llamará la "tabla" en Mongo
 
-# 2. Definimos el "Molde" de los datos que esperamos recibir de C#
+# 2. Definimos el "Molde" 
 class DocumentoAprobado(BaseModel):
-    documento_id: int # El ID original de SQL Server
+    documento_id: int 
     codigo: str
     titulo: str
     version: str
-    etiquetas: list[str] # Lista de palabras clave para buscar rápido
+    etiquetas: list[str] 
     url_archivo: str
     aprobado_por: str
+    # 🚀 AGREGAMOS ESTOS DOS CAMPOS
+    empresa_id: int
+    departamento_id: int
 
 # 3. Ruta de prueba (la que ya tenías)
 @app.get("/")
@@ -57,15 +60,31 @@ async def indexar_documento(doc: DocumentoAprobado):
         raise HTTPException(status_code=500, detail=f"Error al guardar en Mongo: {str(e)}")
     
 
-# 🚀 5. NUEVA RUTA GET: PHP consumirá esta ruta para mostrar el dashboard
+# 🚀 5. NUEVA RUTA GET CON FILTROS
+# 🚀 NUEVO: Agregamos el parámetro 'q' (texto a buscar)
 @app.get("/api/docs/approved")
-async def obtener_documentos_aprobados():
+async def obtener_documentos_aprobados(empresa_id: int = None, departamento_id: int = None, q: str = None):
     try:
-        # Buscamos todos los documentos en Mongo
-        # Ocultamos el campo _id nativo de Mongo para que el JSON salga limpio
-        cursor = coleccion_docs.find({}, {"_id": 0})
+        filtro = {}
         
-        # Convertimos el resultado a una lista (máximo 100 para no saturar)
+        # 1. Filtro estricto de seguridad (Multitenant)
+        if empresa_id and empresa_id != 0:
+            filtro["empresa_id"] = empresa_id
+        if departamento_id and departamento_id != 0:
+            filtro["departamento_id"] = departamento_id
+
+        # 🚀 2. LA MAGIA DEL BUSCADOR: Si el usuario escribió algo
+        if q:
+            # $or significa "Que coincida con CUALQUIERA de estas 3 opciones"
+            # $options: "i" significa "Ignorar mayúsculas y minúsculas" (Insensitive)
+            filtro["$or"] = [
+                {"titulo": {"$regex": q, "$options": "i"}},
+                {"codigo": {"$regex": q, "$options": "i"}},
+                {"etiquetas": {"$regex": q, "$options": "i"}}
+            ]
+
+        # Buscamos en Mongo aplicando ambos filtros
+        cursor = coleccion_docs.find(filtro, {"_id": 0})
         documentos = await cursor.to_list(length=100)
         
         return {

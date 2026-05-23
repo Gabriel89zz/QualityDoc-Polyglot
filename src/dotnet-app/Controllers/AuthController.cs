@@ -38,11 +38,12 @@ namespace QualityDoc.API.Controllers
                 var role = User.FindFirst(ClaimTypes.Role)?.Value;
                 
                 // 🚀 LA TRAMPA EN EL GET: Si ya está logueado y es operario, mandarlo a PHP
-                if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
-                                     role.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase)))
-                {
-                    return RedirectToAction("GoToPhpPortal", "Auth");
-                }
+if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
+                     role.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase) ||
+                     role.Trim().Equals("Auditor", StringComparison.OrdinalIgnoreCase)))
+{
+    return RedirectToAction("GoToPhpPortal", "Auth");
+}
 
                 return RedirectToAction("Index", "Home");
             }
@@ -84,12 +85,13 @@ namespace QualityDoc.API.Controllers
                 new ClaimsPrincipal(claimsIdentity));
 
             // 🚀 EL TRUCO DE LA REDIRECCIÓN BLINDADO
-            if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
-                user.Role.RoleName.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase))
-            {
-                var jwtToken = GenerarTokenParaPhp(user);
-                return Redirect($"http://127.0.0.1/auth/token?token={jwtToken}");
-            }
+if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
+    user.Role.RoleName.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase) ||
+    user.Role.RoleName.Trim().Equals("Auditor", StringComparison.OrdinalIgnoreCase))
+{
+    var jwtToken = GenerarTokenParaPhp(user);
+    return Redirect($"http://127.0.0.1/auth/token?token={jwtToken}");
+}
 
             return RedirectToAction("Index", "Home");
         }
@@ -211,7 +213,7 @@ namespace QualityDoc.API.Controllers
             if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login");
 
             // Buscamos sus datos en la BD para armarle su Token
-            var user = await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.UserId == int.Parse(userIdStr));
+            var user = await _context.Users.Include(u => u.Role).Include(u => u.Company).FirstOrDefaultAsync(u => u.UserId == int.Parse(userIdStr));
             if (user == null) return RedirectToAction("Logout");
 
             // Generamos el Token y saltamos a Nginx / Laravel
@@ -234,6 +236,8 @@ namespace QualityDoc.API.Controllers
                 new Claim("role", user.Role.RoleName),
                 new Claim("name", user.FullName),
                 new Claim("company_id", user.CompanyId.HasValue ? user.CompanyId.Value.ToString() : "0"),
+                new Claim("company_name", user.Company != null ? user.Company.LegalName : "Planta #" + user.CompanyId),
+                new Claim("dept_id", user.DeptId.HasValue ? user.DeptId.Value.ToString() : "0"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

@@ -36,15 +36,29 @@ namespace QualityDoc.API.Controllers
         // ==========================================
         // 1. INDEX: Listar las categorías de SU empresa
         // ==========================================
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? filterNormId)
         {
             var companyId = GetCurrentCompanyId();
 
-            var categories = await _context.DocumentCategories
+            // 🚀 1. Mandamos las normas a la vista para llenar el Dropdown (Menú desplegable)
+            ViewBag.Norms = new SelectList(_context.Norms.Where(n => n.Status == "Active"), "NormId", "NormName", filterNormId);
+            ViewBag.CurrentFilter = filterNormId; // Para saber cuál está seleccionada
+
+            // 🚀 2. Preparamos la consulta base
+            var query = _context.DocumentCategories
                 .IgnoreQueryFilters()
-                .Include(c => c.Norm) // Traemos la info de la norma (si aplica)
-                .Where(c => c.CompanyId == companyId)
-                .OrderBy(c => c.HierarchyLevel) // Ordenamos por la pirámide documental
+                .Include(c => c.Norm) // Traemos la info de la norma
+                .Where(c => c.CompanyId == companyId);
+
+            // 🚀 3. Si el usuario seleccionó una norma en el Dropdown, filtramos la tabla
+            if (filterNormId.HasValue)
+            {
+                query = query.Where(c => c.NormId == filterNormId.Value);
+            }
+
+            // 🚀 4. Ejecutamos la consulta ordenando por jerarquía
+            var categories = await query
+                .OrderBy(c => c.HierarchyLevel)
                 .ToListAsync();
 
             return View(categories);
@@ -139,7 +153,7 @@ namespace QualityDoc.API.Controllers
                     existingCategory.Description = model.Description;
                     existingCategory.HierarchyLevel = model.HierarchyLevel;
                     existingCategory.NormId = model.NormId;
-                    
+                    existingCategory.RetentionYears = model.RetentionYears;
                     existingCategory.UpdatedAt = DateTime.UtcNow;
                     existingCategory.UpdatedBy = GetCurrentUserId();
 

@@ -253,16 +253,34 @@ else
         }
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-brand p-8 rounded-2xl shadow-lg shadow-brand/20 text-white relative overflow-hidden group">
-                <i class="fa-solid fa-pen-nib absolute -right-4 -bottom-4 text-8 font-bold opacity-10 text-9xl group-hover:scale-110 transition duration-500"></i>
-                <h3 class="text-2xl font-bold mb-2">Firmas Pendientes</h3>
-                <p class="text-brand-light/90 text-sm mb-6 max-w-sm">Tienes <strong class="text-white text-lg mx-1">@ViewBag.MisFirmasPendientes</strong> documentos esperando tu revisión y autorización.</p>
-                <a asp-controller="Approvals" asp-action="Index" class="inline-flex items-center bg-white text-brand px-6 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-slate-50 transition-colors">
-                    Ir a Bandeja de Firmas <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
-                </a>
-            </div>
+           @if (ViewBag.MisBorradoresSinIniciar > 0)
+            {
+                <div class="bg-brand p-8 rounded-2xl shadow-lg shadow-brand/20 text-white relative overflow-hidden group">
+                    <i class="fa-solid fa-file-circle-exclamation absolute -right-4 -bottom-4 font-bold opacity-10 text-9xl group-hover:scale-110 transition duration-500"></i>
+                    <h3 class="text-2xl font-bold mb-2">Borradores sin Iniciar</h3>
+                    <p class="text-brand-light/90 text-sm mb-6 max-w-sm">
+                        Tienes <strong class="text-white text-lg mx-1">@ViewBag.MisBorradoresSinIniciar</strong> documento(s) estancados. ¡Solicita las firmas para iniciar el flujo ISO!
+                    </p>
+                    <a asp-controller="Documents" asp-action="Index" class="inline-flex items-center bg-white text-brand px-6 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-slate-50 transition-colors">
+                        Ir a mis Documentos <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="bg-brand p-8 rounded-2xl shadow-lg shadow-brand/20 text-white relative overflow-hidden group">
+                    <i class="fa-solid fa-pen-nib absolute -right-4 -bottom-4 font-bold opacity-10 text-9xl group-hover:scale-110 transition duration-500"></i>
+                    <h3 class="text-2xl font-bold mb-2">Firmas Pendientes</h3>
+                    <p class="text-brand-light/90 text-sm mb-6 max-w-sm">
+                        Tienes <strong class="text-white text-lg mx-1">@ViewBag.MisFirmasPendientes</strong> documentos esperando tu revisión y autorización.
+                    </p>
+                    <a asp-controller="Approvals" asp-action="Index" class="inline-flex items-center bg-white text-brand px-6 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-slate-50 transition-colors">
+                        Ir a Bandeja de Firmas <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
+            }
 
-            <a asp-controller="Documents" asp-action="Index" class="bg-white dark:bg-[#323338] p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
+            <a asp-controller="Documents" asp-action="Create" class="bg-white dark:bg-[#323338] p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
                 <div class="flex items-center">
                     <div class="p-5 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-xl mr-5 border border-orange-100 dark:border-orange-800/30">
                         <i class="fa-solid fa-file-signature text-3xl"></i>

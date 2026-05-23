@@ -14,6 +14,7 @@ class AccessLog extends Model
         'user_id',
         'user_name',
         'user_role',
-        'ip_address'
+        'ip_address',
+        'company_id'
     ];
 }

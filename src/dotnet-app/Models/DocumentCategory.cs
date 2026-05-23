@@ -38,6 +38,11 @@ namespace QualityDoc.API.Models
         [Column("hierarchy_level")]
         public int HierarchyLevel { get; set; }
 
+        [Required(ErrorMessage = "El tiempo de retención es obligatorio")]
+        [Range(1, 99, ErrorMessage = "El tiempo de retención debe ser entre 1 y 99 años")]
+        [Column("retention_years")]
+        public int RetentionYears { get; set; } = 3;
+
         // Propiedades de navegación
         [ForeignKey("CompanyId")]
         public Company? Company { get; set; }

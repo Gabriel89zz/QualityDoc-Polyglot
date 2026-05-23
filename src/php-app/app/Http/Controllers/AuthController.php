@@ -25,7 +25,6 @@ class AuthController extends Controller
 
         try {
             // 3. Validar y decodificar el token
-            // Si el token fue modificado o ya pasaron sus 30 segundos de vida, esto lanzará un Exception
             $decoded = JWT::decode($token, new Key($secretKey, 'HS256'));
 
             // 4. Si llegamos aquí, el token es 100% legítimo. 
@@ -35,11 +34,17 @@ class AuthController extends Controller
                 'user_id' => $decoded->sub,
                 'role' => $decoded->role,
                 'name' => $decoded->name,
-                'company_id' => $decoded->company_id ?? 0
+                'company_id' => $decoded->company_id ?? 0,
+                'company_name' => $decoded->company_name ?? 'Empresa Desconocida',
+                'dept_id' => $decoded->dept_id ?? 0
             ]);
 
-            // 5. Redirigimos al panel principal limpiando la URL por seguridad
-            return redirect()->route('dashboard');
+            // 🚀 5. EL NUEVO CADENERO: Redirección inteligente basada en roles
+            if (in_array($decoded->role, ['Administrador', 'Auditor'])) {
+                return redirect()->route('reports'); // Lo manda al Panel Gerencial
+            } else {
+                return redirect()->route('dashboard'); // Lo manda al Directorio Operativo
+            }
 
         } catch (Exception $e) {
             // El token expiró o alguien intentó hackearlo. Lo regresamos al C#
@@ -47,12 +52,11 @@ class AuthController extends Controller
         }
     }
 
-public function logout(Request $request)
-{
-    // Limpiamos la sesión nativa de Laravel
-    $request->session()->flush();
-    
-    // 🚀 Redirigimos al LOGOUT del sistema central (C#) para destruir la cookie maestra
-    return redirect('http://127.0.0.1:5269/Auth/Logout');
-}
+    public function logout(Request $request)
+    {
+        // Limpiamos la sesión nativa de Laravel
+        $request->session()->flush();
+        // Redirigimos al LOGOUT del sistema central (C#) para destruir la cookie maestra
+        return redirect('http://127.0.0.1:5269/Auth/Logout');
+    }
 }

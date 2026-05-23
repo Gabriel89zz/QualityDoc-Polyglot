@@ -104,6 +104,18 @@
             </div>
 
             <div>
+                <label asp-for="RetentionYears" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Años de Retención Legal <span class="text-red-500">*</span></label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </div>
+                    <input asp-for="RetentionYears" type="number" min="1" max="99" class="pl-10 w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none" required />
+                </div>
+                <p class="text-[11px] text-amber-700 dark:text-amber-400 mt-1 font-medium">Impacta el ciclo de vida de los documentos asignados a esta categoría.</p>
+                <span asp-validation-for="RetentionYears" class="text-xs text-red-500 font-semibold mt-1 block"></span>
+            </div>
+
+            <div>
                 <label asp-for="Description" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Descripción</label>
                 <textarea asp-for="Description" rows="3" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none resize-none"></textarea>
                 <span asp-validation-for="Description" class="text-xs text-red-500 font-semibold mt-1 block"></span>

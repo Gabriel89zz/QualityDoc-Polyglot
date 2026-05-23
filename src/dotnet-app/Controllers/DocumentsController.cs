@@ -38,7 +38,7 @@ namespace QualityDoc.API.Controllers
             return string.IsNullOrEmpty(claim) ? 0 : int.Parse(claim);
         }
 
-        // ==========================================
+// ==========================================
         // 1. INDEX: Listar Documentos
         // ==========================================
         public async Task<IActionResult> Index()
@@ -49,11 +49,21 @@ namespace QualityDoc.API.Controllers
             var currentUser = await _context.Users.FindAsync(currentUserId);
             ViewBag.UserDeptId = currentUser?.DeptId ?? 0;
 
-            var documents = await _context.Documents
+            // 🚀 1. Iniciamos la consulta base (Solo filtramos por empresa)
+            var query = _context.Documents
                 .IgnoreQueryFilters()
                 .Include(d => d.Category)
                 .Include(d => d.Department)
-                .Where(d => d.CompanyId == companyId)
+                .Where(d => d.CompanyId == companyId);
+
+            // 🚀 2. EL BLINDAJE: Si no es Admin, filtramos por su departamento
+            if (!User.IsInRole("Admin de Empresa"))
+            {
+                query = query.Where(d => d.DeptId == currentUser.DeptId);
+            }
+
+            // 🚀 3. Ejecutamos la consulta final
+            var documents = await query
                 .OrderByDescending(d => d.CreatedAt)
                 .ToListAsync();
 
@@ -62,6 +72,7 @@ namespace QualityDoc.API.Controllers
                 .GroupBy(v => v.DocId)
                 .Select(g => new { DocId = g.Key, StatusId = g.OrderByDescending(v => v.VersionId).FirstOrDefault().StatusId })
                 .ToDictionaryAsync(x => x.DocId, x => x.StatusId);
+
             ViewBag.LatestStatuses = latestStatuses;
 
             var hasAdvancedVersions = await _context.DocumentVersions
@@ -69,23 +80,31 @@ namespace QualityDoc.API.Controllers
                 .Select(v => v.DocId)
                 .Distinct()
                 .ToListAsync();
+
             ViewBag.HasAdvancedVersions = hasAdvancedVersions;
 
             return View(documents);
         }
 
-        // ==========================================
+// ==========================================
         // 2. CREATE: GET
         // ==========================================
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            if (!User.IsInRole("Admin de Empresa") && !User.IsInRole("Creador de Doc"))
+            var isAdmin = User.IsInRole("Admin de Empresa");
+            var isCreator = User.IsInRole("Creador de Doc");
+
+            if (!isAdmin && !isCreator)
             {
                 return RedirectToAction("AccessDenied", "Auth");
             }
 
             var companyId = GetCurrentCompanyId();
-
+            var currentUser = await _context.Users.FindAsync(GetCurrentUserId());
+            
+            // 🚀 Enviamos la bandera a la vista para saber si dibujamos el select
+            ViewBag.IsAdmin = isAdmin;
+            
             ViewBag.Categories = new SelectList(_context.DocumentCategories.Where(c => c.CompanyId == companyId && c.Status == "Active"), "CategoryId", "CategoryName");
             ViewBag.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == companyId && d.Status == "Active"), "DeptId", "DeptName");
             
@@ -99,12 +118,22 @@ namespace QualityDoc.API.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Document model, IFormFile uploadedFile)
         {
-            if (!User.IsInRole("Admin de Empresa") && !User.IsInRole("Creador de Doc"))
+            var isAdmin = User.IsInRole("Admin de Empresa");
+            
+            if (!isAdmin && !User.IsInRole("Creador de Doc"))
             {
                 return RedirectToAction("AccessDenied", "Auth");
             }
 
             var companyId = GetCurrentCompanyId();
+            var currentUser = await _context.Users.FindAsync(GetCurrentUserId());
+
+           // EL BLINDAJE DE SEGURIDAD: Forzamos el DeptId si no es Admin
+            if (!isAdmin && currentUser != null)
+            {
+                // Si el usuario tiene departamento lo asigna, si es null, asigna un 0 por defecto.
+                model.DeptId = currentUser.DeptId ?? 0;
+            }
 
             if (uploadedFile == null || uploadedFile.Length == 0)
             {
@@ -126,7 +155,7 @@ namespace QualityDoc.API.Controllers
                     .IgnoreQueryFilters()
                     .Where(d => d.CompanyId == companyId && d.CategoryId == model.CategoryId)
                     .CountAsync();
-                
+
                 string folioCode = $"{category.Prefix}-{(docCount + 1):D3}";
                 model.DocCode = folioCode;
 
@@ -151,7 +180,6 @@ namespace QualityDoc.API.Controllers
                 }
 
                 using var transaction = await _context.Database.BeginTransactionAsync();
-
                 try
                 {
                     _context.Documents.Add(model);
@@ -188,6 +216,7 @@ namespace QualityDoc.API.Controllers
                 }
             }
 
+            ViewBag.IsAdmin = isAdmin;
             ViewBag.Categories = new SelectList(_context.DocumentCategories.Where(c => c.CompanyId == companyId && c.Status == "Active"), "CategoryId", "CategoryName", model.CategoryId);
             ViewBag.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == companyId && d.Status == "Active"), "DeptId", "DeptName", model.DeptId);
             return View(model);

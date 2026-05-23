@@ -83,14 +83,24 @@ services:
       context: .
       dockerfile: docker/dotnet/Dockerfile
     container_name: dotnet_core_mvc
+    ports:
+      - "5269:8080" # 🚀 CRÍTICO: Expone la app para que Laravel y tú puedan acceder
     environment:
-      # 🚀 MAGIA AQUÍ: Cuando C# corra en Docker, usará "sql-server" y el puerto interno 1433 en lugar de localhost
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Server=sql-server;Database=QualityDocDB;User Id=sa;Password=${SQL_SERVER_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True;
+      # 🚀 Variable para que C# encuentre a Python dentro de la red de Docker
+      - Microservices__PythonSearchApi=http://python-app:8000
+      - TZ=America/Monterrey
     depends_on:
       sql-server:
         condition: service_healthy
+      python-app:
+        condition: service_started
     networks:
       - quality-net
+    volumes:
+      - ./src/dotnet-app/wwwroot/uploads:/app/wwwroot/uploads
 
   # Auditoría (PHP Laravel)
   php-app:

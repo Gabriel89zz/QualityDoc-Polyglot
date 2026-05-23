@@ -144,13 +144,23 @@ namespace QualityDoc.API.Controllers
                         var payload = new
                         {
                             documento_id = updatedVersion.DocId,
-                            codigo = updatedVersion.Document.DocCode,
-                            titulo = updatedVersion.Document.DocName,
-                            version = updatedVersion.VersionNum,
-                            // Generamos etiquetas automáticas basadas en su categoría y departamento
-                            etiquetas = new[] { updatedVersion.Document.Category.CategoryName, updatedVersion.Document.Department.DeptName, "Aprobado", "ISO" },
-                            url_archivo = updatedVersion.FilePath,
-                            aprobado_por = currentUser.FullName
+                            codigo = updatedVersion.Document.DocCode ?? "SIN-CODIGO",
+                            titulo = updatedVersion.Document.DocName ?? "Sin Título",
+                            version = updatedVersion.VersionNum ?? "1.0",
+                            
+                            etiquetas = new[] { 
+                                updatedVersion.Document.Category?.CategoryName ?? "General", 
+                                updatedVersion.Document.Department?.DeptName ?? "General", 
+                                "Aprobado", 
+                                "ISO" 
+                            },
+                            
+                            url_archivo = updatedVersion.FilePath ?? "",
+                            aprobado_por = currentUser.FullName ?? "Sistema",
+                            
+                            // 🚀 LA LÓGICA CORRECTA: Los IDs se toman del dueño del documento, no del aprobador
+                            empresa_id = updatedVersion.Document.Department?.CompanyId ?? 0, 
+                            departamento_id = updatedVersion.Document.Department?.DeptId ?? 0 
                         };
 
                         using var httpClient = new HttpClient();

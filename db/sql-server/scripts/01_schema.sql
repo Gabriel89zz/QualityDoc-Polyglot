@@ -122,7 +122,8 @@ CREATE TABLE DocumentCategories (
     category_name NVARCHAR(100) NOT NULL, 
     prefix VARCHAR(5) NOT NULL, 
     description VARCHAR(255) NULL, 
-    hierarchy_level INT NOT NULL CHECK (hierarchy_level BETWEEN 1 AND 4), 
+    hierarchy_level INT NOT NULL CHECK (hierarchy_level BETWEEN 1 AND 10), -- Corregido para empatar con C#
+    retention_years INT NOT NULL DEFAULT 3 CHECK (retention_years BETWEEN 1 AND 99), -- 🚀 NUEVO CAMPO ISO
     CONSTRAINT FK_Categories_Company FOREIGN KEY (company_id) REFERENCES Companies(company_id),
     CONSTRAINT FK_Categories_Norm FOREIGN KEY (norm_id) REFERENCES Norms(norm_id),
     -- Audit Fields
@@ -245,6 +246,11 @@ CREATE INDEX IX_Versions_Doc_Status ON DocumentVersions(doc_id, status_id, statu
 CREATE UNIQUE INDEX UIX_Docs_Code_Company ON Documents(company_id, doc_code) WHERE status <> 'Deleted';
 CREATE INDEX IX_Approvals_Pending ON DocumentApprovals(approver_id, approval_status);
 
+-- 🚀 BLINDAJE ANTI-DUPLICADOS PARA CATEGORÍAS (Ideal para Docker y datos semilla)
+CREATE UNIQUE INDEX UQ_Company_CategoryName 
+ON DocumentCategories (company_id, category_name)
+WITH (IGNORE_DUP_KEY = ON);
+
 -----------------------------------------------------------
 -- 7. TRIGGERS DE AUDITORÍA Y CONTROL
 -----------------------------------------------------------
@@ -318,7 +324,6 @@ IF OBJECT_ID('sp_DisableCompanyComplete', 'P') IS NOT NULL DROP PROCEDURE sp_Dis
 IF OBJECT_ID('sp_SoftDeleteDocument', 'P') IS NOT NULL DROP PROCEDURE sp_SoftDeleteDocument;
 GO
 
--- 🚀 SP MODIFICADO PARA PASAR LA ESTAFETA (REVISOR -> APROBADOR)
 CREATE PROCEDURE sp_SignDocumentWorkflow
     @ApprovalID INT,       
     @ApproverID INT,       

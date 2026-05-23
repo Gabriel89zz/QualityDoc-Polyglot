@@ -58,19 +58,24 @@ namespace QualityDoc.API.Controllers
                     .Take(5) 
                     .ToListAsync();
             }
-            else if (role == "Creador de Doc" || role == "Revisor" || role == "Aprobador")
+           else if (role == "Creador de Doc" || role == "Revisor" || role == "Aprobador")
             {
                 // 1. Tareas de firma pendientes
                 ViewBag.MisFirmasPendientes = await _context.DocumentApprovals
                     .CountAsync(a => a.ApproverId == currentUserId && a.ApprovalStatus == "Pending");
 
-                // 2. 🚀 NUEVO: Alerta de Rechazos/Observaciones
-                // Buscamos versiones creadas por este usuario que estén en Borrador (StatusId = 1) 
-                // PERO que ya tengan un historial en la tabla de Aprobaciones (lo que significa que fue devuelto/rechazado)
+                // 2. Alerta de Rechazos/Observaciones
                 ViewBag.MisDocsRechazados = await _context.DocumentVersions
                     .Where(v => v.CreatedBy == currentUserId 
                              && v.StatusId == 1 
                              && v.Approvals.Any())
+                    .CountAsync();
+
+                // 🚀 3. NUEVO: Borradores olvidados (Sin iniciar flujo)
+                ViewBag.MisBorradoresSinIniciar = await _context.DocumentVersions
+                    .Where(v => v.CreatedBy == currentUserId 
+                             && v.StatusId == 1 
+                             && !v.Approvals.Any()) // La clave: NO hay historial de firmas
                     .CountAsync();
             }
 

@@ -37,6 +37,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UsePathBase("/admin");
+
+app.UseStaticFiles();
 app.UseRouting();
 
 // 3. ACTIVAR LOS GAFETES EN EL PIPELINE (¡EL ORDEN ES VITAL!)
