@@ -19,6 +19,62 @@
         </div>
     </div>
 
+    <form method="get" asp-action="Index" id="searchForm" class="flex flex-col md:flex-row gap-3 mb-2 relative z-40 animate-fade-up">
+        
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+            </span>
+            <input type="text" name="search" value="@ViewData["CurrentSearch"]" autocomplete="off" placeholder="Buscar por nombre de departamento..." 
+                   class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-sm focus:outline-none focus:border-brand dark:focus:border-brand shadow-sm transition-all text-slate-700 dark:text-slate-200" />
+        </div>
+
+        <div class="relative inline-block text-left" id="filterDropdownContainer">
+            <button type="button" id="btnFilterToggle" class="h-full inline-flex justify-center items-center gap-2 rounded-xl border border-slate-200 dark:border-[#4a4b50] shadow-sm px-4 py-2.5 bg-white dark:bg-[#323338] text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition-colors focus:outline-none focus:ring-2 focus:ring-brand/20">
+                <i class="fa-solid fa-filter text-slate-400"></i> Estado 
+                @if(!string.IsNullOrEmpty((string)ViewData["CurrentStatus"]))
+                {
+                    <span class="ml-1 bg-brand text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm">1</span>
+                }
+                <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+            </button>
+
+            <div id="filterMenu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl shadow-xl bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] z-50 p-4 transform origin-top-right transition-all">
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Filtrar por Estado</span>
+                <div class="flex flex-wrap gap-2">
+                    
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status" value="" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @(string.IsNullOrEmpty((string)ViewData["CurrentStatus"]) ? "checked" : "")>
+                        <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">
+                            Todos
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status" value="Active" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @((string)ViewData["CurrentStatus"] == "Active" ? "checked" : "")>
+                        <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">
+                            Solo Activos
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status" value="Inactive" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @((string)ViewData["CurrentStatus"] == "Inactive" ? "checked" : "")>
+                        <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">
+                            Solo Inactivos
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        @if(!string.IsNullOrEmpty((string)ViewData["CurrentSearch"]) || !string.IsNullOrEmpty((string)ViewData["CurrentStatus"]))
+        {
+            <a asp-action="Index" class="bg-slate-100 hover:bg-red-50 dark:bg-[#323338] dark:hover:bg-red-500/10 text-slate-500 hover:text-red-500 dark:text-slate-400 px-4 py-2.5 rounded-xl font-bold shadow-sm transition-colors flex items-center border border-slate-200 dark:border-[#4a4b50]" title="Limpiar filtros">
+                <i class="fa-solid fa-xmark"></i>
+            </a>
+        }
+    </form>
+
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm border border-y-red-100 border-r-red-100 dark:border-transparent transition-colors duration-300">
@@ -127,7 +183,10 @@
             </div>
             
             <div class="flex space-x-2">
-                <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                <a asp-action="Index" 
+                   asp-route-pageNumber="@(Model.PageIndex - 1)"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-status="@ViewData["CurrentStatus"]"
                    class="px-4 py-2 text-xs font-bold rounded-lg border transition-colors shadow-sm
                    @(Model.HasPreviousPage 
                         ? "text-slate-600 bg-white border-slate-300 hover:bg-slate-50 hover:text-brand dark:bg-[#323338] dark:border-[#4a4b50] dark:text-slate-300 dark:hover:bg-brand/20 dark:hover:border-brand" 
@@ -135,7 +194,10 @@
                     <i class="fa-solid fa-chevron-left mr-1"></i> Anterior
                 </a>
 
-                <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                <a asp-action="Index" 
+                   asp-route-pageNumber="@(Model.PageIndex + 1)"
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-status="@ViewData["CurrentStatus"]"
                    class="px-4 py-2 text-xs font-bold rounded-lg border transition-colors shadow-sm
                    @(Model.HasNextPage 
                         ? "text-slate-600 bg-white border-slate-300 hover:bg-slate-50 hover:text-brand dark:bg-[#323338] dark:border-[#4a4b50] dark:text-slate-300 dark:hover:bg-brand/20 dark:hover:border-brand" 
@@ -147,3 +209,30 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnFilterToggle = document.getElementById('btnFilterToggle');
+            const filterMenu = document.getElementById('filterMenu');
+
+            if(btnFilterToggle && filterMenu) {
+                // Abrir/Cerrar menú
+                btnFilterToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    filterMenu.classList.toggle('hidden');
+                });
+
+                // Cerrar al dar click afuera
+                document.addEventListener('click', (e) => {
+                    if (!filterMenu.contains(e.target) && !btnFilterToggle.contains(e.target)) {
+                        filterMenu.classList.add('hidden');
+                    }
+                });
+
+                // Prevenir que se cierre al dar click adentro
+                filterMenu.addEventListener('click', (e) => e.stopPropagation());
+            }
+        });
+    </script>
+}
