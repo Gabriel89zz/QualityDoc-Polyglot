@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\AccessLog;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -64,58 +65,108 @@ class ReportController extends Controller
         ));
     }
 
-    // 🚀 Vista de Historial Completo con Paginación
-    public function historialDetallado()
+    // ==========================================
+    // 🚀 HISTORIAL DETALLADO CON FILTROS MINIMALISTAS
+    // ==========================================
+    public function historialDetallado(Request $request)
     {
         if (!in_array(session('role'), ['Administrador', 'Auditor'])) {
             return redirect()->route('dashboard'); 
         }
 
         $myCompany = session('company_id');
+        $rango = $request->input('rango', 'all');
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
 
-        // Usamos paginate() en lugar de get() para que si hay 10,000 registros, no se congele la pantalla
-        $historial = AccessLog::where('company_id', $myCompany)
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
+        $query = AccessLog::where('company_id', $myCompany);
 
-        return view('history', compact('historial'));
+        // LÓGICA DE RANGOS 
+        if ($rango === '7days') {
+            $fechaInicio = now()->subDays(7)->format('Y-m-d');
+            $fechaFin = now()->format('Y-m-d');
+            $query->whereDate('created_at', '>=', $fechaInicio)->whereDate('created_at', '<=', $fechaFin);
+        } elseif ($rango === '30days') {
+            $fechaInicio = now()->subDays(30)->format('Y-m-d');
+            $fechaFin = now()->format('Y-m-d');
+            $query->whereDate('created_at', '>=', $fechaInicio)->whereDate('created_at', '<=', $fechaFin);
+        } else {
+            if ($fechaInicio) $query->whereDate('created_at', '>=', $fechaInicio);
+            if ($fechaFin) $query->whereDate('created_at', '<=', $fechaFin);
+        }
+
+        $historial = $query->orderBy('created_at', 'desc')->paginate(10);
+        $historial->appends($request->all());
+
+        return view('history', compact('historial', 'rango', 'fechaInicio', 'fechaFin'));
     }
 
-    // 🚀 Exportación Nativa a Excel (CSV con formato UTF-8)
-    public function exportarExcel()
+   // ==========================================
+    // 🚀 EXPORTACIÓN EXCEL Y PDF DINÁMICA
+    // ==========================================
+    public function exportarExcel(Request $request)
     {
         if (!in_array(session('role'), ['Administrador', 'Auditor'])) {
             return redirect()->route('dashboard'); 
         }
 
         $myCompany = session('company_id');
-        $logs = AccessLog::where('company_id', $myCompany)->orderBy('created_at', 'desc')->get();
+        $query = AccessLog::where('company_id', $myCompany);
 
-        $fileName = 'Auditoria_QualityDoc_' . date('Ymd_His') . '.csv';
+        // 🚀 Aplicamos los mismos filtros que haya en la URL al exportar
+        if ($request->input('fecha_inicio')) $query->whereDate('created_at', '>=', $request->input('fecha_inicio'));
+        if ($request->input('fecha_fin')) $query->whereDate('created_at', '<=', $request->input('fecha_fin'));
 
-        $headers = array(
+        $logs = $query->orderBy('created_at', 'desc')->get();
+        $fileName = 'Auditoria_QualityDoc_' . date('Ymd_His');
+
+        // 🚀 CAPTURAMOS EL FORMATO SOLICITADO
+        $formato = $request->input('format', 'csv'); 
+
+        // ==========================================
+        // 📄 RUTA A: EXPORTAR COMO PDF
+        // ==========================================
+        if ($formato === 'pdf') {
+            // 🚀 Ahora VS Code ya sabe exactamente de dónde viene esta clase
+            $pdf = Pdf::loadView('pdf.auditoria', [
+                'logs' => $logs,
+                'companyName' => session('company_name', 'Falcons Manufacturing')
+            ])->setPaper('a4', 'landscape'); 
+
+            return $pdf->download($fileName . '.pdf');
+        }
+
+        // ==========================================
+        // 📊 RUTA B: EXPORTAR COMO CSV (EXCEL)
+        // ==========================================
+        $headers = [
             "Content-type"        => "text/csv; charset=UTF-8",
-            "Content-Disposition" => "attachment; filename=$fileName",
+            "Content-Disposition" => "attachment; filename={$fileName}.csv",
             "Pragma"              => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
             "Expires"             => "0"
-        );
+        ];
 
-        $columns = array('Fecha y Hora', 'Usuario', 'Rol', 'IP', 'Tipo de Accion', 'Codigo de Documento', 'Titulo', 'Version');
+        $columns = ['Fecha y Hora', 'Usuario', 'Rol', 'IP', 'Tipo de Accion', 'Codigo de Documento', 'Titulo', 'Version'];
 
         $callback = function() use($logs, $columns) {
             $file = fopen('php://output', 'w');
-            // 🚀 Este BOM es crucial para que Excel en Windows lea los acentos de México sin romper el texto
-            fputs($file, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+            fputs($file, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
             fputcsv($file, $columns);
 
             foreach ($logs as $log) {
-                // Clasificamos la acción para que el Excel sea fácil de filtrar
                 $tipoAccion = 'Lectura';
-                if ($log->document_code == 'DASHBOARD_VIEW') $tipoAccion = 'Ingreso al Sistema';
-                if (str_contains($log->document_title, '[FIRMA DE ENTERADO]')) $tipoAccion = 'Firma de Acuse';
+                $tituloLimpio = $log->document_title;
 
-                $tituloLimpio = str_replace('[FIRMA DE ENTERADO] ', '', $log->document_title);
+                if ($log->document_code == 'DASHBOARD_VIEW') {
+                    $tipoAccion = 'Ingreso al Sistema';
+                } elseif (str_contains($log->document_title, '[FIRMA DE ENTERADO]')) {
+                    $tipoAccion = 'Firma de Acuse';
+                    $tituloLimpio = str_replace('[FIRMA DE ENTERADO] ', '', $log->document_title);
+                } elseif (str_contains($log->document_title, '[REPORTE DE INCIDENCIA]')) {
+                    $tipoAccion = 'Reporte de Error';
+                    $tituloLimpio = str_replace('[REPORTE DE INCIDENCIA] ', '', $log->document_title);
+                }
 
                 $row = [
                     $log->created_at->format('d/m/Y H:i:s'),
@@ -130,7 +181,6 @@ class ReportController extends Controller
 
                 fputcsv($file, $row);
             }
-
             fclose($file);
         };
 

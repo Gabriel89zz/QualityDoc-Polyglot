@@ -23,11 +23,9 @@ namespace QualityDoc.API.Data
         public DbSet<DocumentCategory> DocumentCategories { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<DocumentVersion> DocumentVersions { get; set; }
-        
-        // 🚀 NUEVA TABLA: La plantilla de los pasos del workflow
-        //public DbSet<DocumentSignatureStep> DocumentSignatureSteps { get; set; } 
-        
+        public DbSet<DocumentAuditLog> DocumentAuditLogs { get; set; }
         public DbSet<DocumentApproval> DocumentApprovals { get; set; }
+        public DbSet<DocumentIssue> DocumentIssues { get; set; }
 
         // =======================================================
         // 2. CONFIGURACIÓN FLUÍDA (Fluent API)
@@ -62,6 +60,7 @@ namespace QualityDoc.API.Data
             // 🚀 NUEVO FILTRO: Aplicado a la nueva tabla de pasos del workflow
             //modelBuilder.Entity<DocumentSignatureStep>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
             modelBuilder.Entity<DocumentApproval>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
+            modelBuilder.Entity<DocumentIssue>().HasQueryFilter(x => x.Status != "Deleted" && x.Status != "Inactive");
 
             // C. CONFIGURACIÓN DINÁMICA DE VALORES POR DEFECTO Y AUDITORÍA
             // Iteramos sobre todas las tablas de tu modelo para configurar la clase BaseEntity
@@ -118,6 +117,11 @@ namespace QualityDoc.API.Data
                 // Registramos los Check Constraints para sincronizar con SQL Server
                 entity.ToTable(t => t.HasCheckConstraint("CHK_StepType", "step_type IN ('Elaboró', 'Revisó', 'Aprobó')"));
                 entity.ToTable(t => t.HasCheckConstraint("CHK_ApprovalStatus", "approval_status IN ('Pending', 'Approved', 'Rejected')"));
+            });
+
+            modelBuilder.Entity<DocumentIssue>(entity =>
+            {
+                entity.ToTable(t => t.HasCheckConstraint("CHK_IssueStatus", "issue_status IN ('Pending', 'In Review', 'Resolved')"));
             });
 
 

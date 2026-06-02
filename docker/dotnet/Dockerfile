@@ -12,7 +12,7 @@ COPY src/ .
 
 # 3. Nos movemos a la carpeta del proyecto y compilamos
 WORKDIR "/app/dotnet-app"
-RUN dotnet publish -c Release -o /app/out
+RUN dotnet publish -c Release -o /app/out --no-restore
 
 # --- ETAPA 2: Ejecución (Runtime ligero) ---
 FROM mcr.microsoft.com/dotnet/aspnet:10.0

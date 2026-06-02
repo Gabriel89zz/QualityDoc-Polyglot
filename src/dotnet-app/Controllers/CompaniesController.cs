@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using QualityDoc.API.Helpers;
 
 namespace QualityDoc.API.Controllers
 {
@@ -27,17 +28,31 @@ namespace QualityDoc.API.Controllers
         private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1");
         private int CurrentCompanyId => int.Parse(User.FindFirstValue("CompanyId") ?? "0");
 
-        // 1. GET: /Companies
-        public async Task<IActionResult> Index()
+      // 1. GET: /Companies (Paginado y Filtrado)
+        public async Task<IActionResult> Index(string search, string status, int? pageNumber)
         {
-            // IgnoreQueryFilters() es la clave: obliga al sistema a traer a las empresas
-            // sin importar si están Activas, Inactivas o Borradas lógicamente.
-            var companies = await _context.Companies
-                .IgnoreQueryFilters()
-                .OrderByDescending(c => c.CreatedAt)
-                .ToListAsync();
+            // Guardamos los valores actuales para que la vista no pierda el texto al recargar
+            ViewData["CurrentSearch"] = search;
+            ViewData["CurrentStatus"] = status;
 
-            return View(companies);
+            int pageSize = 10;
+            var query = _context.Companies.IgnoreQueryFilters().AsQueryable();
+
+            // 🔍 Filtro por texto libre (Razón Social o RFC)
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c => c.LegalName.Contains(search) || c.TaxId.Contains(search));
+            }
+
+            // 🏷️ Filtro por Estado de la empresa
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(c => c.Status == status);
+            }
+
+            query = query.OrderByDescending(c => c.CreatedAt);
+
+            return View(await PaginatedList<Company>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
         // 2. GET: /Companies/Details/5
@@ -152,14 +167,15 @@ namespace QualityDoc.API.Controllers
         {
             if (id == null) return NotFound();
 
-            // 🛡️ ESCUDO HOST TENANT: Bloquea la vista de suspensión si es la Empresa #1 o tu propia empresa
-            if (id == 1 || id == CurrentCompanyId)
+            // 🛡️ ESCUDO INTELIGENTE: Si el Super Admin tiene una empresa asignada (diferente de 0), 
+            // no lo deja borrar su propia casa. Quitamos la regla obsoleta del ID 1.
+            if (CurrentCompanyId != 0 && id == CurrentCompanyId)
             {
-                // Podrías usar TempData para mandar un mensaje de error a la vista Index si quisieras
+                TempData["ErrorMessage"] = "🛑 Escudo de Seguridad: No puedes suspender tu propia empresa.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // 👁️ CORRECCIÓN: Ignorar filtros por si le dan clic por error a una inactiva
+            // 👁️ Ignorar filtros por si le dan clic por error a una inactiva
             var company = await _context.Companies
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(m => m.CompanyId == id);
@@ -174,22 +190,27 @@ namespace QualityDoc.API.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            // 🛡️ ESCUDO HOST TENANT (Doble validación por seguridad)
-            if (id == 1 || id == CurrentCompanyId)
+            // 🛡️ ESCUDO INTELIGENTE (Validación en el POST por seguridad)
+            if (CurrentCompanyId != 0 && id == CurrentCompanyId)
             {
+                TempData["ErrorMessage"] = "🛑 Escudo de Seguridad: No puedes suspender tu propia empresa.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Usamos IgnoreQueryFilters() para encontrarla y suspenderla correctamente
-            var company = await _context.Companies.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.CompanyId == id);
-            
-            if (company != null)
+            try 
             {
-                // 🚀 EJECUCIÓN DEL PROCEDIMIENTO ALMACENADO MULTI-TENANT
-                // Esto apagará la empresa, sus usuarios y sus documentos de un solo golpe.
+                // 🚀 EJECUCIÓN CON BLINDAJE
                 await _context.Database.ExecuteSqlRawAsync(
                     "EXEC sp_DisableCompanyComplete @CompanyID = {0}, @AdminUserID = {1}", 
                     id, CurrentUserId);
+                
+                TempData["SuccessMessage"] = "Empresa suspendida correctamente junto con todos sus usuarios y documentos.";
+            }
+            catch (Exception ex)
+            {
+                // Si llegara a fallar SQL por alguna llave foránea (FK), te lo dirá aquí con la alerta que configuramos
+                string errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                TempData["ErrorMessage"] = "Error en base de datos al suspender: " + errorReal;
             }
             
             return RedirectToAction(nameof(Index));

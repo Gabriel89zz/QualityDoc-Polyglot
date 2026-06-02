@@ -1,18 +1,26 @@
 :root {
-    /* Paleta de colores base de QualityDoc */
-    --color-primary: #754ee5; 
-    --color-primary-hover: #5e3ab8; 
+    /* Paleta unificada del nuevo diseño QualityDoc */
+    --color-primary: #8772FE; 
+    --color-primary-hover: #755DF0; 
     --color-bg-light: #FAFAFA; 
     --color-bg-dark: #2a2b2e; 
     --color-surface-light: #ffffff; 
     --color-surface-dark: #1e293b; 
     --color-text-light: #0f172a; 
     --color-text-dark: #f8fafc; 
+
+    /* Variables requeridas para transición y efectos */
+    --border: #8772FE;
+    --muted-foreground: rgba(135, 114, 254, 0.2);
 }
 
 html.dark {
-    --color-primary: #baa5ff; 
-    --color-primary-hover: #a48aed; 
+    --color-primary: #B8ACFF; 
+    --color-primary-hover: #A594FF; 
+    
+    /* Variables de animación para el modo oscuro */
+    --border: #B8ACFF;
+    --muted-foreground: rgba(184, 172, 255, 0.15);
 }
 
 /* El fondo base de la aplicación */
@@ -20,6 +28,7 @@ body {
     background-color: var(--color-bg-light);
     color: var(--color-text-light);
     transition: background-color 0.3s ease, color 0.3s ease;
+    margin-bottom: 60px;
 }
 
 html.dark body {
@@ -27,25 +36,49 @@ html.dark body {
     color: var(--color-text-dark);
 }
 
+/* --- NUEVO: Scrollbar moderno --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+    background: #4a4b50;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* --- NUEVO: Animación de entrada fluida para las tarjetas --- */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.delay-100 { animation-delay: 100ms; opacity: 0; }
+.delay-200 { animation-delay: 200ms; opacity: 0; }
+
+/* --- Configuraciones base originales (NO TOCAR) --- */
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }

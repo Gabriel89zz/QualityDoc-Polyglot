@@ -1,10 +1,11 @@
-@model IEnumerable<QualityDoc.API.Models.Norm>
+@using QualityDoc.API.Helpers
+@model PaginatedList<QualityDoc.API.Models.Norm>
 
 @{
     ViewData["Title"] = "Catálogo de Normativas ISO";
 }
 
-<div class="max-w-7xl mx-auto space-y-6 mt-4">
+<div class="w-full max-w-6xl mx-auto space-y-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
         <div>
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center">
@@ -125,9 +126,28 @@
             </table>
         </div>
         
-        <div class="bg-slate-50 dark:bg-[#2a2b2e] px-4 py-3 border-t border-slate-200 dark:border-[#4a4b50] flex items-center justify-between sm:px-6 transition-colors duration-300">
-            <div class="text-sm text-slate-500 dark:text-slate-400">
-                Mostrando <span class="font-bold text-slate-800 dark:text-white">@Model.Count()</span> normativas registradas
+        <!-- 🚀 NUEVO: CONTROLES DE PAGINACIÓN -->
+        <div class="bg-slate-50 dark:bg-[#2a2b2e] px-4 py-4 border-t border-slate-200 dark:border-[#4a4b50] flex flex-col sm:flex-row items-center justify-between transition-colors duration-300">
+            <div class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 sm:mb-0">
+                Mostrando página <span class="font-bold text-slate-800 dark:text-white">@Model.PageIndex</span> de <span class="font-bold text-slate-800 dark:text-white">@Model.TotalPages</span>
+            </div>
+            
+            <div class="flex space-x-2">
+                <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                   class="px-4 py-2 text-xs font-bold rounded-lg border transition-colors shadow-sm
+                   @(Model.HasPreviousPage 
+                        ? "text-slate-600 bg-white border-slate-300 hover:bg-slate-50 hover:text-brand dark:bg-[#323338] dark:border-[#4a4b50] dark:text-slate-300 dark:hover:bg-brand/20 dark:hover:border-brand" 
+                        : "text-slate-400 border-slate-200 bg-slate-100 cursor-not-allowed pointer-events-none dark:bg-[#2a2b2e] dark:border-[#323338] dark:text-slate-600")">
+                    <i class="fa-solid fa-chevron-left mr-1"></i> Anterior
+                </a>
+
+                <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                   class="px-4 py-2 text-xs font-bold rounded-lg border transition-colors shadow-sm
+                   @(Model.HasNextPage 
+                        ? "text-slate-600 bg-white border-slate-300 hover:bg-slate-50 hover:text-brand dark:bg-[#323338] dark:border-[#4a4b50] dark:text-slate-300 dark:hover:bg-brand/20 dark:hover:border-brand" 
+                        : "text-slate-400 border-slate-200 bg-slate-100 cursor-not-allowed pointer-events-none dark:bg-[#2a2b2e] dark:border-[#323338] dark:text-slate-600")">
+                    Siguiente <i class="fa-solid fa-chevron-right ml-1"></i>
+                </a>
             </div>
         </div>
     </div>

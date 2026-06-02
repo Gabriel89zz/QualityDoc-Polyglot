@@ -84,30 +84,32 @@ GO
 -- 7. CATEGORÍAS DOCUMENTALES (Estructura ISO / IATF)
 -- =======================================================
 INSERT INTO DocumentCategories (company_id, norm_id, category_name, prefix, description, hierarchy_level, retention_years, created_by) VALUES
--- Estructura ISO 9000 para Falcons (Empresa 1, Norma 1)
-(1, 1, 'Manual de Calidad', 'MAN', 'Documento maestro del SGC', 1, 5, 1),
-(1, 1, 'Procedimientos', 'PRO', 'Procedimientos operativos estándar', 2, 3, 1),
-(1, 1, 'Instrucciones', 'INS', 'Instrucciones de trabajo en piso', 3, 3, 1),
-(1, 1, 'Formatos', 'FOR', 'Plantillas en blanco para llenado', 4, 3, 1),
-(1, 1, 'Registros', 'REG', 'Evidencia de actividades completadas', 5, 5, 1),
-(1, 1, 'Externos', 'EXT', 'Documentación de origen externo', 6, 3, 1),
+-- Estructura ISO 9001 para Falcons (Empresa 1, Norma 1)
+(1, 1, 'Manual de Calidad', 'ISO-MAN', 'Documento maestro del SGC', 1, 5, 1),
+(1, 1, 'Procedimientos', 'ISO-PRO', 'Procedimientos operativos estándar', 2, 3, 1),
+(1, 1, 'Instrucciones', 'ISO-INS', 'Instrucciones de trabajo en piso', 3, 3, 1),
+(1, 1, 'Formatos', 'ISO-FOR', 'Plantillas en blanco para llenado', 4, 3, 1),
+(1, 1, 'Registros', 'ISO-REG', 'Evidencia de actividades completadas', 5, 5, 1),
+(1, 1, 'Externos', 'ISO-EXT', 'Documentación de origen externo', 6, 3, 1),
 
-(1, 2, 'Manual de Calidad', 'MAN', 'Manual del sistema automotriz', 1, 5, 1),
-(1, 2, 'Procedimientos', 'PRO', 'Procedimientos core del sistema', 2, 3, 1),
-(1, 2, 'Instrucciones', 'INS', 'Instrucciones operativas específicas', 3, 3, 1),
-(1, 2, 'Registros', 'REG', 'Registros de calidad con retención estricta', 4, 7, 1),
+-- Estructura IATF 16949 para Falcons (Empresa 1, Norma 2)
+(1, 2, 'Manual de Calidad', 'IATF-MAN', 'Manual del sistema automotriz', 1, 5, 1),
+(1, 2, 'Procedimientos', 'IATF-PRO', 'Procedimientos core del sistema', 2, 3, 1),
+(1, 2, 'Instrucciones', 'IATF-INS', 'Instrucciones operativas específicas', 3, 3, 1),
+(1, 2, 'Registros', 'IATF-REG', 'Registros de calidad con retención estricta', 4, 7, 1),
 
--- Estructura IATF para Merco (Empresa 2, Norma 2)
-(2, 1, 'Manual de Calidad', 'MAN', 'Documento maestro del SGC', 1, 5, 1),
-(2, 1, 'Procedimientos', 'PRO', 'Procedimientos operativos estándar', 2, 3, 1),
-(2, 1, 'Instrucciones', 'INS', 'Instrucciones de trabajo en piso', 3, 3, 1),
-(2, 1, 'Formatos', 'FOR', 'Plantillas en blanco para llenado', 4, 3, 1),
-(2, 1, 'Registros', 'REG', 'Evidencia de actividades completadas', 5, 5, 1),
-(2, 1, 'Externos', 'EXT', 'Documentación de origen externo', 6, 3, 1),
+-- Estructura ISO 9001 para Merco (Empresa 2, Norma 1)
+(2, 1, 'Manual de Calidad', 'ISO-MAN', 'Documento maestro del SGC', 1, 5, 1),
+(2, 1, 'Procedimientos', 'ISO-PRO', 'Procedimientos operativos estándar', 2, 3, 1),
+(2, 1, 'Instrucciones', 'ISO-INS', 'Instrucciones de trabajo en piso', 3, 3, 1),
+(2, 1, 'Formatos', 'ISO-FOR', 'Plantillas en blanco para llenado', 4, 3, 1),
+(2, 1, 'Registros', 'ISO-REG', 'Evidencia de actividades completadas', 5, 5, 1),
+(2, 1, 'Externos', 'ISO-EXT', 'Documentación de origen externo', 6, 3, 1),
 
-(2, 2, 'Manual de Calidad', 'MAN', 'Manual del sistema automotriz', 1, 5, 1),
-(2, 2, 'Procedimientos', 'PRO', 'Procedimientos core del sistema', 2, 3, 1),
-(2, 2, 'Instrucciones', 'INS', 'Instrucciones operativas específicas', 3, 3, 1),
-(2, 2, 'Registros', 'REG', 'Registros de calidad con retención estricta', 4, 7, 1);
+-- Estructura IATF 16949 para Merco (Empresa 2, Norma 2)
+(2, 2, 'Manual de Calidad', 'IATF-MAN', 'Manual del sistema automotriz', 1, 5, 1),
+(2, 2, 'Procedimientos', 'IATF-PRO', 'Procedimientos core del sistema', 2, 3, 1),
+(2, 2, 'Instrucciones', 'IATF-INS', 'Instrucciones operativas específicas', 3, 3, 1),
+(2, 2, 'Registros', 'IATF-REG', 'Registros de calidad con retención estricta', 4, 7, 1);
 GO
 

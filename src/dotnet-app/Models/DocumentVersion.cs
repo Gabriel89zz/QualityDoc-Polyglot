@@ -65,5 +65,7 @@ namespace QualityDoc.API.Models
 
         // Inicializamos la lista para evitar NullReferenceException
         public virtual ICollection<DocumentApproval> Approvals { get; set; } = new List<DocumentApproval>();
+        // Añade esta línea al final de las propiedades de DocumentVersion
+        public virtual ICollection<DocumentAuditLog> AuditLogs { get; set; } = new List<DocumentAuditLog>();
     }
 }

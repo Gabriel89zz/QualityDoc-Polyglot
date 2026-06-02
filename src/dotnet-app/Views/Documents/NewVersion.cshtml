@@ -4,7 +4,7 @@
     ViewData["Title"] = "Subir Nueva Versión";
 }
 
-<div class="max-w-4xl mx-auto space-y-6 mt-4">
+<div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 mt-4">
     <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
         <ol class="inline-flex items-center space-x-2">
             <li><a asp-action="Index" class="hover:text-brand transition-colors">Documentos</a></li>
@@ -27,62 +27,95 @@
             </div>
         </div>
 
-        <div class="p-6 md:p-8">
+        <div class="p-6 lg:p-10">
             <form asp-action="NewVersion" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-red-500 mb-6 text-sm font-semibold bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-transparent"></div>
 
                 <input type="hidden" asp-for="DocId" />
 
-                <div class="bg-slate-50 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] rounded-xl p-5 mb-8 flex items-center shadow-sm transition-colors">
-                    <div class="w-12 h-12 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center border border-slate-200 dark:border-[#4a4b50] mr-4 shadow-sm">
-                        <i class="fa-solid fa-file-circle-check text-2xl text-brand/60"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Actualizando Documento</p>
-                        <p class="text-lg font-black text-slate-800 dark:text-white">@Model.DocCode <span class="font-medium text-slate-500 dark:text-slate-400 ml-1">- @Model.DocName</span></p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
                     
-                    <div>
-                        <label asp-for="ChangeDescription" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Motivo del Cambio (Justificación) <span class="text-red-500">*</span>
-                        </label>
-                        <textarea asp-for="ChangeDescription" rows="3" class="w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-3 text-slate-700 dark:text-white placeholder-slate-400 focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none resize-none" placeholder="Ej. Se actualizó el diagrama de flujo debido a la compra de la nueva máquina CNC..." required></textarea>
-                        <span asp-validation-for="ChangeDescription" class="text-red-500 text-xs mt-1 block font-semibold"></span>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">
-                            <i class="fa-solid fa-circle-info mr-1 text-brand/70"></i> Este campo es auditable por ISO 9001 y se guardará permanentemente en la bitácora.
-                        </p>
+                    <div class="lg:col-span-5 lg:border-r border-slate-100 dark:border-[#4a4b50] lg:pr-10 transition-colors duration-300">
+                        
+                        <div class="bg-slate-50 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] rounded-xl p-5 mb-8 flex items-center shadow-sm transition-colors">
+                            <div class="w-12 h-12 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center border border-slate-200 dark:border-[#4a4b50] mr-4 shadow-sm">
+                                <i class="fa-solid fa-file-circle-check text-2xl text-brand/60"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Actualizando Documento</p>
+                                <p class="text-lg font-black text-slate-800 dark:text-white">@Model.DocCode</p>
+                                <p class="text-sm font-medium text-slate-500 dark:text-slate-400 truncate max-w-[250px]">@Model.DocName</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label asp-for="ChangeDescription" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                                Motivo del Cambio (Justificación) <span class="text-red-500">*</span>
+                            </label>
+                            <textarea asp-for="ChangeDescription" rows="5" class="w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-3 text-slate-700 dark:text-white placeholder-slate-400 focus:border-brand dark:focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none resize-none" placeholder="Ej. Se actualizó el diagrama de flujo debido a la compra de la nueva máquina CNC..." required></textarea>
+                            <span asp-validation-for="ChangeDescription" class="text-red-500 text-xs mt-1 block font-semibold"></span>
+                            
+                            <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-xl">
+                                <p class="text-xs text-blue-700 dark:text-blue-400 font-medium">
+                                    <i class="fa-solid fa-circle-info mr-1"></i> Este campo es auditable por ISO 9001 y se guardará permanentemente en la bitácora del nuevo borrador.
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <label asp-for="NewFile" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                            Nuevo Archivo (PDF/Word) <span class="text-red-500">*</span>
-                        </label>
-                        
-                        <div class="bg-slate-50 dark:bg-[#2a2b2e] border-2 border-dashed border-slate-300 dark:border-[#4a4b50] rounded-2xl p-8 text-center hover:bg-slate-100 dark:hover:bg-[#323338] transition duration-150 ease-in-out">
-                            <div class="w-16 h-16 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100 dark:border-transparent">
-                                <i class="fa-solid fa-file-arrow-up text-2xl text-brand/60"></i>
+                    <div class="lg:col-span-7 flex flex-col h-full">
+                        <div class="flex justify-between items-center border-b border-slate-100 dark:border-[#4a4b50] pb-2 mb-5">
+                            <h5 class="text-slate-400 dark:text-slate-500 font-bold uppercase text-xs tracking-widest">Nuevo Archivo PDF</h5>
+                        </div>
+
+                        <div id="uploadContainer" class="bg-slate-50 dark:bg-[#2a2b2e] border-2 border-dashed border-slate-300 dark:border-[#4a4b50] rounded-2xl p-6 text-center transition duration-300 ease-in-out relative min-h-[650px] flex flex-col justify-center">
+                            
+                            <div id="uploadPrompt" class="transition-opacity duration-300">
+                                <div class="w-20 h-20 bg-white dark:bg-[#323338] rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm border border-slate-100 dark:border-transparent">
+                                    <i class="fa-solid fa-file-arrow-up text-3xl text-brand/60"></i>
+                                </div>
+                                <label for="NewFile" class="block text-base font-bold text-slate-700 dark:text-slate-300 mb-2 cursor-pointer hover:text-brand transition-colors">Seleccionar Nuevo Documento <span class="text-red-500">*</span></label>
+                                
+                                <input type="file" name="NewFile" id="NewFile" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required />
+                                
+                                <button type="button" onclick="document.getElementById('NewFile').click();" class="mt-4 bg-brand/10 text-brand hover:bg-brand/20 dark:bg-brand/20 dark:text-brand-light font-bold py-2.5 px-6 rounded-xl text-sm transition shadow-sm">
+                                    Explorar Archivos
+                                </button>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-5 font-medium">PDF, Word, Excel o Imágenes. Máx: 10MB.</p>
                             </div>
-                            
-                            <input type="file" name="NewFile" id="NewFile" class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand/10 file:text-brand dark:file:bg-brand/20 dark:file:text-brand-light hover:file:bg-brand/20 cursor-pointer transition mt-4 mx-auto" accept=".pdf,.doc,.docx,.xls,.xlsx" required />
-                            
-                            <p class="text-xs text-slate-400 dark:text-slate-500 mt-4 font-medium">Tamaño máximo recomendado: 10MB.</p>
-                            
+
+                            <div id="previewContainer" class="hidden w-full h-full flex flex-col absolute inset-0 p-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h6 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-md border border-emerald-200 dark:border-emerald-800/30 shadow-sm">
+                                        <i class="fa-solid fa-circle-check mr-1.5"></i> Archivo Listo
+                                    </h6>
+                                    <button type="button" onclick="removeFile()" class="text-red-500 hover:text-white hover:bg-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-lg transition-colors shadow-sm text-xs font-bold flex items-center" title="Quitar archivo">
+                                        <i class="fa-solid fa-trash-can mr-1.5"></i> Quitar
+                                    </button>
+                                </div>
+                                
+                                <div id="filePreview" class="w-full flex-grow bg-slate-200 dark:bg-[#1a1b1e] rounded-xl overflow-hidden border border-slate-300 dark:border-[#4a4b50] flex items-center justify-center relative shadow-inner">
+                                </div>
+
+                                <div class="mt-3 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] p-3 rounded-lg shadow-sm">
+                                    <span id="fileNameDisplay" class="truncate max-w-[200px] lg:max-w-[400px] text-slate-700 dark:text-slate-200"></span>
+                                    <span id="fileSizeDisplay" class="bg-slate-100 dark:bg-[#2a2b2e] px-2.5 py-1 rounded-md border border-slate-200 dark:border-[#4a4b50]"></span>
+                                </div>
+                            </div>
+
                             @if (ViewData.ModelState["NewFile"]?.Errors.Count > 0)
                             {
-                                <span class="text-red-500 text-sm font-bold block mt-3">@ViewData.ModelState["NewFile"]?.Errors[0].ErrorMessage</span>
+                                <span class="text-red-500 text-sm font-bold block mt-3 absolute bottom-2 left-0 w-full text-center bg-white/80 dark:bg-[#323338]/80 py-1">@ViewData.ModelState["NewFile"]?.Errors[0].ErrorMessage</span>
                             }
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-10 pt-6 border-t border-slate-100 dark:border-[#4a4b50] flex justify-end space-x-3 transition-colors duration-300">
-                    <a asp-action="Details" asp-route-id="@Model.DocId" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150">
+                    <a asp-action="Details" asp-route-id="@Model.DocId" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-3 px-6 rounded-xl transition duration-150">
                         Cancelar
                     </a>
-                    <button type="submit" class="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-150">
+                    <button type="submit" class="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-3 px-8 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-150">
                         <i class="fa-solid fa-cloud-arrow-up mr-2 text-lg"></i> Guardar Nueva Versión
                     </button>
                 </div>
@@ -93,4 +126,78 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // ==========================================
+            // LÓGICA DE VISTA PREVIA DEL DOCUMENTO (NEW VERSION)
+            // ==========================================
+            const fileInput = document.getElementById('NewFile'); // Escuchamos el campo NewFile
+            const uploadPrompt = document.getElementById('uploadPrompt');
+            const previewContainer = document.getElementById('previewContainer');
+            const filePreview = document.getElementById('filePreview');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const fileSizeDisplay = document.getElementById('fileSizeDisplay');
+            let currentObjectUrl = null;
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        fileNameDisplay.textContent = file.name;
+                        fileSizeDisplay.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+                        uploadPrompt.classList.add('hidden');
+                        previewContainer.classList.remove('hidden');
+
+                        if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+
+                        if (file.type === 'application/pdf') {
+                            currentObjectUrl = URL.createObjectURL(file);
+                            filePreview.innerHTML = `<iframe src="${currentObjectUrl}#toolbar=0&navpanes=0" class="absolute inset-0 w-full h-full border-0"></iframe>`;
+                        } 
+                        else if (file.type.startsWith('image/')) {
+                            currentObjectUrl = URL.createObjectURL(file);
+                            filePreview.innerHTML = `<img src="${currentObjectUrl}" class="absolute inset-0 w-full h-full object-contain bg-slate-100 dark:bg-[#2a2b2e] p-2" alt="Vista previa" />`;
+                        } 
+                        else {
+                            let iconClass = 'fa-file-lines text-slate-400';
+                            let fileTypeName = 'Documento';
+
+                            if(file.name.toLowerCase().endsWith('.doc') || file.name.toLowerCase().endsWith('.docx')) {
+                                iconClass = 'fa-file-word text-blue-500';
+                                fileTypeName = 'Word';
+                            }
+                            if(file.name.toLowerCase().endsWith('.xls') || file.name.toLowerCase().endsWith('.xlsx')) {
+                                iconClass = 'fa-file-excel text-emerald-500';
+                                fileTypeName = 'Excel';
+                            }
+                            
+                            filePreview.innerHTML = `
+                                <div class="absolute inset-0 w-full h-full bg-white dark:bg-[#323338] text-center p-6 flex flex-col items-center justify-center">
+                                    <i class="fa-solid ${iconClass} text-6xl mb-4 opacity-90 drop-shadow-sm"></i>
+                                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200">Archivo de ${fileTypeName} Listo</p>
+                                    <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 px-4">
+                                        Los navegadores web no previsualizan archivos de Office localmente. Tu nueva versión está lista para ser guardada.
+                                    </p>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+            }
+
+            window.removeFile = function() {
+                fileInput.value = ''; 
+                uploadPrompt.classList.remove('hidden'); 
+                previewContainer.classList.add('hidden'); 
+                filePreview.innerHTML = ''; 
+                if (currentObjectUrl) {
+                    URL.revokeObjectURL(currentObjectUrl);
+                    currentObjectUrl = null;
+                }
+            };
+        });
+    </script>
 }

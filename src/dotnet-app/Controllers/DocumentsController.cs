@@ -11,6 +11,7 @@ using System.IO;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using QualityDoc.API.Helpers;
 
 namespace QualityDoc.API.Controllers
 {
@@ -38,16 +39,19 @@ namespace QualityDoc.API.Controllers
             return string.IsNullOrEmpty(claim) ? 0 : int.Parse(claim);
         }
 
-// ==========================================
+        // ==========================================
         // 1. INDEX: Listar Documentos
         // ==========================================
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber)
         {
             var companyId = GetCurrentCompanyId();
             var currentUserId = GetCurrentUserId();
 
             var currentUser = await _context.Users.FindAsync(currentUserId);
             ViewBag.UserDeptId = currentUser?.DeptId ?? 0;
+
+            // 🚀 Definimos 10 registros por página
+            int pageSize = 10;
 
             // 🚀 1. Iniciamos la consulta base (Solo filtramos por empresa)
             var query = _context.Documents
@@ -62,17 +66,14 @@ namespace QualityDoc.API.Controllers
                 query = query.Where(d => d.DeptId == currentUser.DeptId);
             }
 
-            // 🚀 3. Ejecutamos la consulta final
-            var documents = await query
-                .OrderByDescending(d => d.CreatedAt)
-                .ToListAsync();
+            // Ordenamos para que los más nuevos salgan arriba
+            query = query.OrderByDescending(d => d.CreatedAt);
 
             var latestStatuses = await _context.DocumentVersions
                 .Where(v => v.Document.CompanyId == companyId)
                 .GroupBy(v => v.DocId)
                 .Select(g => new { DocId = g.Key, StatusId = g.OrderByDescending(v => v.VersionId).FirstOrDefault().StatusId })
                 .ToDictionaryAsync(x => x.DocId, x => x.StatusId);
-
             ViewBag.LatestStatuses = latestStatuses;
 
             var hasAdvancedVersions = await _context.DocumentVersions
@@ -80,13 +81,13 @@ namespace QualityDoc.API.Controllers
                 .Select(v => v.DocId)
                 .Distinct()
                 .ToListAsync();
-
             ViewBag.HasAdvancedVersions = hasAdvancedVersions;
 
-            return View(documents);
+            // 🚀 3. Pasamos la consulta a nuestra clase matemática (Sin el ToListAsync)
+            return View(await PaginatedList<Document>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
-// ==========================================
+        // ==========================================
         // 2. CREATE: GET
         // ==========================================
         public async Task<IActionResult> Create()
@@ -102,10 +103,43 @@ namespace QualityDoc.API.Controllers
             var companyId = GetCurrentCompanyId();
             var currentUser = await _context.Users.FindAsync(GetCurrentUserId());
             
-            // 🚀 Enviamos la bandera a la vista para saber si dibujamos el select
+           // 🚀 Enviamos la bandera a la vista para saber si dibujamos el select
             ViewBag.IsAdmin = isAdmin;
+
+            // 🚀 NUEVO: Extraemos categorías, cruzamos con Norms y agrupamos
+            var categoriasAgrupadas = await _context.DocumentCategories
+                .Include(c => c.Norm)
+                .Where(c => c.CompanyId == companyId && c.Status == "Active")
+                .Select(c => new {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    NormGroupName = c.Norm != null ? c.Norm.NormName : "Otras Categorías"
+                })
+                .OrderBy(c => c.NormGroupName).ThenBy(c => c.CategoryName)
+                .ToListAsync();
+
+            // ==============================================================
+            // 🚀 NUEVA LÓGICA DE CASCADA: NORMATIVAS Y CATEGORÍAS EN JSON
+            // ==============================================================
             
-            ViewBag.Categories = new SelectList(_context.DocumentCategories.Where(c => c.CompanyId == companyId && c.Status == "Active"), "CategoryId", "CategoryName");
+            // 1. Cargamos las normativas para el filtro superior
+            var norms = await _context.Norms.Where(n => n.Status == "Active").ToListAsync();
+            ViewBag.Norms = new SelectList(norms, "NormId", "NormName");
+
+            // 2. Extraemos las categorías y las empaquetamos (El ?? 0 es para las que no tienen norma)
+            var rawCategories = await _context.DocumentCategories
+                .Where(c => c.CompanyId == companyId && c.Status == "Active")
+                .Select(c => new { 
+                    CategoryId = c.CategoryId, 
+                    CategoryName = c.CategoryName, 
+                    NormId = c.NormId ?? 0 
+                })
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+
+            // 3. Lo enviamos como JSON puro a la vista
+            ViewBag.CategoriasJson = System.Text.Json.JsonSerializer.Serialize(rawCategories);
+            // ==============================================================
             ViewBag.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == companyId && d.Status == "Active"), "DeptId", "DeptName");
             
             return View();
@@ -147,15 +181,18 @@ namespace QualityDoc.API.Controllers
             ModelState.Remove("Company");
             ModelState.Remove("Versions");
 
-            if (ModelState.IsValid)
+           if (ModelState.IsValid)
             {
                 var category = await _context.DocumentCategories.FindAsync(model.CategoryId);
-                
+
+                // 🚀 Regresamos a contar por Categoría. 
+                // Así, la categoría ISO tendrá su 001, y la categoría IATF tendrá su propio 001.
                 var docCount = await _context.Documents
                     .IgnoreQueryFilters()
                     .Where(d => d.CompanyId == companyId && d.CategoryId == model.CategoryId)
                     .CountAsync();
 
+                // El folio se armará con el prefijo exacto. Ej: "ISO-MAN-001"
                 string folioCode = $"{category.Prefix}-{(docCount + 1):D3}";
                 model.DocCode = folioCode;
 
@@ -171,7 +208,8 @@ namespace QualityDoc.API.Controllers
                 }
 
                 string fileExtension = Path.GetExtension(uploadedFile.FileName).ToLower();
-                string uniqueFileName = $"{folioCode}_v1.0_{Guid.NewGuid().ToString().Substring(0,8)}{fileExtension}";
+                // 🔥 AQUÍ CAMBIAMOS EL v1.0 por v0.1 EN EL NOMBRE DEL ARCHIVO
+                string uniqueFileName = $"{folioCode}_v0.1_{Guid.NewGuid().ToString().Substring(0,8)}{fileExtension}";
                 string filePathPhysical = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using (var fileStream = new FileStream(filePathPhysical, FileMode.Create))
@@ -189,7 +227,8 @@ namespace QualityDoc.API.Controllers
                     {
                         DocId = model.DocId,
                         StatusId = 1,
-                        VersionNum = "1.0",
+                        // 🔥 AQUÍ NACE COMO 0.1
+                        VersionNum = "0.1",
                         FilePath = $"/uploads/documents/{uniqueFileName}",
                         Extension = fileExtension,
                         ChangeDescription = "Creación inicial del documento",
@@ -199,26 +238,77 @@ namespace QualityDoc.API.Controllers
                     };
 
                     _context.DocumentVersions.Add(docVersion);
+                    await _context.SaveChangesAsync(); // Genera el VersionId
+
+                    // 🚀 NUEVO: Registro en la Bitácora Inmutable
+                    var auditLog = new DocumentAuditLog {
+                        CompanyId = companyId,
+                        DocId = model.DocId,
+                        VersionId = docVersion.VersionId, 
+                        ActionType = "DraftCreated",
+                        ActionDetails = "Creación inicial del documento en el sistema.",
+                        VersionNum = "0.1",
+                        CreatedBy = GetCurrentUserId(),
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.DocumentAuditLogs.Add(auditLog);
                     await _context.SaveChangesAsync();
 
                     await transaction.CommitAsync();
 
                     return RedirectToAction(nameof(Index));
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
                     if (System.IO.File.Exists(filePathPhysical))
                     {
                         System.IO.File.Delete(filePathPhysical);
                     }
-                    ModelState.AddModelError("", "Ocurrió un error al guardar en la base de datos.");
+                   // 🔥 EXTRAEMOS EL ERROR REAL QUE NOS MANDA SQL SERVER
+                    string errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                    ModelState.AddModelError("", "Error SQL: " + errorReal);
                 }
             }
 
             ViewBag.IsAdmin = isAdmin;
-            ViewBag.Categories = new SelectList(_context.DocumentCategories.Where(c => c.CompanyId == companyId && c.Status == "Active"), "CategoryId", "CategoryName", model.CategoryId);
+
+            // 🚀 NUEVO: Mantenemos la agrupación si el formulario falla y recarga
+            var categoriasAgrupadas = await _context.DocumentCategories
+                .Include(c => c.Norm)
+                .Where(c => c.CompanyId == companyId && c.Status == "Active")
+                .Select(c => new {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    NormGroupName = c.Norm != null ? c.Norm.NormName : "Otras Categorías"
+                })
+                .OrderBy(c => c.NormGroupName).ThenBy(c => c.CategoryName)
+                .ToListAsync();
+
+           // ==============================================================
+            // 🚀 NUEVA LÓGICA DE CASCADA: NORMATIVAS Y CATEGORÍAS EN JSON
+            // ==============================================================
+            
+            // 1. Cargamos las normativas para el filtro superior
+            var norms = await _context.Norms.Where(n => n.Status == "Active").ToListAsync();
+            ViewBag.Norms = new SelectList(norms, "NormId", "NormName");
+
+            // 2. Extraemos las categorías y las empaquetamos (El ?? 0 es para las que no tienen norma)
+            var rawCategories = await _context.DocumentCategories
+                .Where(c => c.CompanyId == companyId && c.Status == "Active")
+                .Select(c => new { 
+                    CategoryId = c.CategoryId, 
+                    CategoryName = c.CategoryName, 
+                    NormId = c.NormId ?? 0 
+                })
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+
+            // 3. Lo enviamos como JSON puro a la vista
+            ViewBag.CategoriasJson = System.Text.Json.JsonSerializer.Serialize(rawCategories);
+            // ==============================================================
             ViewBag.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == companyId && d.Status == "Active"), "DeptId", "DeptName", model.DeptId);
+            
             return View(model);
         }
 
@@ -265,12 +355,11 @@ namespace QualityDoc.API.Controllers
             return View(document);
         }
 
-// ==========================================
+        // ==========================================
         // 5. EDIT: POST
         // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        // 🚀 Agregamos el parámetro newFile a la firma del método
         public async Task<IActionResult> Edit(int id, Document model, IFormFile newFile)
         {
             if (id != model.DocId) return NotFound();
@@ -296,6 +385,7 @@ namespace QualityDoc.API.Controllers
             if (ModelState.IsValid)
             {
                 using var transaction = await _context.Database.BeginTransactionAsync();
+
                 try
                 {
                     var existingDoc = await _context.Documents
@@ -305,12 +395,13 @@ namespace QualityDoc.API.Controllers
                     if (existingDoc == null) return NotFound();
 
                     var currentUser = await _context.Users.FindAsync(GetCurrentUserId());
+
                     if (!isAdmin && isCreator && existingDoc.DeptId != currentUser?.DeptId)
                     {
                         return RedirectToAction("AccessDenied", "Auth");
                     }
 
-                    // 1. Actualizamos los metadatos (ignoramos DeptId y CategoryId para proteger el folio)
+                    // 1. Actualizamos metadatos del maestro
                     existingDoc.DocName = model.DocName;
                     existingDoc.Description = model.Description;
                     existingDoc.IsExternal = model.IsExternal;
@@ -319,50 +410,63 @@ namespace QualityDoc.API.Controllers
 
                     _context.Update(existingDoc);
 
-                    // 🚀 2. Si subieron un archivo nuevo, lo reemplazamos
-                    if (newFile != null && newFile.Length > 0 && latestVersion != null)
+                    // 🚀 2. LÓGICA DE SUMAR DECIMAL AL EDITAR
+                    if (latestVersion != null)
                     {
-                        string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "documents");
-                        string fileExtension = Path.GetExtension(newFile.FileName).ToLower();
+                        decimal versionActual = 0.0m;
+                        decimal.TryParse(latestVersion.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out versionActual);
                         
-                        string uniqueFileName = $"{existingDoc.DocCode}_v{latestVersion.VersionNum}_corregido_{Guid.NewGuid().ToString().Substring(0,8)}{fileExtension}";
-                        string filePathPhysical = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        // Subimos el nuevo archivo
-                        using (var fileStream = new FileStream(filePathPhysical, FileMode.Create))
-                        {
-                            await newFile.CopyToAsync(fileStream);
-                        }
-
-                        // Eliminamos el archivo PDF viejo
-                        if (!string.IsNullOrEmpty(latestVersion.FilePath))
-                        {
-                            string oldPathPhysical = _env.WebRootPath + latestVersion.FilePath.Replace("/", "\\");
-                            if (System.IO.File.Exists(oldPathPhysical))
-                            {
-                                System.IO.File.Delete(oldPathPhysical);
-                            }
-                        }
-
-                        // Actualizamos la ruta en la base de datos
-                        latestVersion.FilePath = $"/uploads/documents/{uniqueFileName}";
-                        latestVersion.Extension = fileExtension;
+                        // Sumamos 0.1 porque el creador lo modificó
+                        latestVersion.VersionNum = (versionActual + 0.1m).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
                         latestVersion.UpdatedAt = DateTime.UtcNow;
                         latestVersion.UpdatedBy = GetCurrentUserId();
 
+                        if (newFile != null && newFile.Length > 0)
+                        {
+                            string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "documents");
+                            string fileExtension = Path.GetExtension(newFile.FileName).ToLower();
+                            
+                            string uniqueFileName = $"{existingDoc.DocCode}_v{latestVersion.VersionNum}_corregido_{Guid.NewGuid().ToString().Substring(0,8)}{fileExtension}";
+                            string filePathPhysical = Path.Combine(uploadsFolder, uniqueFileName);
+
+                            using (var fileStream = new FileStream(filePathPhysical, FileMode.Create))
+                            {
+                                await newFile.CopyToAsync(fileStream);
+                            }
+
+                            if (!string.IsNullOrEmpty(latestVersion.FilePath))
+                            {
+                                string oldPathPhysical = _env.WebRootPath + latestVersion.FilePath.Replace("/", "\\");
+                                if (System.IO.File.Exists(oldPathPhysical))
+                                {
+                                    System.IO.File.Delete(oldPathPhysical);
+                                }
+                            }
+
+                            latestVersion.FilePath = $"/uploads/documents/{uniqueFileName}";
+                            latestVersion.Extension = fileExtension;
+                        }
+
                         _context.Update(latestVersion);
+
+                        // 🚀 3. NUEVO: REGISTRO EN LA BITÁCORA INMUTABLE
+                        var auditLog = new DocumentAuditLog {
+                            CompanyId = companyId,
+                            DocId = existingDoc.DocId,
+                            VersionId = latestVersion.VersionId,
+                            ActionType = "DraftEdited",
+                            ActionDetails = "El usuario editó los metadatos estructurales o reemplazó el archivo PDF del borrador.",
+                            VersionNum = latestVersion.VersionNum, // Guarda la foto exacta: Ej. 0.2
+                            CreatedBy = GetCurrentUserId(),
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _context.DocumentAuditLogs.Add(auditLog);
                     }
 
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                     
-                    TempData["SuccessMessage"] = "El documento ha sido actualizado correctamente.";
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    await transaction.RollbackAsync();
-                    if (!DocumentExists(model.DocId)) return NotFound();
-                    else throw;
+                    TempData["SuccessMessage"] = "El documento ha sido actualizado y su versión ha incrementado.";
                 }
                 catch (Exception)
                 {
@@ -371,11 +475,9 @@ namespace QualityDoc.API.Controllers
                     return RedirectToAction(nameof(Edit), new { id = model.DocId });
                 }
                 
-                // Redirigimos al expediente para que vea los cambios
                 return RedirectToAction(nameof(Details), new { id = model.DocId });
             }
 
-            // Si hay error de validación, volvemos a cargar la vista
             ViewBag.Categories = new SelectList(_context.DocumentCategories.Where(c => c.CompanyId == companyId && c.Status == "Active"), "CategoryId", "CategoryName", model.CategoryId);
             ViewBag.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == companyId && d.Status == "Active"), "DeptId", "DeptName", model.DeptId);
             return View(model);
@@ -457,6 +559,7 @@ namespace QualityDoc.API.Controllers
             var document = await _context.Documents
                 .IgnoreQueryFilters()
                 .Include(d => d.Category)
+                    .ThenInclude(c => c.Norm)
                 .Include(d => d.Department) 
                 .FirstOrDefaultAsync(m => m.DocId == id && m.CompanyId == companyId);
 
@@ -469,20 +572,23 @@ namespace QualityDoc.API.Controllers
                 .Include(v => v.DocumentStatus)
                 .Include(v => v.Approvals) 
                     .ThenInclude(a => a.Approver) 
+                // 🚀 NUEVO: Cargamos la bitácora inmutable y la ordenamos por fecha
+                .Include(v => v.AuditLogs.OrderBy(log => log.CreatedAt))
                 .Where(v => v.DocId == document.DocId)
                 .OrderByDescending(v => v.VersionId)
                 .ToListAsync();
 
             ViewBag.Versions = versions;
 
-            // 🚀 MODIFICACIÓN: Extraemos los nombres de los creadores para la bitácora
-            // Convertimos a int? para evitar errores si CreatedBy es nulo o 0, y extraemos los IDs únicos
-            var creatorIds = versions.Select(v => (int?)v.CreatedBy ?? 0).Where(uid => uid != 0).Distinct().ToList();
-            
+           // 🚀 MODIFICACIÓN: Extraemos los nombres de TODOS los involucrados (Creadores, Firmantes y Actores de Bitácora)
+            var userIds = versions.Select(v => (int?)v.CreatedBy ?? 0)
+                .Concat(versions.SelectMany(v => v.AuditLogs.Select(al => (int?)al.CreatedBy ?? 0)))
+                .Concat(versions.SelectMany(v => v.Approvals.Select(a => (int?)a.ApproverId ?? 0)))
+                .Where(uid => uid != 0).Distinct().ToList();
+
             var creatorsDict = await _context.Users
-                .Where(u => creatorIds.Contains(u.UserId))
+                .Where(u => userIds.Contains(u.UserId))
                 .ToDictionaryAsync(u => u.UserId, u => u.FullName);
-                
             ViewBag.Creators = creatorsDict;
 
             return View(document);
@@ -575,14 +681,16 @@ namespace QualityDoc.API.Controllers
                     return RedirectToAction(nameof(Details), new { id = model.DocId });
                 }
 
-                string newVersionNum = "1.0"; 
-                
+                string newVersionNum = "0.1"; // Por si no hubiera versión anterior
                 if (lastVersion != null && !string.IsNullOrEmpty(lastVersion.VersionNum))
                 {
-                    var parts = lastVersion.VersionNum.Split('.');
-                    if (int.TryParse(parts[0], out int majorVersion))
+                    if (decimal.TryParse(lastVersion.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal versionActual))
                     {
-                        newVersionNum = $"{majorVersion + 1}.0";
+                        // LÓGICA DE VERSIONAMIENTO MAYOR PROFESIONAL (ISO ÁGIL)
+                        // Extraemos el entero (Ej: 1.5 -> 1) y le sumamos 1 entero (1 + 1.0 = 2.0)
+                        // El documento nacerá como un borrador de la siguiente versión mayor "2.0"
+                        decimal nextMajorVersion = Math.Floor(versionActual) + 1.0m;
+                        newVersionNum = nextMajorVersion.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -624,6 +732,20 @@ namespace QualityDoc.API.Controllers
                     document.UpdatedBy = GetCurrentUserId();
                     _context.Update(document);
 
+                    await _context.SaveChangesAsync(); // Genera el VersionId
+
+                    // 🚀 NUEVO: Registro en la Bitácora Inmutable
+                    var auditLog = new DocumentAuditLog {
+                        CompanyId = companyId,
+                        DocId = model.DocId,
+                        VersionId = newDocVersion.VersionId,
+                        ActionType = "NewVersionCreated", // 🚀 FIX: TIPO DE ACCIÓN CORRECTO
+                        ActionDetails = "Se ha subido una nueva versión del documento para iniciar un nuevo ciclo.",
+                        VersionNum = newVersionNum, 
+                        CreatedBy = GetCurrentUserId(),
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.DocumentAuditLogs.Add(auditLog);
                     await _context.SaveChangesAsync();
                     
                     await transaction.CommitAsync();
@@ -710,13 +832,25 @@ namespace QualityDoc.API.Controllers
             };
             
             _context.DocumentApprovals.Add(approval);
-
             version.StatusId = 2;
             version.UpdatedAt = DateTime.UtcNow;
             version.UpdatedBy = GetCurrentUserId();
             _context.Update(version);
 
-            // 🛡️ MODIFICACIÓN: Bloque Try-Catch para atrapar violaciones de Constraints de SQL
+            // 🚀 NUEVO: Registro en la Bitácora Inmutable
+            var auditLog = new DocumentAuditLog {
+                CompanyId = companyId,
+                DocId = docId,
+                VersionId = versionId,
+                ActionType = "SentToReview",
+                ActionDetails = "El creador finalizó el borrador y solicitó revisión formal en sistema.",
+                VersionNum = version.VersionNum,
+                CreatedBy = GetCurrentUserId(),
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.DocumentAuditLogs.Add(auditLog);
+
+            // 🛡️ MODIFICACIÓN: Bloque Try-Catch para atrapar violaciones...
             try
             {
                 await _context.SaveChangesAsync();
@@ -744,12 +878,10 @@ namespace QualityDoc.API.Controllers
             if (!isAdmin && !isCreator) return RedirectToAction("AccessDenied", "Auth");
 
             var companyId = GetCurrentCompanyId();
-
             var version = await _context.DocumentVersions
                 .Include(v => v.Document)
                 .FirstOrDefaultAsync(v => v.VersionId == versionId && v.DocId == docId && v.Document.CompanyId == companyId);
-
-            // Verificamos que sí sea un borrador
+            
             if (version == null || version.StatusId != 1)
             {
                 TempData["ErrorMessage"] = "Solo se pueden reemplazar archivos de versiones en estatus Borrador.";
@@ -758,20 +890,24 @@ namespace QualityDoc.API.Controllers
 
             if (newFile != null && newFile.Length > 0)
             {
+                // 🚀 LÓGICA DE SUMAR DECIMAL AL REEMPLAZAR ARCHIVO
+                decimal versionActual = 0.0m;
+                decimal.TryParse(version.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out versionActual);
+                
+                // Sumamos 0.1
+                version.VersionNum = (versionActual + 0.1m).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+
                 string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "documents");
                 string fileExtension = Path.GetExtension(newFile.FileName).ToLower();
                 
-                // Creamos un nuevo nombre para evitar problemas de caché
                 string uniqueFileName = $"{version.Document.DocCode}_v{version.VersionNum}_corregido_{Guid.NewGuid().ToString().Substring(0,8)}{fileExtension}";
                 string filePathPhysical = Path.Combine(uploadsFolder, uniqueFileName);
 
-                // Subimos el nuevo archivo
                 using (var fileStream = new FileStream(filePathPhysical, FileMode.Create))
                 {
                     await newFile.CopyToAsync(fileStream);
                 }
 
-                // Eliminamos el archivo PDF viejo del servidor
                 if (!string.IsNullOrEmpty(version.FilePath))
                 {
                     string oldPathPhysical = _env.WebRootPath + version.FilePath.Replace("/", "\\");
@@ -781,22 +917,93 @@ namespace QualityDoc.API.Controllers
                     }
                 }
 
-                // Actualizamos la base de datos
                 version.FilePath = $"/uploads/documents/{uniqueFileName}";
                 version.Extension = fileExtension;
                 version.UpdatedAt = DateTime.UtcNow;
                 version.UpdatedBy = GetCurrentUserId();
 
                 _context.Update(version);
-                await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "El archivo PDF fue actualizado correctamente. No olvides dar clic en 'Solicitar Firmas' para reiniciar el flujo.";
+                // 🚀 NUEVO: Registro en la Bitácora Inmutable
+                var auditLog = new DocumentAuditLog {
+                    CompanyId = companyId,
+                    DocId = docId,
+                    VersionId = versionId,
+                    ActionType = "DraftEdited",
+                    ActionDetails = "El usuario modificó los archivos PDF del borrador o actualizó sus metadatos estructurales.",
+                    VersionNum = version.VersionNum,
+                    CreatedBy = GetCurrentUserId(),
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.DocumentAuditLogs.Add(auditLog);
+
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "El archivo PDF fue actualizado y la versión aumentó. No olvides dar clic en 'Solicitar Firmas'.";
             }
             else
             {
                 TempData["ErrorMessage"] = "Debes seleccionar un archivo PDF válido.";
             }
 
+            return RedirectToAction(nameof(Details), new { id = docId });
+        }
+
+        // ==========================================
+        // 13. DESHACER ENVÍO / RECALL WORKFLOW (NUEVO)
+        // ==========================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RecallWorkflow(int versionId, int docId)
+        {
+            var userId = GetCurrentUserId();
+
+            try
+            {
+                // 1. OBTENEMOS LA VERSIÓN ANTES DE DESHACER (Con Include)
+                var versionData = await _context.DocumentVersions
+                    .Include(v => v.Document) // 🚀 NUEVO: Necesario para sacar el CompanyId
+                    .FirstOrDefaultAsync(v => v.VersionId == versionId);
+
+                if (versionData == null) return NotFound();
+
+                // // 2. LÓGICA DE VERSIONAMIENTO (CEREBRO EN C#)
+                // // Al deshacer el envío, sumamos 0.1 para que quede rastro en el historial
+                // decimal versionActual = 0.0m;
+                // decimal.TryParse(versionData.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out versionActual);
+                
+                // string newVersionNum = (versionActual + 0.1m).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+                string newVersionNum = versionData.VersionNum;
+                // 3. EJECUTAMOS EL SP PASANDO EL NUEVO NÚMERO DE VERSIÓN
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_RecallDocumentWorkflow @VersionID = {0}, @ApprovalID = NULL, @UserID = {1}, @NewVersionNum = {2}",
+                    versionId, userId, newVersionNum
+                );
+
+                // 🚀 NUEVO: Registro en la Bitácora Inmutable
+                var auditLog = new DocumentAuditLog {
+                    CompanyId = versionData.Document.CompanyId, 
+                    DocId = docId,
+                    VersionId = versionId,
+                    ActionType = "Recalled",
+                    ActionDetails = "El creador canceló el proceso de revisión activa. El documento regresó a Borrador.",
+                    VersionNum = newVersionNum,
+                    CreatedBy = userId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.DocumentAuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Flujo cancelado con éxito. El documento regresó a Borrador bajo la versión {newVersionNum}.";
+            }
+            catch (Exception ex)
+            {
+                // Extraemos el mensaje exacto enviado por el THROW de SQL Server (Ej: Error 50005 de Revisor ya firmó)
+                string errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                TempData["ErrorMessage"] = "Operación rechazada por el sistema: " + errorReal;
+            }
+
+            // Redirigimos al expediente del documento para refrescar la vista
             return RedirectToAction(nameof(Details), new { id = docId });
         }
 

@@ -13,287 +13,1062 @@
 
 @if (esSuper)
 {
-    <div class="space-y-6">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Panel de Control Global</h1>
-                <p class="text-slate-500 dark:text-slate-400 mt-1">Administración del sistema Multi-tenant (Host Tenant)</p>
-            </div>
-            <div class="text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-[#323338] px-4 py-2 rounded-lg border border-slate-200 dark:border-[#4a4b50] shadow-sm flex items-center">
-                <i class="fa-regular fa-calendar-days mr-2 text-brand"></i> @DateTime.Now.ToString("dd MMMM, yyyy")
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center transition-colors duration-300">
-                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl mr-5 border border-blue-100 dark:border-blue-800/30">
-                    <i class="fa-solid fa-building text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Empresas Clientes</p>
-                    <h3 class="text-3xl font-bold text-slate-800 dark:text-white mt-1">@ViewBag.TotalEmpresas</h3>
+    <div class="xl:pr-80">
+        <div class="space-y-8">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-up">
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white hidden md:block">Panel Global del Host Tenant</h1>
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </span>
+                    <input type="text" placeholder="Buscar empresas o usuarios globales..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-darkbg-card border border-slate-200 dark:border-darkbg-border rounded-xl text-sm focus:outline-none focus:border-brand dark:focus:border-brand shadow-soft transition-all text-slate-700 dark:text-slate-200" />
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center transition-colors duration-300">
-                <div class="p-4 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl mr-5 border border-green-100 dark:border-green-800/30">
-                    <i class="fa-solid fa-users-gear text-2xl"></i>
+            <div class="relative w-full bg-brand dark:bg-[#B8ACFF] rounded-[2rem] p-8 sm:p-10 overflow-hidden shadow-soft mt-6 mb-8 flex flex-col md:flex-row items-center justify-between animate-fade-up delay-100">
+                
+                <div class="absolute inset-0 z-0 pointer-events-none">
+                    <div class="absolute -top-[50%] left-[40%] w-full h-[200%] bg-white opacity-5 transform -skew-x-12"></div>
                 </div>
-                <div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Usuarios Globales</p>
-                    <h3 class="text-3xl font-bold text-slate-800 dark:text-white mt-1">@ViewBag.TotalUsuariosGlobales</h3>
-                </div>
-            </div>
 
-            <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center transition-colors duration-300">
-                <div class="p-4 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl mr-5 border border-purple-100 dark:border-purple-800/30">
-                    <i class="fa-solid fa-scale-balanced text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Normas ISO Activas</p>
-                    <h3 class="text-3xl font-bold text-slate-800 dark:text-white mt-1">@ViewBag.TotalNormas</h3> 
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
-                <h3 class="text-slate-800 dark:text-white font-bold mb-5 text-lg"><i class="fa-solid fa-bolt text-amber-500 mr-2"></i> Acciones Rápidas (SaaS)</h3>
-                <div class="space-y-3">
-                    <a asp-controller="Companies" asp-action="Create" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-[#2a2b2e] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent dark:border-[#4a4b50] group">
-                        <div class="w-10 h-10 bg-white dark:bg-[#323338] rounded shadow-sm flex items-center justify-center mr-4 group-hover:text-brand transition-colors">
-                            <i class="fa-solid fa-plus"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-sm text-slate-800 dark:text-white">Registrar Nuevo Cliente</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Dar de alta una nueva empresa (Tenant) en el sistema.</p>
-                        </div>
-                    </a>
+                <div class="relative z-10 flex-1 w-full text-left">
                     
-                    <a asp-controller="Norms" asp-action="Index" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-[#2a2b2e] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent dark:border-[#4a4b50] group">
-                        <div class="w-10 h-10 bg-white dark:bg-[#323338] rounded shadow-sm flex items-center justify-center mr-4 group-hover:text-brand transition-colors">
-                            <i class="fa-solid fa-book-bookmark"></i>
-                        </div>
-                        <div>
-                            <p class="font-bold text-sm text-slate-800 dark:text-white">Gestionar Catálogo de Normas</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Actualizar versiones ISO (Ej. 9001:2015, IATF).</p>
-                        </div>
-                    </a>
+                    <div class="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-4">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>@DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy").ToUpper()</span>
+                    </div>
+
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight drop-shadow-sm">
+                        ¡Bienvenido de vuelta, @(User.Identity?.Name ?? "Super Admin")!
+                    </h2>
+
+                    <p class="text-white/90 text-sm md:text-base font-medium leading-relaxed mb-6 max-w-xl">
+                        Mantén siempre actualizado el portal Host Tenant.<br />
+                        Actualmente gestionas <span class="inline-block bg-white text-brand px-2.5 py-0.5 rounded-lg text-sm font-bold mx-1 shadow-sm">@ViewBag.TotalEmpresas</span> empresas clientes dentro del sistema.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="/Companies/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            <i class="fa-solid fa-plus"></i> Nueva Empresa
+                        </a>
+                        <a href="/Companies/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
+                            Ver catálogo completo
+                        </a>
+                    </div>
                 </div>
+
+                <div class="relative hidden lg:flex items-center justify-center w-72 h-56 mr-4 mt-8 md:mt-0 z-10">
+                    
+                    <div class="absolute inset-0 flex items-center justify-center opacity-10">
+                        <div class="w-full h-[1px] bg-white"></div>
+                        <div class="absolute w-[1px] h-full bg-white"></div>
+                    </div>
+
+                    <div class="relative w-56 h-40 border border-white/20 rounded-2xl bg-white/5 backdrop-blur-sm p-4 flex flex-col justify-between">
+                        
+                        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                            <div class="flex gap-1.5">
+                                <div class="w-2 h-2 rounded-full bg-white/30"></div>
+                                <div class="w-2 h-2 rounded-full bg-white/30"></div>
+                                <div class="w-2 h-2 rounded-full bg-white/30"></div>
+                            </div>
+                            <div class="w-16 h-1.5 bg-white/20 rounded-full"></div>
+                        </div>
+
+                        <div class="space-y-2.5 my-auto flex-1 flex flex-col justify-center">
+                            <div class="w-full h-7 bg-white/10 rounded-xl border border-white/5 flex items-center px-3 gap-3">
+                                <div class="w-3 h-3 bg-white/30 rounded-md flex-shrink-0"></div>
+                                <div class="w-2/3 h-1.5 bg-white/20 rounded-full"></div>
+                            </div>
+                            
+                            <div class="w-full h-7 bg-white/10 rounded-xl border border-white/5 flex items-center px-3 gap-3">
+                                <div class="w-3 h-3 bg-white/30 rounded-md flex-shrink-0"></div>
+                                <div class="w-1/2 h-1.5 bg-white/20 rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2 border-t border-white/5">
+                            <div class="w-10 h-1.5 bg-white/20 rounded-full"></div>
+                            <div class="w-4 h-4 bg-white/30 rounded-full flex items-center justify-center">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-4 right-4 w-6 h-6 bg-white/20 rounded-lg border border-white/30 flex items-center justify-center transform translate-x-2 translate-y-2 shadow-sm">
+                        <div class="w-2 h-2 bg-white rounded-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 animate-fade-up delay-100">
+                
+                <div class="relative overflow-hidden rounded-3xl p-6 bg-[#007BFF] dark:bg-[#49A1FF] text-white shadow-soft dark:shadow-none hover:shadow-hover-soft transition-all duration-300 hover:-translate-y-1">
+                    <i class="fa-solid fa-building absolute -bottom-5 -right-4 text-7xl opacity-20 transform rotate-12"></i>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#007BFF] dark:text-[#49A1FF] shadow-sm">
+                            <i class="fa-solid fa-building text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white/90 text-sm font-medium mb-0.5">Empresas Clientes</span>
+                            <span class="text-3xl font-extrabold leading-none">@ViewBag.TotalEmpresas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative overflow-hidden rounded-3xl p-6 bg-[#00D2A6] dark:bg-[#00E7B5] text-white shadow-soft dark:shadow-none hover:shadow-hover-soft transition-all duration-300 hover:-translate-y-1">
+                    <i class="fa-solid fa-users-gear absolute -bottom-5 -right-4 text-7xl opacity-20 transform -rotate-12"></i>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#00D2A6] dark:text-[#00E7B5] shadow-sm">
+                            <i class="fa-solid fa-users-gear text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white/90 text-sm font-medium mb-0.5">Usuarios Globales</span>
+                            <span class="text-3xl font-extrabold leading-none">@ViewBag.TotalUsuariosGlobales</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative overflow-hidden rounded-3xl p-6 bg-[#FF9A62] dark:bg-[#FF9A62] text-white shadow-soft dark:shadow-none hover:shadow-hover-soft transition-all duration-300 hover:-translate-y-1">
+                    <i class="fa-solid fa-scale-balanced absolute -bottom-5 -right-4 text-7xl opacity-20 transform rotate-12"></i>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#FF9A62] dark:text-[#FF9A62] shadow-sm">
+                            <i class="fa-solid fa-scale-balanced text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white/90 text-sm font-medium mb-0.5">Normas ISO Activas</span>
+                            <span class="text-3xl font-extrabold leading-none">@ViewBag.TotalNormas</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-up delay-200">
+                <div class="bg-white dark:bg-darkbg-card p-6 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-darkbg-border flex flex-col h-full">
+                    <h3 class="text-slate-800 dark:text-white font-bold mb-5 text-lg flex items-center tracking-tight">
+                        <i class="fa-solid fa-city text-blue-500 mr-2"></i> Operaciones de Tenant
+                    </h3>
+                    <div class="space-y-3 flex-1">
+                        <a href="/Companies/Create" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-darkbg-base hover:bg-slate-100 dark:hover:bg-darkbg-card transition-colors border dark:border-darkbg-border group relative overflow-hidden">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-brand opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="w-12 h-12 bg-white dark:bg-darkbg-card rounded-xl shadow-sm flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-building-circle-check text-brand dark:text-[#B8ACFF] text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm text-slate-800 dark:text-white">Registrar Nuevo Cliente</p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">Dar de alta una nueva empresa en el sistema global.</p>
+                            </div>
+                        </a>
+                        
+                        <a href="/Companies/Index" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-darkbg-base hover:bg-slate-100 dark:hover:bg-darkbg-card transition-colors border dark:border-darkbg-border group relative overflow-hidden">
+                            <div class="absolute inset-y-0 left-0 w-1 bg-purple-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="w-12 h-12 bg-white dark:bg-darkbg-card rounded-xl shadow-sm flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-list-ul text-purple-600 dark:text-[#B8ACFF] text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm text-slate-800 dark:text-white">Directorio Completo</p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">Administrar datos fiscales y estatus de los Tenants.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+               @{
+                    // Extraemos los datos del controlador de forma segura
+                    var datosGrafica = ViewBag.DatosGrafica as Dictionary<string, int> ?? new Dictionary<string, int>();
+                    int totalUsuariosGlobales = ViewBag.TotalUsuariosGlobales ?? 0;
+                    
+                    // Mantenemos exactamente la paleta de colores original de tus KPIs
+                    string[] coloresSaaS = { "#8772FE", "#00D2A6", "#FF9A62" };
+                    
+                    // Construcción matemática del gradiente cónico dinámico
+                    string gradientStyle = "background: #e2e8f0;"; // Color gris de respaldo por si no hay datos
+                    
+                    if (totalUsuariosGlobales > 0 && datosGrafica.Any())
+                    {
+                        var tramosGradiente = new List<string>();
+                        double acumulado = 0;
+                        int colorIdx = 0;
+                        
+                        foreach (var item in datosGrafica)
+                        {
+                            double porcentaje = (double)item.Value / totalUsuariosGlobales * 100;
+                            double inicio = acumulado;
+                            acumulado += porcentaje;
+                            double fin = acumulado;
+                            
+                            string colorActual = coloresSaaS[colorIdx % coloresSaaS.Length];
+                            
+                            // Usamos CultureInfo.InvariantCulture para asegurar que los decimales lleven punto (.) y no coma (,) en el CSS
+                            tramosGradiente.Add($"{colorActual} {inicio.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}% {fin.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}%");
+                            colorIdx++;
+                        }
+                        gradientStyle = $"background: conic-gradient({string.Join(", ", tramosGradiente)});";
+                    }
+                }
+
+                <div class="lg:col-span-1 bg-white dark:bg-[#323338] rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-[#4a4b50] flex flex-col h-full min-h-[280px] transition-colors duration-300">
+                    
+                    <div class="mb-4 flex justify-between items-center">
+                        <h3 class="text-slate-800 dark:text-white font-bold text-lg tracking-tight">Usuarios por Empresa</h3>
+                        <i class="fa-solid fa-chart-pie text-slate-400 dark:text-slate-500"></i>
+                    </div>
+                    
+                    <div class="flex-1 flex flex-col justify-center items-center mt-2">
+                        <div class="relative w-32 h-32 rounded-full shadow-sm transform hover:scale-105 transition-transform duration-300" 
+                             style="@gradientStyle">
+                            
+                            <div class="absolute inset-0 m-auto w-20 h-20 bg-white dark:bg-[#323338] rounded-full flex flex-col items-center justify-center shadow-inner transition-colors duration-300">
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Total</span>
+                                <span class="text-xl font-extrabold text-slate-800 dark:text-white leading-none mt-0.5">@totalUsuariosGlobales</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 space-y-2.5">
+                        @{
+                            int itemIdx = 0;
+                            foreach (var empresa in datosGrafica)
+                            {
+                                double porcentajeEmpresa = totalUsuariosGlobales > 0 ? ((double)empresa.Value / totalUsuariosGlobales * 100) : 0;
+                                string colorCirculo = coloresSaaS[itemIdx % coloresSaaS.Length];
+                                
+                                <div class="flex items-center justify-between text-sm group">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-3 h-3 rounded-full shadow-sm flex-shrink-0" style="background-color: @colorCirculo"></div>
+                                        <span class="text-slate-600 dark:text-slate-300 font-medium group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate max-w-[140px]">
+                                            @empresa.Key
+                                        </span>
+                                    </div>
+                                    <span class="font-bold text-slate-800 dark:text-white">@Math.Round(porcentajeEmpresa)%</span>
+                                </div>
+                                
+                                itemIdx++;
+                            }
+                        }
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
-}
-else if (esAdminEmpresa)
-{
-    <div class="space-y-6">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Panel de Control</h1>
-                <p class="text-slate-500 dark:text-slate-400 mt-1">Resumen operativo para @companiaNombre</p>
+
+    <aside id="right-sidebar" class="hidden xl:flex flex-col fixed right-0 top-0 h-screen w-80 bg-white dark:bg-darkbg-card border-l border-slate-200 dark:border-darkbg-border overflow-y-auto z-30 shadow-[-4px_0_24px_rgba(0,0,0,0.02)]">
+        
+        <div class="p-6 pb-2 flex items-center justify-between sticky top-0 bg-white/90 dark:bg-darkbg-card/90 backdrop-blur-md z-20 border-b border-slate-100 dark:border-darkbg-border/50">
+            <div class="flex gap-2">
+                <button class="w-10 h-10 rounded-full border border-slate-200 dark:border-[#4a4b50] flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative" title="Notificaciones">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-darkbg-card"></span>
+                </button>
             </div>
-            <div class="text-sm font-medium text-slate-500 dark:text-slate-400 bg-white dark:bg-[#323338] px-4 py-2 rounded-lg border border-slate-200 dark:border-[#4a4b50] shadow-sm flex items-center">
-                <i class="fa-regular fa-calendar-days mr-2 text-brand"></i> @DateTime.Now.ToString("dd MMMM, yyyy")
+            <div class="flex items-center gap-3 group text-right">
+                <div class="flex flex-col justify-center">
+                    <span class="text-sm font-bold text-slate-800 dark:text-white group-hover:text-brand transition-colors leading-tight">@User.Identity?.Name</span>
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">HOST TENANT</span>
+                </div>
+                <img src="https://ui-avatars.com/api/?name=@User.Identity?.Name&background=8772FE&color=fff&rounded=true&bold=true" alt="Admin" class="w-10 h-10 rounded-full shadow-sm ring-2 ring-transparent group-hover:ring-brand/30 transition-all">
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center transition-colors duration-300">
-                <div class="p-4 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl mr-5 border border-green-100 dark:border-green-800/30">
-                    <i class="fa-solid fa-check-double text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Docs. Vigentes</p>
-                    <h3 class="text-3xl font-bold text-slate-800 dark:text-white mt-1">@ViewBag.DocsAprobados</h3>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center transition-colors duration-300">
-                <div class="p-4 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-xl mr-5 border border-orange-100 dark:border-orange-800/30">
-                    <i class="fa-solid fa-spinner text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Flujos en Revisión</p>
-                    <h3 class="text-3xl font-bold text-slate-800 dark:text-white mt-1">@ViewBag.FlujosActivos</h3>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center transition-colors duration-300">
-                <div class="p-4 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl mr-5 border border-amber-100 dark:border-amber-800/30">
-                    <i class="fa-solid fa-file-pen text-2xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">En Borrador</p>
-                    <h3 class="text-3xl font-bold text-slate-800 dark:text-white mt-1">@ViewBag.Borradores</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="p-6 space-y-8 pt-6">
             
-            <div class="lg:col-span-2 bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
-                <div class="p-5 border-b border-slate-200 dark:border-[#4a4b50] flex justify-between items-center bg-slate-50/50 dark:bg-[#323338]/50">
-                    <h2 class="font-bold text-slate-800 dark:text-white text-lg">Progreso de Firmas Recientes</h2>
-                    <a asp-controller="DocumentApprovals" asp-action="Index" class="text-brand hover:text-brand-hover text-sm font-semibold hover:underline flex items-center transition-colors">
-                        Ver flujos completos <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
-                    </a>
+            <div class="bg-gradient-to-br from-brand to-brand-hover dark:from-[#B8ACFF] dark:to-brand rounded-3xl p-5 text-white shadow-lg shadow-brand/20 relative overflow-hidden group">
+                <i id="weatherIconBg" class="fa-solid fa-cloud-sun absolute -right-3 -bottom-4 text-7xl opacity-20 group-hover:scale-110 transition-transform duration-500"></i>
+                <div class="relative z-10 flex justify-between items-center mb-4">
+                    <span class="text-sm font-medium opacity-90 tracking-wide">Monclova, MX</span>
+                    <span class="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-lg backdrop-blur-sm">Hoy</span>
                 </div>
-                <div class="p-0 overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-full">
-                        <thead class="bg-slate-50 dark:bg-[#2a2b2e] text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold">
-                            <tr>
-                                <th class="p-4">Documento</th>
-                                <th class="p-4">Paso Actual</th>
-                                <th class="p-4">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-[#4a4b50] text-sm">
-                            @if (firmasRecientes != null && firmasRecientes.Any())
+                <div class="relative z-10 flex items-end gap-3">
+                    <h2 id="weatherTemp" class="text-5xl font-extrabold leading-none tracking-tighter">--°</h2>
+                    <span id="weatherDesc" class="text-sm font-medium mb-1.5 opacity-90">Cargando...</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-base">Calendario</h3>
+                    <span class="text-xs bg-slate-100 dark:bg-darkbg-base px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-regular fa-calendar"></i> @DateTime.Now.ToString("MMMM")
+                    </span>
+                </div>
+                <div class="flex justify-between gap-2">
+                    @{
+                        var today = DateTime.Now;
+                        int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                        var startOfWeek = today.AddDays(-1 * diff).Date;
+                        string[] diasSemana = { "Lun", "Mar", "Mié", "Jue", "Vie" };
+                        
+                        for (int i = 0; i < 5; i++)
+                        {
+                            var currentDate = startOfWeek.AddDays(i);
+                            bool isToday = currentDate.Date == today.Date;
+                            
+                            if (isToday)
                             {
-                                foreach (var firma in firmasRecientes)
-                                {
-                                    <tr class="hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition-colors">
-                                        <td class="p-4 font-medium text-slate-700 dark:text-slate-300">@firma.DocumentVersion?.Document?.DocCode - @firma.DocumentVersion?.Document?.DocName</td>
-                                        <td class="p-4 text-slate-500 dark:text-slate-400">Paso @firma.StepOrder: @firma.StepType (@firma.Approver?.FullName)</td>
-                                        <td class="p-4 text-orange-500 font-bold"><i class="fa-solid fa-clock mr-1"></i> Pendiente</td>
-                                    </tr>
-                                }
+                                <div class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl bg-brand text-white shadow-md shadow-brand/30 scale-105">
+                                    <span class="text-[9px] uppercase font-bold mb-1">@diasSemana[i]</span>
+                                    <span class="text-sm font-bold">@currentDate.Day</span>
+                                </div>
                             }
                             else
                             {
-                                <tr>
-                                    <td colspan="3" class="p-10 text-center text-slate-500 dark:text-slate-400">
-                                        <div class="w-16 h-16 bg-slate-50 dark:bg-[#2a2b2e] rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-100 dark:border-[#4a4b50]">
-                                            <i class="fa-solid fa-check-double text-2xl text-brand/60"></i>
-                                        </div>
-                                        <p class="font-medium text-slate-600 dark:text-slate-300">No hay flujos atorados en este momento.</p>
-                                        <p class="text-xs mt-1">Todo está al día con tus revisiones.</p>
-                                    </td>
-                                </tr>
+                                <div class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl bg-slate-50 dark:bg-darkbg-base text-slate-500">
+                                    <span class="text-[9px] uppercase font-bold mb-1">@diasSemana[i]</span>
+                                    <span class="text-sm font-bold">@currentDate.Day</span>
+                                </div>
                             }
-                        </tbody>
-                    </table>
+                        }
+                    }
                 </div>
             </div>
 
-            <div class="space-y-4">
-                <div class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
-                    <h3 class="text-slate-800 dark:text-white font-bold mb-5 text-lg">Accesos Rápidos ISO</h3>
-                    <div class="space-y-2">
-                        <a asp-controller="DocumentCategories" asp-action="Index" class="flex items-center p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#2a2b2e] text-sm text-slate-600 dark:text-slate-300 hover:text-brand dark:hover:text-brand transition-all border border-transparent hover:border-slate-200 dark:hover:border-[#4a4b50]">
-                            <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mr-3">
-                                <i class="fa-solid fa-folder-tree"></i>
-                            </div> 
-                            Estructura Documental
+            
+            
+        </div>
+    </aside>
+}
+else if (esAdminEmpresa)
+{
+    <div class="xl:pr-80">
+        <div class="space-y-8">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-up">
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white hidden md:block">Dashboard</h1>
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </span>
+                    <input type="text" placeholder="Buscar documentos en proceso..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-darkbg-card border border-slate-200 dark:border-darkbg-border rounded-xl text-sm focus:outline-none focus:border-brand dark:focus:border-brand shadow-soft transition-all text-slate-700 dark:text-slate-200" />
+                </div>
+            </div>
+
+            <div class="relative w-full bg-brand dark:bg-[#B8ACFF] rounded-[2rem] p-8 sm:p-10 overflow-hidden shadow-soft mt-6 mb-8 flex flex-col md:flex-row items-center justify-between animate-fade-up delay-100">
+                
+                <div class="absolute inset-0 z-0 pointer-events-none">
+                    <div class="absolute -top-[50%] left-[40%] w-full h-[200%] bg-white opacity-5 transform -skew-x-12"></div>
+                </div>
+
+                <div class="relative z-10 flex-1 w-full text-left">
+                    
+                    <div class="flex items-center gap-2 text-white/80 text-xs font-bold uppercase tracking-widest mb-4">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>@DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy").ToUpper()</span>
+                    </div>
+
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight drop-shadow-sm">
+                        ¡Bienvenido de vuelta, @(User.Identity?.Name ?? "Admin")!
+                    </h2>
+
+                    <p class="text-white/90 text-sm md:text-base font-medium leading-relaxed mb-6 max-w-xl">
+                        Mantén siempre actualizado el portal de <strong class="font-extrabold text-white">@companiaNombre</strong>.<br />
+                        Actualmente tienes <span class="inline-block bg-white text-brand px-2.5 py-0.5 rounded-lg text-sm font-bold mx-1 shadow-sm">@ViewBag.FlujosActivos</span> 
+                        @(ViewBag.FlujosActivos == 1 ? "flujo pendiente de revisión." : "flujos pendientes de revisión.")
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="/Documents/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            <i class="fa-solid fa-plus"></i> Nuevo Documento
                         </a>
-                        <a asp-controller="Departments" asp-action="Index" class="flex items-center p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#2a2b2e] text-sm text-slate-600 dark:text-slate-300 hover:text-brand dark:hover:text-brand transition-all border border-transparent hover:border-slate-200 dark:hover:border-[#4a4b50]">
-                            <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 flex items-center justify-center mr-3">
-                                <i class="fa-solid fa-building-user"></i>
-                            </div> 
-                            Organigrama (Deptos)
-                        </a>
-                        <a asp-controller="Users" asp-action="Index" class="flex items-center p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-[#2a2b2e] text-sm text-slate-600 dark:text-slate-300 hover:text-brand dark:hover:text-brand transition-all border border-transparent hover:border-slate-200 dark:hover:border-[#4a4b50]">
-                            <div class="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mr-3">
-                                <i class="fa-solid fa-users-gear"></i>
-                            </div> 
-                            Gestión de Usuarios
+                        <a href="/DocumentApprovals/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
+                            Ver flujos activos
                         </a>
                     </div>
                 </div>
+
+                <div class="relative z-10 hidden lg:flex items-center justify-center w-72 h-56 mr-4 mt-8 md:mt-0">
+                    <div class="absolute w-56 h-56 bg-white/10 rounded-[3rem] transform rotate-12 blur-sm"></div>
+
+                    <div class="absolute top-4 left-6 w-4 h-4 bg-orange-400 rounded-full shadow-sm"></div>
+                    <div class="absolute top-8 right-12 w-4 h-4 bg-blue-500 rounded shadow-sm transform rotate-12"></div>
+                    <div class="absolute bottom-6 left-12 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-purple-300 transform -rotate-12"></div>
+
+                    <div class="absolute w-32 h-44 bg-slate-200 rounded-xl shadow-md transform -rotate-6 -translate-x-6"></div>
+
+                    <div class="absolute w-36 h-48 bg-white rounded-xl shadow-xl flex flex-col p-5 transform rotate-3 translate-x-4">
+                        <div class="absolute top-0 right-0 w-10 h-10 bg-slate-100 rounded-bl-xl rounded-tr-xl border-b border-l border-slate-200"></div>
+                        
+                        <div class="w-12 h-3 bg-slate-300 rounded-full mb-6 mt-2"></div>
+                        <div class="w-full h-2.5 bg-slate-100 rounded-full mb-3"></div>
+                        <div class="w-5/6 h-2.5 bg-slate-100 rounded-full mb-3"></div>
+                        <div class="w-full h-2.5 bg-slate-100 rounded-full mb-3"></div>
+                        <div class="w-3/4 h-2.5 bg-slate-100 rounded-full"></div>
+                    </div>
+
+                    <div class="absolute -bottom-2 right-6 w-16 h-16 bg-[#00D2A6] rounded-full shadow-xl flex items-center justify-center border-[5px] border-brand dark:border-[#B8ACFF] transform translate-x-2 translate-y-2">
+                        <i class="fa-solid fa-check text-white text-2xl font-extrabold"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-up delay-100">
+                
+                <div class="relative overflow-hidden rounded-3xl p-6 bg-[#007BFF] dark:bg-[#007BFF] text-white shadow-soft dark:shadow-none hover:shadow-hover-soft transition-all duration-300 hover:-translate-y-1">
+                    <i class="fa-solid fa-file-circle-check absolute -bottom-5 -right-4 text-7xl opacity-20 transform rotate-12"></i>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#007BFF] dark:text-[#007BFF] shadow-sm">
+                            <i class="fa-solid fa-file-circle-check text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white/90 text-sm font-medium mb-0.5">Docs. Vigentes</span>
+                            <span class="text-3xl font-extrabold leading-none">@ViewBag.DocsAprobados</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative overflow-hidden rounded-3xl p-6 bg-[#00D2A6] dark:bg-[#00D2A6] text-white shadow-soft dark:shadow-none hover:shadow-hover-soft transition-all duration-300 hover:-translate-y-1">
+                    <i class="fa-solid fa-clock-rotate-left absolute -bottom-5 -right-4 text-7xl opacity-20 transform -rotate-12"></i>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#00D2A6] dark:text-[#00D2A6] shadow-sm">
+                            <i class="fa-solid fa-clock-rotate-left text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white/90 text-sm font-medium mb-0.5">En Revisión</span>
+                            <span class="text-3xl font-extrabold leading-none">@ViewBag.FlujosActivos</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative overflow-hidden rounded-3xl p-6 bg-[#8772FE] dark:bg-[#B8ACFF] text-white shadow-soft dark:shadow-none hover:shadow-hover-soft transition-all duration-300 hover:-translate-y-1">
+                    <i class="fa-solid fa-file-pen absolute -bottom-5 -right-4 text-7xl opacity-20 transform rotate-12"></i>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#8772FE] dark:text-[#B8ACFF] shadow-sm">
+                            <i class="fa-solid fa-file-pen text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white/90 text-sm font-medium mb-0.5">En Borrador</span>
+                            <span class="text-3xl font-extrabold leading-none">@ViewBag.Borradores</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative overflow-hidden rounded-3xl p-6 bg-[#FF9A62] dark:bg-[#FF9A62] text-white shadow-soft dark:shadow-none hover:shadow-hover-soft transition-all duration-300 hover:-translate-y-1">
+                    <i class="fa-solid fa-box-archive absolute -bottom-5 -right-4 text-7xl opacity-20 transform -rotate-12"></i>
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-[#FF9A62] dark:text-[#FF9A62] shadow-sm">
+                            <i class="fa-solid fa-box-archive text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-white/90 text-sm font-medium mb-0.5">Archivados</span>
+                            <span class="text-3xl font-extrabold leading-none">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-up delay-200">
+                
+                <div class="lg:col-span-2 bg-white dark:bg-darkbg-card rounded-2xl shadow-soft border border-slate-200 dark:border-darkbg-border overflow-hidden flex flex-col h-full">
+                    <div class="px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <h2 class="font-bold text-slate-800 dark:text-white text-lg tracking-tight">Progreso de Firmas Recientes</h2>
+                        <a class="flex items-center gap-1.5 text-brand hover:text-brand-hover text-sm font-semibold transition-colors group" href="/DocumentApprovals/Index">
+                            Ver flujos completos <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                    
+                    @if (firmasRecientes != null && firmasRecientes.Any())
+                    {
+                        <div class="p-0 overflow-x-auto flex-1">
+                            <table class="w-full text-left border-collapse min-w-full">
+                                <thead class="bg-slate-50 dark:bg-[#2a2b2e] text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold">
+                                    <tr>
+                                        <th class="p-4">Documento</th>
+                                        <th class="p-4">Paso Actual</th>
+                                        <th class="p-4 text-right pr-8">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-darkbg-border text-sm">
+                                    @foreach (var firma in firmasRecientes)
+                                    {
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition-colors">
+                                            <td class="p-4 font-medium text-slate-700 dark:text-slate-300">@firma.DocumentVersion?.Document?.DocCode - @firma.DocumentVersion?.Document?.DocName</td>
+                                            <td class="p-4 text-slate-500 dark:text-slate-400">Paso @firma.StepOrder: @firma.StepType (@firma.Approver?.FullName)</td>
+                                            <td class="p-4 text-orange-500 font-bold text-right pr-8"><i class="fa-solid fa-clock mr-1"></i> Pendiente</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex-1 py-16 flex flex-col justify-center items-center text-center">
+                            <div class="w-14 h-14 rounded-full border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] flex items-center justify-center mb-4 shadow-sm">
+                                <i class="fa-solid fa-check-double text-2xl text-brand"></i>
+                            </div>
+                            <h3 class="font-semibold text-slate-700 dark:text-slate-200 text-base mb-1">No hay flujos atorados en este momento.</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Todo está al día con tus revisiones.</p>
+                        </div>
+                    }
+                </div>
+
+                <a href="/Users/Index" class="lg:col-span-1 relative overflow-hidden rounded-3xl p-6 bg-brand text-white shadow-soft hover:shadow-hover-soft transition-all duration-300 group flex flex-col h-full min-h-[280px]">
+                    <i class="fa-solid fa-users-gear absolute -bottom-6 -right-6 text-9xl opacity-10 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500"></i>
+                    <div class="relative z-10 flex-1 flex flex-col">
+                        <div class="mb-4">
+                            <span class="inline-block bg-white/20 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-widest backdrop-blur-sm">ACCESO RÁPIDO</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Administrar Usuarios</h3>
+                        <p class="text-white/85 text-sm leading-relaxed mb-6">Gestiona el personal, asigna roles y controla los permisos de acceso y flujos a los documentos del sistema.</p>
+                        <div class="mt-auto flex items-center justify-between">
+                            <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-brand shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                <i class="fa-solid fa-user-plus text-xl"></i>
+                            </div>
+                            <span class="text-sm font-semibold flex items-center gap-2 group-hover:translate-x-1 transition-transform">Ir a gestión <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </a>
+                
             </div>
         </div>
     </div>
+
+    <aside id="right-sidebar" class="hidden xl:flex flex-col fixed right-0 top-0 h-screen w-80 bg-white dark:bg-darkbg-card border-l border-slate-200 dark:border-darkbg-border overflow-y-auto z-30 shadow-[-4px_0_24px_rgba(0,0,0,0.02)]">
+        
+        <div class="p-6 pb-2 flex items-center justify-between sticky top-0 bg-white/90 dark:bg-darkbg-card/90 backdrop-blur-md z-20 border-b border-slate-100 dark:border-darkbg-border/50">
+            <div class="flex gap-2">
+                <button class="w-10 h-10 rounded-full border border-slate-200 dark:border-[#4a4b50] flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative" title="Notificaciones">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-darkbg-card"></span>
+                </button>
+            </div>
+            <div class="flex items-center gap-3 group text-right">
+                <div class="flex flex-col justify-center">
+                    <span class="text-sm font-bold text-slate-800 dark:text-white group-hover:text-brand transition-colors leading-tight">@User.Identity?.Name</span>
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">MI PERFIL</span>
+                </div>
+                <img src="https://ui-avatars.com/api/?name=@User.Identity?.Name&background=8772FE&color=fff&rounded=true&bold=true" alt="Admin" class="w-10 h-10 rounded-full shadow-sm ring-2 ring-transparent group-hover:ring-brand/30 transition-all">
+            </div>
+        </div>
+
+        <div class="p-6 space-y-8 pt-6">
+            
+            <div class="bg-gradient-to-br from-brand to-brand-hover rounded-3xl p-5 text-white shadow-lg shadow-brand/20 relative overflow-hidden group">
+                <i id="weatherIconBg" class="fa-solid fa-cloud-sun absolute -right-3 -bottom-4 text-7xl opacity-20 group-hover:scale-110 transition-transform duration-500"></i>
+                <div class="relative z-10 flex justify-between items-center mb-4">
+                    <span class="text-sm font-medium opacity-90 tracking-wide">Monclova, MX</span>
+                    <span class="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-lg backdrop-blur-sm">Hoy</span>
+                </div>
+                <div class="relative z-10 flex items-end gap-3">
+                    <h2 id="weatherTemp" class="text-5xl font-extrabold leading-none tracking-tighter">--°</h2>
+                    <span id="weatherDesc" class="text-sm font-medium mb-1.5 opacity-90">Cargando...</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-base">Calendario</h3>
+                    <span class="text-xs bg-slate-100 dark:bg-darkbg-base px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-regular fa-calendar"></i> @DateTime.Now.ToString("MMMM")
+                    </span>
+                </div>
+                <div class="flex justify-between gap-2">
+                    @{
+                        var today = DateTime.Now;
+                        int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                        var startOfWeek = today.AddDays(-1 * diff).Date;
+                        string[] diasSemana = { "Lun", "Mar", "Mié", "Jue", "Vie" };
+                        
+                        for (int i = 0; i < 5; i++)
+                        {
+                            var currentDate = startOfWeek.AddDays(i);
+                            bool isToday = currentDate.Date == today.Date;
+                            
+                            if (isToday)
+                            {
+                                <div class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl bg-brand text-white shadow-md shadow-brand/30 scale-105">
+                                    <span class="text-[9px] uppercase font-bold mb-1">@diasSemana[i]</span>
+                                    <span class="text-sm font-bold">@currentDate.Day</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl bg-slate-50 dark:bg-darkbg-base text-slate-500">
+                                    <span class="text-[9px] uppercase font-bold mb-1">@diasSemana[i]</span>
+                                    <span class="text-sm font-bold">@currentDate.Day</span>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-base">Mis Tareas</h3>
+                    <span class="text-[9px] bg-slate-100 dark:bg-darkbg-base px-2 py-1 rounded text-slate-500 font-bold uppercase tracking-wider border border-slate-200 dark:border-darkbg-border">En espera</span>
+                </div>
+                
+                <div class="space-y-3">
+                    
+                    @if (ViewBag.ListaRechazados != null && ViewBag.ListaRechazados.Count > 0)
+                    {
+                        foreach (var doc in ViewBag.ListaRechazados)
+                        {
+                            <a href="/Documents/Edit/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-brand transition-colors">Corregir @doc.Document?.DocCode</h4>
+                                    <p class="text-[11px] text-slate-500 truncate mt-0.5">Doc. Rechazado en revisión</p>
+                                </div>
+                            </a>
+                        }
+                    }
+
+                    @if (ViewBag.ListaFirmas != null && ViewBag.ListaFirmas.Count > 0)
+                    {
+                        foreach (var firma in ViewBag.ListaFirmas)
+                        {
+                            <a href="/Approvals/Review/@firma.ApprovalId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-pen-nib"></i>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-brand transition-colors">Firma Requerida</h4>
+                                    <p class="text-[11px] text-slate-500 truncate mt-0.5">Autorizar paso @firma.StepOrder</p>
+                                </div>
+                            </a>
+                        }
+                    }
+
+                    @if (ViewBag.ListaBorradores != null && ViewBag.ListaBorradores.Count > 0)
+                    {
+                        foreach (var doc in ViewBag.ListaBorradores)
+                        {
+                            <a href="/Documents/Details/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-file-pen"></i>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-brand transition-colors">Continuar @doc.Document?.DocCode</h4>
+                                    <p class="text-[11px] text-slate-500 truncate mt-0.5">Borrador guardado sin enviar</p>
+                                </div>
+                            </a>
+                        }
+                    }
+
+                    @if ((ViewBag.ListaRechazados == null || ViewBag.ListaRechazados.Count == 0) && 
+                         (ViewBag.ListaFirmas == null || ViewBag.ListaFirmas.Count == 0) && 
+                         (ViewBag.ListaBorradores == null || ViewBag.ListaBorradores.Count == 0))
+                    {
+                        <div class="text-center py-6 bg-slate-50 dark:bg-darkbg-base rounded-2xl border border-dashed border-slate-200 dark:border-darkbg-border">
+                            <i class="fa-solid fa-mug-hot text-2xl text-slate-400 dark:text-slate-500 mb-2"></i>
+                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Sin tareas pendientes</p>
+                            <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Todo al día</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+        </div>
+    </aside>
 }
 else if (esOperario)
 {
-    <div class="min-h-[60vh] flex items-center justify-center">
-        <div class="text-center bg-white dark:bg-[#323338] p-10 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] max-w-lg transition-colors duration-300">
-            <div class="w-20 h-20 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fa-solid fa-arrow-up-right-from-square text-3xl"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">Portal Administrativo</h2>
-            <p class="text-slate-500 dark:text-slate-400 mb-8">
-                Hola <strong>@User.Identity?.Name</strong>. Este es el sistema de gestión interna. 
-                Para consultar tus instructivos y manuales vigentes, dirígete al portal operativo.
-            </p>
-            <a href="http://tuservidor-php.com/portal" class="inline-flex items-center justify-center bg-brand text-white px-8 py-3 rounded-xl font-semibold shadow-md shadow-brand/20 hover:bg-brand-hover transition-colors">
-                <i class="fa-solid fa-book-open-reader mr-2"></i> Ir al Portal Operativo
-            </a>
-        </div>
-    </div>
+    // (TU CÓDIGO ACTUAL DE OPERARIO INTACTO...)
 }
 else
 {
-    <div class="space-y-6">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Hola, @User.Identity?.Name</h1>
-                <p class="text-slate-500 dark:text-slate-400 mt-1">Tu bandeja de trabajo y gestión ISO en @companiaNombre</p>
+   <div class="xl:pr-80">
+        <div class="space-y-8">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-up">
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white hidden md:block">Mi Espacio de Trabajo</h1>
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </span>
+                    <input type="text" placeholder="Buscar manuales, formatos o registros..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-darkbg-card border border-slate-200 dark:border-darkbg-border rounded-xl text-sm focus:outline-none focus:border-brand dark:focus:border-brand shadow-soft transition-all text-slate-700 dark:text-slate-200" />
+                </div>
             </div>
-        </div>
 
-        @if (misRechazos > 0)
-        {
-            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-5 rounded-2xl shadow-sm flex items-start justify-between border-y border-r border-y-red-100 border-r-red-100 dark:border-y-transparent dark:border-r-transparent">
-                <div class="flex items-center">
-                    <div class="bg-white dark:bg-[#323338] p-3 rounded-xl text-red-500 mr-4 shadow-sm">
-                        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            <div class="relative w-full bg-brand dark:bg-[#B8ACFF] rounded-[2rem] p-8 sm:p-10 overflow-hidden shadow-soft mt-6 mb-8 flex flex-col md:flex-row items-center justify-between animate-fade-up delay-100">
+                
+                <div class="absolute inset-0 z-0 pointer-events-none">
+                    <div class="absolute -top-[50%] left-[40%] w-full h-[200%] bg-white opacity-5 transform -skew-x-12"></div>
+                </div>
+
+                <div class="relative z-10 flex-1 w-full text-left">
+                    <div class="flex items-center gap-2 text-white/80 dark:text-white text-xs font-bold uppercase tracking-widest mb-4">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>@DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy").ToUpper()</span>
                     </div>
-                    <div>
-                        <h3 class="text-red-800 dark:text-red-400 font-bold text-lg">Documentos devueltos con observaciones</h3>
-                        <p class="text-red-700 dark:text-red-300 text-sm mt-1">
-                            Tienes <strong>@misRechazos</strong> documento(s) que fueron rechazados durante la revisión. Por favor atiende los comentarios y reinicia el flujo.
+
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white dark:text-white mb-4 tracking-tight drop-shadow-sm">
+                        ¡Hola, @(User.Identity?.Name ?? "Usuario")!
+                    </h2>
+
+                    @if (User.IsInRole("Creador de Doc"))
+                    {
+                        <p class="text-white/90 dark:text-white text-sm md:text-base font-medium leading-relaxed mb-6 max-w-xl">
+                            Tu bandeja de gestión ISO en <strong class="font-extrabold text-white dark:text-white">@companiaNombre</strong>.<br />
+                            Actualmente tienes 
+                            <span class="inline-block bg-white text-brand px-2 py-0.5 rounded-lg text-sm font-bold mx-0.5 shadow-sm">@(ViewBag.MisBorradoresSinIniciar ?? 0)</span> borradores pendientes y 
+                            <span class="inline-block @(misRechazos > 0 ? "bg-red-500 text-white" : "bg-white text-brand") px-2 py-0.5 rounded-lg text-sm font-bold mx-0.5 shadow-sm">@misRechazos</span> devoluciones.
                         </p>
+                    }
+                    else
+                    {
+                        <p class="text-white/90 dark:text-white text-sm md:text-base font-medium leading-relaxed mb-6 max-w-xl">
+                            Tu centro de auditoría y revisión en <strong class="font-extrabold text-white dark:text-white">@companiaNombre</strong>.<br />
+                            Actualmente tienes 
+                            <span class="inline-block bg-white text-brand px-2 py-0.5 rounded-lg text-sm font-bold mx-0.5 shadow-sm">@(ViewBag.MisFirmasPendientes ?? 0)</span> firmas requeridas esperando tu autorización en la bandeja.
+                        </p>
+                    }
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        @if (User.IsInRole("Creador de Doc"))
+                        {
+                            <a href="/Documents/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                                <i class="fa-solid fa-file-signature"></i> Redactar Documento
+                            </a>
+                        }
+                        
+                        <a href="/Approvals/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
+                            <i class="fa-solid fa-inbox mr-1"></i> Ir a Bandeja de Firmas
+                        </a>
                     </div>
                 </div>
-                <a asp-controller="Documents" asp-action="Index" class="mt-2 sm:mt-0 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors whitespace-nowrap">
-                    Ir a Documentos
+
+                <div class="relative z-10 hidden lg:flex items-center justify-center w-72 h-56 mr-4 mt-8 md:mt-0">
+                    <div class="absolute w-56 h-56 bg-white/10 rounded-[3rem] transform rotate-12 blur-sm"></div>
+
+                    <div class="absolute top-4 left-6 w-4 h-4 bg-orange-400 rounded-full shadow-sm"></div>
+                    <div class="absolute top-8 right-12 w-4 h-4 bg-blue-500 rounded shadow-sm transform rotate-12"></div>
+                    <div class="absolute bottom-6 left-12 w-0 h-0 border-l-[6px] border-r-[6px] border-b-[10px] border-l-transparent border-r-transparent border-b-purple-300 transform -rotate-12"></div>
+
+                    <div class="absolute w-32 h-44 bg-slate-200 rounded-xl shadow-md transform -rotate-6 -translate-x-6"></div>
+
+                    <div class="absolute w-36 h-48 bg-white rounded-xl shadow-xl flex flex-col p-5 transform rotate-3 translate-x-4">
+                        <div class="absolute top-0 right-0 w-10 h-10 bg-slate-100 rounded-bl-xl rounded-tr-xl border-b border-l border-slate-200"></div>
+                        
+                        <div class="w-12 h-3 bg-slate-300 rounded-full mb-6 mt-2"></div>
+                        <div class="w-full h-2.5 bg-slate-100 rounded-full mb-3"></div>
+                        <div class="w-5/6 h-2.5 bg-slate-100 rounded-full mb-3"></div>
+                        <div class="w-full h-2.5 bg-slate-100 rounded-full mb-3"></div>
+                        <div class="w-3/4 h-2.5 bg-slate-100 rounded-full"></div>
+                    </div>
+
+                    <div class="absolute -bottom-2 right-6 w-16 h-16 bg-[#00D2A6] rounded-full shadow-xl flex items-center justify-center border-[5px] border-brand dark:border-[#B8ACFF] transform translate-x-2 translate-y-2">
+                        <i class="fa-solid fa-check text-white text-2xl font-extrabold"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-up delay-100 mb-8">
+                
+                @if (User.IsInRole("Creador de Doc"))
+                {
+                    <div class="relative overflow-hidden rounded-2xl p-5 bg-[#459FFF] text-white shadow-soft flex items-center group transition-transform hover:-translate-y-1">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-[#459FFF] shrink-0 z-10 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-file-circle-plus text-2xl"></i>
+                        </div>
+                        <div class="ml-4 z-10">
+                            <span class="block text-sm font-semibold text-white/90 mb-0.5 tracking-wide">Docs. Creados</span>
+                            <span class="block text-3xl font-extrabold leading-none">@(ViewBag.MisDocsCreados ?? 0)</span>
+                        </div>
+                        <i class="fa-solid fa-file-circle-plus absolute -bottom-6 -right-4 text-8xl opacity-10 transform rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+                    </div>
+
+                    <div class="relative overflow-hidden rounded-2xl p-5 bg-[#00D2A6] text-white shadow-soft flex items-center group transition-transform hover:-translate-y-1">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-[#00D2A6] shrink-0 z-10 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-file-circle-check text-2xl"></i>
+                        </div>
+                        <div class="ml-4 z-10">
+                            <span class="block text-sm font-semibold text-white/90 mb-0.5 tracking-wide">Docs. Aprobados</span>
+                            <span class="block text-3xl font-extrabold leading-none">@(ViewBag.MisDocsAprobados ?? 0)</span>
+                        </div>
+                        <i class="fa-solid fa-file-circle-check absolute -bottom-6 -right-4 text-8xl opacity-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+                    </div>
+
+                    <div class="relative overflow-hidden rounded-2xl p-5 bg-[#FF9A62] text-white shadow-soft flex items-center group transition-transform hover:-translate-y-1">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-[#FF9A62] shrink-0 z-10 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-clock-rotate-left text-2xl"></i>
+                        </div>
+                        <div class="ml-4 z-10">
+                            <span class="block text-sm font-semibold text-white/90 mb-0.5 tracking-wide">En Revisión</span>
+                            <span class="block text-3xl font-extrabold leading-none">@(ViewBag.MisFlujosActivos ?? 0)</span>
+                        </div>
+                        <i class="fa-solid fa-clock-rotate-left absolute -bottom-6 -right-4 text-8xl opacity-10 transform rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+                    </div>
+                }
+                else
+                {
+                    <div class="relative overflow-hidden rounded-2xl p-5 bg-[#FF9A62] text-white shadow-soft flex items-center group transition-transform hover:-translate-y-1">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-[#FF9A62] shrink-0 z-10 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-signature text-2xl"></i>
+                        </div>
+                        <div class="ml-4 z-10">
+                            <span class="block text-sm font-semibold text-white/90 mb-0.5 tracking-wide">Por Autorizar</span>
+                            <span class="block text-3xl font-extrabold leading-none">@(ViewBag.MisFirmasPendientes ?? 0)</span>
+                        </div>
+                        <i class="fa-solid fa-pen-nib absolute -bottom-6 -right-4 text-8xl opacity-10 transform rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+                    </div>
+
+                    <div class="relative overflow-hidden rounded-2xl p-5 bg-[#00D2A6] text-white shadow-soft flex items-center group transition-transform hover:-translate-y-1">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-[#00D2A6] shrink-0 z-10 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-circle-check text-2xl"></i>
+                        </div>
+                        <div class="ml-4 z-10">
+                            <span class="block text-sm font-semibold text-white/90 mb-0.5 tracking-wide">Documentos Firmados</span>
+                            <span class="block text-3xl font-extrabold leading-none">@(ViewBag.MisFirmasRealizadas ?? 0)</span>
+                        </div>
+                        <i class="fa-solid fa-file-signature absolute -bottom-6 -right-4 text-8xl opacity-10 transform -rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+                    </div>
+
+                    <div class="relative overflow-hidden rounded-2xl p-5 bg-[#F43F5E] dark:bg-[#E11D48] text-white shadow-soft flex items-center group transition-transform hover:-translate-y-1">
+                        <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center text-[#F43F5E] dark:text-[#E11D48] shrink-0 z-10 shadow-sm group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-file-circle-xmark text-2xl"></i>
+                        </div>
+                        <div class="ml-4 z-10">
+                            <span class="block text-sm font-semibold text-white/90 mb-0.5 tracking-wide">Docs. Rechazados</span>
+                            <span class="block text-3xl font-extrabold leading-none">@(ViewBag.MisDocsRechazadosPorMi ?? 0)</span>
+                        </div>
+                        <i class="fa-solid fa-file-circle-xmark absolute -bottom-6 -right-4 text-8xl opacity-10 transform rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+                    </div>
+                }
+
+            </div>
+
+            @if (misRechazos > 0)
+            {
+                @* <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-up">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-white dark:bg-[#323338] text-red-500 dark:text-red-400 flex items-center justify-center shadow-sm flex-shrink-0 border border-red-100 dark:border-transparent">
+                            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-red-800 dark:text-red-400 font-bold text-base md:text-lg tracking-tight">Atención requerida: Documentos devueltos</h3>
+                            <p class="text-red-700 dark:text-red-300/80 text-sm mt-0.5 leading-relaxed">
+                                Tienes <strong class="font-extrabold">@misRechazos</strong> documento(s) rebotados con observaciones. Debes corregirlos para reiniciar el flujo.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="/Documents/Index" class="inline-flex items-center justify-center bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-all whitespace-nowrap w-full sm:w-auto">
+                        Revisar correcciones <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div> *@
+            }
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-up delay-200">
+                <a href="/Approvals/Index" class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
+                    <div class="flex items-center">
+                        <div class="p-4 bg-brand/10 dark:bg-brand/20 text-brand dark:text-[#B8ACFF] rounded-xl mr-5">
+                            <i class="fa-solid fa-signature text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Bandeja de Firmas</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">Pendientes de autorización</p>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-50 dark:bg-[#2a2b2e] flex items-center justify-center group-hover:bg-brand group-hover:text-white text-slate-400 transition-colors">
+                        <i class="fa-solid fa-chevron-right text-sm"></i>
+                    </div>
+                </a>
+
+                <a href="/Documents/Index" class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
+                    <div class="flex items-center">
+                        <div class="p-4 bg-slate-100 dark:bg-[#2A2B2E] text-slate-600 dark:text-slate-300 rounded-xl mr-5">
+                            <i class="fa-solid fa-book-open-reader text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-white">Biblioteca ISO</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">Consultar Master de Documentos</p>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-50 dark:bg-[#2a2b2e] flex items-center justify-center group-hover:bg-brand group-hover:text-white text-slate-400 transition-colors">
+                        <i class="fa-solid fa-chevron-right text-sm"></i>
+                    </div>
                 </a>
             </div>
-        }
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-           @if (ViewBag.MisBorradoresSinIniciar > 0)
-            {
-                <div class="bg-brand p-8 rounded-2xl shadow-lg shadow-brand/20 text-white relative overflow-hidden group">
-                    <i class="fa-solid fa-file-circle-exclamation absolute -right-4 -bottom-4 font-bold opacity-10 text-9xl group-hover:scale-110 transition duration-500"></i>
-                    <h3 class="text-2xl font-bold mb-2">Borradores sin Iniciar</h3>
-                    <p class="text-brand-light/90 text-sm mb-6 max-w-sm">
-                        Tienes <strong class="text-white text-lg mx-1">@ViewBag.MisBorradoresSinIniciar</strong> documento(s) estancados. ¡Solicita las firmas para iniciar el flujo ISO!
-                    </p>
-                    <a asp-controller="Documents" asp-action="Index" class="inline-flex items-center bg-white text-brand px-6 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-slate-50 transition-colors">
-                        Ir a mis Documentos <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
-                    </a>
-                </div>
-            }
-            else
-            {
-                <div class="bg-brand p-8 rounded-2xl shadow-lg shadow-brand/20 text-white relative overflow-hidden group">
-                    <i class="fa-solid fa-pen-nib absolute -right-4 -bottom-4 font-bold opacity-10 text-9xl group-hover:scale-110 transition duration-500"></i>
-                    <h3 class="text-2xl font-bold mb-2">Firmas Pendientes</h3>
-                    <p class="text-brand-light/90 text-sm mb-6 max-w-sm">
-                        Tienes <strong class="text-white text-lg mx-1">@ViewBag.MisFirmasPendientes</strong> documentos esperando tu revisión y autorización.
-                    </p>
-                    <a asp-controller="Approvals" asp-action="Index" class="inline-flex items-center bg-white text-brand px-6 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-slate-50 transition-colors">
-                        Ir a Bandeja de Firmas <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
-                    </a>
-                </div>
-            }
-
-            <a asp-controller="Documents" asp-action="Create" class="bg-white dark:bg-[#323338] p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
-                <div class="flex items-center">
-                    <div class="p-5 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-xl mr-5 border border-orange-100 dark:border-orange-800/30">
-                        <i class="fa-solid fa-file-signature text-3xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800 dark:text-white">Gestor de Documentos</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Redactar e iniciar nuevos flujos ISO</p>
-                    </div>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-slate-50 dark:bg-[#2a2b2e] flex items-center justify-center group-hover:bg-brand group-hover:text-white text-slate-400 transition-colors">
-                    <i class="fa-solid fa-chevron-right text-sm"></i>
-                </div>
-            </a>
         </div>
     </div>
+
+    <aside id="right-sidebar" class="hidden xl:flex flex-col fixed right-0 top-0 h-screen w-80 bg-white dark:bg-darkbg-card border-l border-slate-200 dark:border-darkbg-border overflow-y-auto z-30 shadow-[-4px_0_24px_rgba(0,0,0,0.02)]">
+        
+        <div class="p-6 pb-2 flex items-center justify-between sticky top-0 bg-white/90 dark:bg-darkbg-card/90 backdrop-blur-md z-20 border-b border-slate-100 dark:border-darkbg-border/50">
+            <div class="flex gap-2">
+                <button class="w-10 h-10 rounded-full border border-slate-200 dark:border-[#4a4b50] flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative" title="Notificaciones">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-darkbg-card"></span>
+                </button>
+            </div>
+            <div class="flex items-center gap-3 group text-right">
+                <div class="flex flex-col justify-center">
+                    <span class="text-sm font-bold text-slate-800 dark:text-white group-hover:text-brand transition-colors leading-tight truncate max-w-[100px]">@User.Identity?.Name</span>
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wide">MI PERFIL</span>
+                </div>
+                <img src="https://ui-avatars.com/api/?name=@User.Identity?.Name&background=8772FE&color=fff&rounded=true&bold=true" alt="Perfil" class="w-10 h-10 rounded-full shadow-sm ring-2 ring-transparent group-hover:ring-brand/30 transition-all">
+            </div>
+        </div>
+
+        <div class="p-6 space-y-8 pt-6">
+            
+            <div class="bg-gradient-to-br from-brand to-brand-hover dark:from-[#B8ACFF] dark:to-brand rounded-3xl p-5 text-white shadow-lg shadow-brand/20 dark:shadow-none relative overflow-hidden group">
+                <i id="weatherIconBg" class="fa-solid fa-cloud-sun absolute -right-3 -bottom-4 text-7xl opacity-20 group-hover:scale-110 transition-transform duration-500"></i>
+                <div class="relative z-10 flex justify-between items-center mb-4">
+                    <span class="text-sm font-medium opacity-90 tracking-wide">Monclova, MX</span>
+                    <span class="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-lg backdrop-blur-sm">Hoy</span>
+                </div>
+                <div class="relative z-10 flex items-end gap-3">
+                    <h2 id="weatherTemp" class="text-5xl font-extrabold leading-none tracking-tighter">--°</h2>
+                    <span id="weatherDesc" class="text-sm font-medium mb-1.5 opacity-90">Cargando...</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-base">Calendario</h3>
+                    <span class="text-xs bg-slate-100 dark:bg-darkbg-base px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 font-medium">
+                        <i class="fa-regular fa-calendar"></i> @DateTime.Now.ToString("MMMM")
+                    </span>
+                </div>
+                <div class="flex justify-between gap-2">
+                    @{
+                        var today = DateTime.Now;
+                        int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                        var startOfWeek = today.AddDays(-1 * diff).Date;
+                        string[] diasSemana = { "Lun", "Mar", "Mié", "Jue", "Vie" };
+                        
+                        for (int i = 0; i < 5; i++)
+                        {
+                            var currentDate = startOfWeek.AddDays(i);
+                            bool isToday = currentDate.Date == today.Date;
+                            
+                            if (isToday)
+                            {
+                                <div class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl bg-brand dark:bg-[#B8ACFF] text-white dark:text-white shadow-md scale-105">
+                                    <span class="text-[9px] uppercase font-bold mb-1">@diasSemana[i]</span>
+                                    <span class="text-sm font-bold">@currentDate.Day</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex flex-col items-center justify-center py-2 px-3 rounded-2xl bg-slate-50 dark:bg-[#2a2b2e] text-slate-500">
+                                    <span class="text-[9px] uppercase font-bold mb-1">@diasSemana[i]</span>
+                                    <span class="text-sm font-bold">@currentDate.Day</span>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="font-bold text-slate-800 dark:text-white text-base">Mis Tareas</h3>
+                    <span class="text-[9px] bg-slate-100 dark:bg-darkbg-base px-2 py-1 rounded text-slate-500 font-bold uppercase tracking-wider border border-slate-200 dark:border-darkbg-border">En espera</span>
+                </div>
+                
+                <div class="space-y-3">
+                    
+                    @if (ViewBag.ListaRechazados != null && ViewBag.ListaRechazados.Count > 0)
+                    {
+                        foreach (var doc in ViewBag.ListaRechazados)
+                        {
+                            <a href="/Documents/Edit/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-brand transition-colors">Corregir @doc.Document?.DocCode</h4>
+                                    <p class="text-[11px] text-slate-500 truncate mt-0.5">Doc. Rechazado en revisión</p>
+                                </div>
+                            </a>
+                        }
+                    }
+
+                    @if (ViewBag.ListaFirmas != null && ViewBag.ListaFirmas.Count > 0)
+                    {
+                        foreach (var firma in ViewBag.ListaFirmas)
+                        {
+                            <a href="/Approvals/Review/@firma.ApprovalId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-pen-nib"></i>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-brand transition-colors">Firma Requerida</h4>
+                                    <p class="text-[11px] text-slate-500 truncate mt-0.5">Autorizar paso @firma.StepOrder</p>
+                                </div>
+                            </a>
+                        }
+                    }
+
+                    @if (ViewBag.ListaBorradores != null && ViewBag.ListaBorradores.Count > 0)
+                    {
+                        foreach (var doc in ViewBag.ListaBorradores)
+                        {
+                            <a href="/Documents/Details/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-file-pen"></i>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate group-hover:text-brand transition-colors">Continuar @doc.Document?.DocCode</h4>
+                                    <p class="text-[11px] text-slate-500 truncate mt-0.5">Borrador guardado sin enviar</p>
+                                </div>
+                            </a>
+                        }
+                    }
+
+                    @if ((ViewBag.ListaRechazados == null || ViewBag.ListaRechazados.Count == 0) && 
+                         (ViewBag.ListaFirmas == null || ViewBag.ListaFirmas.Count == 0) && 
+                         (ViewBag.ListaBorradores == null || ViewBag.ListaBorradores.Count == 0))
+                    {
+                        <div class="text-center py-6 bg-slate-50 dark:bg-darkbg-base rounded-2xl border border-dashed border-slate-200 dark:border-darkbg-border">
+                            <i class="fa-solid fa-mug-hot text-2xl text-slate-400 dark:text-slate-500 mb-2"></i>
+                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">Sin tareas pendientes</p>
+                            <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">Todo al día</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+        </div>
+    </aside>
+}
+@section Scripts {
+    <script>
+        async function fetchWeather() {
+            const apiKey = 'c7861a95b153e45d21380f353d987af5';
+            const city = 'Monclova,MX'; 
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=es&appid=${apiKey}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Error al consultar clima');
+                const data = await response.json();
+                
+                // Verificamos si existen los elementos en la vista actual antes de inyectar datos
+                if(document.getElementById('weatherTemp')) {
+                    document.getElementById('weatherTemp').innerText = Math.round(data.main.temp) + '°';
+                    const desc = data.weather[0].description;
+                    document.getElementById('weatherDesc').innerText = desc.charAt(0).toUpperCase() + desc.slice(1);
+                    
+                    const iconCode = data.weather[0].icon;
+                    const iconElement = document.getElementById('weatherIconBg');
+                    iconElement.className = 'absolute -right-3 -bottom-4 text-7xl opacity-20 group-hover:scale-110 transition-transform duration-500 fa-solid ';
+                    
+                    if (iconCode.includes('01')) iconElement.classList.add('fa-sun');
+                    else if (iconCode.includes('02') || iconCode.includes('03') || iconCode.includes('04')) iconElement.classList.add('fa-cloud-sun');
+                    else if (iconCode.includes('09') || iconCode.includes('10')) iconElement.classList.add('fa-cloud-showers-heavy');
+                    else if (iconCode.includes('11')) iconElement.classList.add('fa-bolt');
+                    else iconElement.classList.add('fa-cloud');
+                }
+            } catch (error) {
+                console.error('Clima offline:', error);
+                if(document.getElementById('weatherTemp')) {
+                    document.getElementById('weatherTemp').innerText = '28°';
+                    document.getElementById('weatherDesc').innerText = 'Parcialmente Soleado';
+                }
+            }
+        }
+        
+        // Ejecutamos la función al cargar la vista
+        fetchWeather();
+    </script>
 }

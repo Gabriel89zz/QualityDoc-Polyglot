@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using QualityDoc.API.Helpers;
 
 namespace QualityDoc.API.Controllers
 {
@@ -25,17 +26,21 @@ namespace QualityDoc.API.Controllers
         // ==========================================
         // HELPERS DE SEGURIDAD PARA EL CONTROLADOR
         // ==========================================
-        private bool IsSuperAdmin => User.IsInRole("Super Administrador");
+        private bool IsSuperAdmin => User.IsInRole("Super Admin");
         private int CurrentCompanyId => int.Parse(User.FindFirstValue("CompanyId") ?? "0");
 
-        // 1. GET: /Users
-        public async Task<IActionResult> Index()
+       // 1. GET: /Users
+        public async Task<IActionResult> Index(int? pageNumber)
         {
+            // 🚀 Definimos 8 usuarios por página
+            int pageSize = 8;
+
             var query = _context.Users
                 .IgnoreQueryFilters()
                 .Include(u => u.Role)
                 .Include(u => u.Department)
                 .Include(u => u.Company)
+                .OrderBy(u => u.FullName) // 🚀 FIX: Siempre debemos ordenar antes de paginar
                 .AsQueryable();
 
             // 🕵️ LÓGICA MULTI-TENANT: Si no eres SuperAdmin, filtramos por tu empresa
@@ -44,7 +49,8 @@ namespace QualityDoc.API.Controllers
                 query = query.Where(u => u.CompanyId == CurrentCompanyId);
             }
 
-            return View(await query.ToListAsync());
+            // 🚀 Pasamos la consulta a nuestra clase matemática (nota que ya no lleva el ToListAsync)
+            return View(await PaginatedList<User>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
         // 2. GET: /Users/Details/5

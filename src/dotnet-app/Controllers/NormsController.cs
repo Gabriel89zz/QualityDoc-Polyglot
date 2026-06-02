@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using QualityDoc.API.Helpers;
 
 namespace QualityDoc.API.Controllers
 {
@@ -25,16 +26,20 @@ namespace QualityDoc.API.Controllers
         private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1");
 
         // 1. GET: /Norms
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber)
         {
+            // 🚀 Definimos 10 registros por página
+            int pageSize = 10;
+
             // Traemos TODAS las normas (Activas e Inactivas)
-            var norms = await _context.Norms
+            // ⚠️ OJO: Le quitamos el .ToListAsync()
+            var query = _context.Norms
                 .IgnoreQueryFilters()
                 .OrderBy(n => n.NormName)
-                .ThenByDescending(n => n.ReleaseYear) // Las más recientes primero
-                .ToListAsync();
+                .ThenByDescending(n => n.ReleaseYear); // Las más recientes primero
 
-            return View(norms);
+            // 🚀 Pasamos la consulta a nuestra clase matemática
+            return View(await PaginatedList<Norm>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
         // 2. GET: /Norms/Details/5

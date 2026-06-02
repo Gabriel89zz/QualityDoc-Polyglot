@@ -20,11 +20,18 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 // 2. ZONA DEL OPERARIO (Consulta y Cumplimiento)
 // ==========================================
 Route::prefix('operario')->group(function () {
-    // Mantenemos los nombres de ruta ('name') iguales para no romper tus vistas actuales
-    Route::get('/documentos', [DashboardController::class, 'index'])->name('dashboard'); 
+    
+    // 🚀 VISTAS PRINCIPALES
+    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard'); 
+    Route::get('/directorio', [DashboardController::class, 'directorio'])->name('directorio'); 
+    
+    // ACCIONES Y LECTURAS
     Route::get('/log-access', [DashboardController::class, 'logDocumentAccess'])->name('log.document');
     Route::post('/documentos/acuse', [DashboardController::class, 'acuseLectura'])->name('document.acuse');
     Route::get('/mis-cumplimientos', [DashboardController::class, 'misCumplimientos'])->name('dashboard.compliances');
+
+    // 🚀 NUEVA RUTA: Puente AJAX para enviar el reporte de error a C#
+    Route::post('/reportar-error', [DashboardController::class, 'reportarError'])->name('reportar.error');
 });
 
 

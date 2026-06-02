@@ -1,0 +1,141 @@
+@model IEnumerable<QualityDoc.API.Models.DocumentIssue>
+@{
+    ViewData["Title"] = "Buzón de Incidencias";
+    bool isSuperAdmin = User.IsInRole("Super Admin");
+}
+
+<div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 mt-4">
+    
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
+        <div class="flex items-center">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mr-4 border border-amber-500/20 shadow-sm">
+                <i class="fa-solid fa-inbox text-amber-500 text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Tickets de Calidad</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Buzón de reportes de incidencias en documentos normativos.</p>
+            </div>
+        </div>
+        <div class="mt-4 sm:mt-0 flex gap-4">
+            <div class="bg-slate-50 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] px-4 py-2 rounded-xl flex flex-col justify-center items-center shadow-inner">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendientes</span>
+                <span class="text-lg font-black text-amber-500">@Model.Count(t => t.IssueStatus == "Pending")</span>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded-r-xl shadow-sm border border-y-green-100 border-r-green-100 dark:border-transparent transition-colors duration-300">
+            <div class="flex items-center">
+                <i class="fa-solid fa-circle-check text-green-500 text-lg mr-3"></i>
+                <p class="text-sm text-green-700 dark:text-green-400 font-bold">@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    }
+
+    <div class="bg-white dark:bg-[#323338] rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] overflow-hidden transition-colors duration-300">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 dark:bg-[#2a2b2e] text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="p-4 font-semibold w-48">Fecha</th>
+                        <th class="p-4 font-semibold">Documento Afectado</th>
+                        <th class="p-4 font-semibold">Reporte</th>
+                        <th class="p-4 font-semibold text-center">Estado</th>
+                        <th class="p-4 font-semibold text-center">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-[#4a4b50] text-sm">
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="p-12 text-center text-slate-500 dark:text-slate-400">
+                                <div class="w-16 h-16 bg-slate-50 dark:bg-[#2a2b2e] rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-[#4a4b50]">
+                                    <i class="fa-solid fa-mug-hot text-2xl text-slate-300 dark:text-slate-600"></i>
+                                </div>
+                                <h5 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">Buzón Vacío</h5>
+                                <p class="text-sm">No hay incidencias reportadas. ¡Todo funciona a la perfección!</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var ticket in Model)
+                        {
+                            <tr class="hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition duration-150 group">
+                                <td class="p-4">
+                                    <div class="font-bold text-slate-700 dark:text-slate-300">
+                                        @ticket.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                    </div>
+                                    <div class="text-xs text-slate-400">
+                                        @ticket.CreatedAt.ToLocalTime().ToString("HH:mm") hrs
+                                    </div>
+                                </td>
+
+                                <td class="p-4">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded bg-slate-100 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] flex items-center justify-center mr-3 text-slate-400 shrink-0">
+                                            <i class="fa-solid fa-file-pdf"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-brand dark:text-brand-light">@ticket.DocCode</p>
+                                            @if (isSuperAdmin)
+                                            {
+                                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-building mr-1"></i> @ticket.Company?.LegalName</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="p-4">
+                                    <div class="mb-1">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-[#4a4b50] uppercase tracking-wider">
+                                            @ticket.IssueType
+                                        </span>
+                                        <span class="text-xs text-slate-400 ml-2"><i class="fa-solid fa-user mr-1"></i> @(ticket.Reporter?.FullName ?? "Desconocido")</span>
+                                    </div>
+                                    <p class="text-slate-600 dark:text-slate-300 text-sm max-w-md line-clamp-2" title="@ticket.Details">
+                                        "@ticket.Details"
+                                    </p>
+                                </td>
+
+                                <td class="p-4 text-center">
+                                    @if (ticket.IssueStatus == "Pending")
+                                    {
+                                        <span class="inline-flex items-center bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-200 dark:border-amber-800/30">
+                                            <i class="fa-regular fa-clock mr-1.5"></i> Pendiente
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-200 dark:border-emerald-800/30">
+                                            <i class="fa-solid fa-check mr-1.5"></i> Resuelto
+                                        </span>
+                                    }
+                                </td>
+                                
+                                <td class="p-4 text-center">
+                                    @if (ticket.IssueStatus == "Pending")
+                                    {
+                                        <form asp-action="Resolve" asp-route-id="@ticket.IssueId" method="post" class="inline-block m-0 p-0">
+                                            <button type="submit" class="bg-white dark:bg-[#323338] text-emerald-600 hover:text-white hover:bg-emerald-500 border border-emerald-200 dark:border-emerald-800/50 hover:border-transparent px-3 py-1.5 rounded-lg font-bold text-xs transition-colors shadow-sm flex items-center mx-auto" onclick="return confirm('¿Confirmas que esta incidencia ya fue corregida?');">
+                                                <i class="fa-solid fa-wrench mr-1.5"></i> Resolver
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-slate-300 dark:text-slate-600 cursor-not-allowed text-xs font-bold flex items-center justify-center">
+                                            <i class="fa-solid fa-lock mr-1"></i> Cerrado
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

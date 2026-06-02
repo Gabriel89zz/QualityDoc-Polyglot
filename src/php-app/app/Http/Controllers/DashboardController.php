@@ -10,7 +10,127 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    // =========================================================
+    // 🚀 1. VISTA DASHBOARD (Resumen Visual y KPIs Optimizados)
+    // =========================================================
+    public function dashboard(Request $request)
+    {
+        if (!session('is_authenticated')) {
+            return redirect('http://127.0.0.1:5269/Auth/Login');
+        }
+
+        $myCompany = session('company_id');
+        $myUserId = session('user_id');
+        $rolActual = session('role');
+
+       // Variables para Operarios
+        $kpiDocsLeidos = 0;
+        $kpiPorFirmar = 0;
+        $kpiCumplimiento = 100;
+
+        // Variables para Auditores
+        $kpiPersonalAuditado = 0;
+        $kpiReportes = 0;
+        $kpiErrores = 0;
+        $chartLabels = [];
+        $chartData = [];
+        $actividadReciente = collect();
+        $chartRange = '7days'; // 🚀 FIX: Declaramos la variable aquí para que exista siempre
+
+        // 📊 CÁLCULO DE KPIS SEGÚN EL ROL
+        if (in_array($rolActual, ['Administrador', 'Auditor'])) {
+            
+            // 1. KPI: Personal Auditado (Usuarios únicos)
+            $kpiPersonalAuditado = AccessLog::where('company_id', $myCompany)
+                                        ->distinct('user_id')
+                                        ->count('user_id');
+
+            // 2. KPI: Logs de Actividad (Movimientos totales en la plataforma)
+            $kpiReportes = AccessLog::where('company_id', $myCompany)->count();
+
+            // 3. KPI: Errores Reportados (No Conformidades)
+            $kpiErrores = AccessLog::where('company_id', $myCompany)
+                                   ->where('document_title', 'LIKE', '%[REPORTE DE INCIDENCIA]%')
+                                   ->count();
+
+            // 📈 DATOS PARA LA GRÁFICA DINÁMICA
+            $chartRange = $request->input('chart_range', '7days');
+            $daysToSubtract = 6; // Por defecto 7 días (0 a 6)
+            
+            if ($chartRange === '15days') $daysToSubtract = 14;
+            if ($chartRange === '30days') $daysToSubtract = 29;
+
+            for ($i = $daysToSubtract; $i >= 0; $i--) {
+                $fecha = Carbon::now('America/Monterrey')->subDays($i);
+                $chartLabels[] = $fecha->translatedFormat('d M'); // Ej: "01 Jun"
+                
+                // Contar movimientos por día
+                $chartData[] = AccessLog::where('company_id', $myCompany)
+                                        ->whereDate('created_at', $fecha->format('Y-m-d'))
+                                        ->count();
+            }
+
+            // 📋 ÚLTIMOS 5 REGISTROS PARA LA LISTA DE ACTIVIDAD (La mitad derecha)
+            $actividadReciente = AccessLog::where('company_id', $myCompany)
+                                        ->orderBy('created_at', 'desc')
+                                        ->limit(3)
+                                        ->get();
+
+        } else {
+            // LÓGICA DE OPERARIO
+            $kpiDocsLeidos = AccessLog::where('company_id', $myCompany)
+                                ->where('user_id', $myUserId)
+                                ->where('document_title', 'LIKE', '%[FIRMA DE ENTERADO]%')
+                                ->count();
+            try {
+                $pythonApiUrl = env('PYTHON_API_URL', 'http://python-app:8000');
+                $response = \Illuminate\Support\Facades\Http::timeout(5)->get($pythonApiUrl . '/api/docs/approved', [
+                    'empresa_id' => $myCompany,
+                    'departamento_id' => session('dept_id')
+                ]);
+
+                if ($response->successful()) {
+                    $totalDocs = count($response->json()['data'] ?? []);
+                    $kpiPorFirmar = max(0, $totalDocs - $kpiDocsLeidos);
+                    if ($totalDocs > 0) {
+                        $kpiCumplimiento = round(($kpiDocsLeidos / $totalDocs) * 100);
+                    }
+                }
+            } catch (Exception $e) {}
+        }
+
+        // 📝 LOG DE INGRESO INICIAL
+        if (!session()->has('ya_ingreso')) {
+            try {
+                $log = new AccessLog([
+                    'document_code'  => 'DASHBOARD_VIEW', 
+                    'document_title' => 'Ingreso al Dashboard Principal',
+                    'version_num'    => 'N/A',
+                    'user_id'        => $myUserId ?? 0,
+                    'user_name'      => session('name') ?? 'Usuario Desconocido',
+                    'user_role'      => $rolActual ?? 'Sin Rol',
+                    'ip_address'     => $request->ip(),
+                    'company_id'     => $myCompany ?? 0
+                ]);
+                $log->created_at = Carbon::now('America/Monterrey');
+                $log->updated_at = Carbon::now('America/Monterrey');
+                $log->save();
+
+                session(['ya_ingreso' => true]);
+            } catch (Exception $e) { }
+        }
+
+       return view('dashboard', compact(
+            'kpiDocsLeidos', 'kpiPorFirmar', 'kpiCumplimiento',
+            'kpiPersonalAuditado', 'kpiReportes', 'kpiErrores',
+            'chartLabels', 'chartData', 'chartRange', 'actividadReciente'
+        ));
+    }
+
+    // =========================================================
+    // 🚀 2. NUEVA VISTA: DIRECTORIO VIGENTE (Tabla Completa)
+    // =========================================================
+    public function directorio(Request $request)
     {
         if (!session('is_authenticated')) {
             return redirect('http://127.0.0.1:5269/Auth/Login');
@@ -22,14 +142,14 @@ class DashboardController extends Controller
 
         try {
             $pythonApiUrl = env('PYTHON_API_URL', 'http://python-app:8000');
-            
-            // 🚀 EL ARREGLO DINÁMICO: Preparamos los parámetros base
+
+            // EL ARREGLO DINÁMICO: Preparamos los parámetros base
             $queryParams = [
                 'empresa_id' => session('company_id'),
                 'q'          => $searchTerm 
             ];
 
-            // 🚀 LA REGLA DE NEGOCIO: Si NO es Administrador ni Auditor, filtramos por su departamento
+            // LA REGLA DE NEGOCIO: Si NO es Administrador ni Auditor, filtramos por su departamento
             $rolActual = session('role');
             if (!in_array($rolActual, ['Administrador', 'Auditor'])) {
                 $queryParams['departamento_id'] = session('dept_id');
@@ -46,40 +166,34 @@ class DashboardController extends Controller
             $errorApi = "Error al conectar con MongoDB.";
         }
 
-        // 🚀 LOG DE INGRESO (Solo una vez por sesión)
-        if (!session()->has('ya_ingreso')) {
-            try {
-                $log = new AccessLog([
-                    'document_code'  => 'DASHBOARD_VIEW', 
-                    'document_title' => 'Consulta de Directorio General',
-                    'version_num'    => 'N/A',
-                    'user_id'        => session('user_id') ?? 0,
-                    'user_name'      => session('name') ?? 'Usuario Desconocido',
-                    'user_role'      => session('role') ?? 'Sin Rol',
-                    'ip_address'     => $request->ip(),
-                    'company_id'     => session('company_id') ?? 0
-                ]);
-
-                $log->created_at = Carbon::now('America/Monterrey');
-                $log->updated_at = Carbon::now('America/Monterrey');
-                $log->save();
-
-                session(['ya_ingreso' => true]);
-            } catch (Exception $e) {
-                // Si falla aquí, al menos el dashboard carga
+        // 🚀 NUEVO: Extraer todas las etiquetas únicas para los chips de filtro
+        $allTags = [];
+        foreach ($documentos as $doc) {
+            if (isset($doc['etiquetas']) && is_array($doc['etiquetas'])) {
+                foreach ($doc['etiquetas'] as $etiqueta) {
+                    if (!empty(trim($etiqueta))) {
+                        $allTags[] = trim($etiqueta);
+                    }
+                }
             }
         }
+        $allTags = array_unique($allTags);
+        sort($allTags); // Ordenamos alfabéticamente
 
-        return view('dashboard', [
+        // Retornamos la nueva vista 'directorio'
+        return view('directorio', [
             'documentos' => $documentos,
+            'allTags'    => $allTags, // 🚀 Pasamos las etiquetas a la vista
             'errorApi'   => $errorApi,
+            'searchTerm' => $searchTerm,
             'userName'   => session('name'),
-            'userRole'   => session('role'),
-            'searchTerm' => $searchTerm 
+            'userRole'   => session('role')
         ]);
     }
 
-    // 🚀 MÉTODO CORREGIDO PARA ABRIR PDF Y REGISTRAR LOG
+    // =========================================================
+    // 🚀 3. LOG DE LECTURA DE PDF
+    // =========================================================
     public function logDocumentAccess(Request $request)
     {
         if (!session('is_authenticated')) {
@@ -93,7 +207,6 @@ class DashboardController extends Controller
         $urlArchivo = $request->query('url', '');
 
         try {
-            // Creamos el log manualmente para asegurar la hora y los datos
             $log = new AccessLog();
             $log->document_code  = $codigo;
             $log->document_title = $titulo;
@@ -110,7 +223,6 @@ class DashboardController extends Controller
             
             $log->save();
         } catch (Exception $e) {
-            // Si el log falla, imprimimos el error en el log de Laravel para que lo veas
             \Log::error("Error al guardar log de PDF: " . $e->getMessage());
         }
 
@@ -119,7 +231,9 @@ class DashboardController extends Controller
         return redirect('http://127.0.0.1:5269' . $urlLimpia);
     }
 
-    // 🚀 NUEVO MÉTODO: Firma de Enterado / Cumplimiento
+    // =========================================================
+    // 🚀 4. FIRMA DE CUMPLIMIENTO / ENTERADO
+    // =========================================================
     public function acuseLectura(Request $request)
     {
         if (!session('is_authenticated')) {
@@ -133,7 +247,6 @@ class DashboardController extends Controller
         try {
             $log = new AccessLog();
             $log->document_code  = $codigo;
-            // 🚀 EL TRUCO: Le ponemos una etiqueta clara para que el Auditor lo vea distinto en el reporte
             $log->document_title = '[FIRMA DE ENTERADO] ' . $titulo;
             $log->version_num    = $version;
             $log->user_id        = session('user_id') ?? 0;
@@ -142,13 +255,11 @@ class DashboardController extends Controller
             $log->ip_address     = $request->ip();
             $log->company_id     = session('company_id') ?? 0;
             
-            // Forzamos la zona horaria
             $log->created_at = Carbon::now('America/Monterrey');
             $log->updated_at = Carbon::now('America/Monterrey');
             
             $log->save();
 
-            // Regresamos a la vista con un mensaje de éxito
             return back()->with('success', "Has firmado de enterado la versión $version del documento $codigo exitosamente.");
         } catch (Exception $e) {
             \Log::error("Error al registrar acuse: " . $e->getMessage());
@@ -156,10 +267,11 @@ class DashboardController extends Controller
         }
     }
 
-
+    // =========================================================
+    // 🚀 5. MIS CUMPLIMIENTOS (Historial de firmas del usuario)
+    // =========================================================
     public function misCumplimientos(Request $request)
     {
-        // 1. Validamos que esté logueado
         if (!session('is_authenticated')) {
             return redirect('http://127.0.0.1:5269/Auth/Login');
         }
@@ -167,18 +279,88 @@ class DashboardController extends Controller
         $myCompany = session('company_id');
         $myUserId = session('user_id');
 
-        // 2. Buscamos solo los acuses de recibo ([FIRMA DE ENTERADO]) de ESTE usuario en SU empresa
-        $cumplimientos = AccessLog::where('company_id', $myCompany)
-            ->where('user_id', $myUserId)
-            ->where('document_title', 'LIKE', '%[FIRMA DE ENTERADO]%')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10); // Paginamos de 10 en 10 para mantener la vista limpia
+        // 1. Capturar los filtros (Agregamos 'rango' por defecto 'all')
+        $rango = $request->input('rango', 'all');
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
 
-        // 3. Retornamos la nueva vista que crearemos en el paso 3
+        $query = AccessLog::where('company_id', $myCompany)
+            ->where('user_id', $myUserId)
+            ->where('document_title', 'LIKE', '%[FIRMA DE ENTERADO]%');
+
+        // 2. LÓGICA DE RANGOS MINIMALISTA
+        if ($rango === '7days') {
+            $fechaInicio = Carbon::now('America/Monterrey')->subDays(7)->format('Y-m-d');
+            $fechaFin = Carbon::now('America/Monterrey')->format('Y-m-d');
+            $query->whereDate('created_at', '>=', $fechaInicio)->whereDate('created_at', '<=', $fechaFin);
+        } elseif ($rango === '30days') {
+            $fechaInicio = Carbon::now('America/Monterrey')->subDays(30)->format('Y-m-d');
+            $fechaFin = Carbon::now('America/Monterrey')->format('Y-m-d');
+            $query->whereDate('created_at', '>=', $fechaInicio)->whereDate('created_at', '<=', $fechaFin);
+        } else {
+            // Rango "Personalizado" o "Todos"
+            if ($fechaInicio) $query->whereDate('created_at', '>=', $fechaInicio);
+            if ($fechaFin) $query->whereDate('created_at', '<=', $fechaFin);
+        }
+
+        $cumplimientos = $query->orderBy('created_at', 'desc')->paginate(8);
+        
+        // Mantiene los filtros en la paginación
+        $cumplimientos->appends($request->all());
+
         return view('compliances', [
             'cumplimientos' => $cumplimientos,
             'userName'      => session('name'),
-            'userRole'      => session('role')
+            'userRole'      => session('role'),
+            'rango'         => $rango,
+            'fechaInicio'   => $fechaInicio,
+            'fechaFin'      => $fechaFin
         ]);
+    }
+
+    // =========================================================
+    // 🚀 6. REPORTAR INCIDENCIA (Puente hacia C#)
+    // =========================================================
+    public function reportarError(Request $request)
+    {
+        if (!session('is_authenticated')) {
+            return response()->json(['success' => false, 'message' => 'No autorizado'], 401);
+        }
+
+        try {
+            // Usa el nombre de tu contenedor de C# que configuraste
+            $csharpApiUrl = env('CSHARP_API_URL', 'http://dotnep-app:80');
+
+            // 🚀 FIX 2: Forzamos el casteo a (int) para que el JSON sea perfecto para C#
+            $response = Http::timeout(5)->post($csharpApiUrl . '/api/issues', [
+                'CompanyId' => (int) session('company_id'),
+                'UserId'    => (int) session('user_id'),
+                'DocCode'   => $request->input('codigo'),
+                'IssueType' => $request->input('tipo'),
+                'Details'   => $request->input('detalles')
+            ]);
+
+            if ($response->successful()) {
+                // 🚀 NUEVO: Dejamos la huella en el historial de Laravel
+                AccessLog::create([
+                    'company_id' => session('company_id'),
+                    'user_id'    => session('user_id'),
+                    'user_name'  => session('name'),
+                    'user_role'  => session('role'),
+                    'ip_address' => $request->ip(),
+                    'document_code'  => $request->input('codigo'),
+                    'document_title' => '[REPORTE DE INCIDENCIA] ' . $request->input('tipo'),
+                    'version_num' => 'N/A'
+                ]);
+
+                return response()->json(['success' => true, 'message' => 'Reporte enviado con éxito']);
+            } else {
+                // 🚀 FIX 3: Ya no estamos ciegos. Extraemos el mensaje de rechazo de C#
+                $errorBody = $response->body();
+                return response()->json(['success' => false, 'message' => 'C# Rechazó la petición: ' . $errorBody]);
+            }
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error crítico de red: ' . $e->getMessage()]);
+        }
     }
 }

@@ -61,7 +61,6 @@ async def indexar_documento(doc: DocumentoAprobado):
     
 
 # 🚀 5. NUEVA RUTA GET CON FILTROS
-# 🚀 NUEVO: Agregamos el parámetro 'q' (texto a buscar)
 @app.get("/api/docs/approved")
 async def obtener_documentos_aprobados(empresa_id: int = None, departamento_id: int = None, q: str = None):
     try:
@@ -85,7 +84,7 @@ async def obtener_documentos_aprobados(empresa_id: int = None, departamento_id: 
 
         # Buscamos en Mongo aplicando ambos filtros
         cursor = coleccion_docs.find(filtro, {"_id": 0})
-        documentos = await cursor.to_list(length=100)
+        documentos = await cursor.to_list(length=2000)
         
         return {
             "success": True,
@@ -94,3 +93,26 @@ async def obtener_documentos_aprobados(empresa_id: int = None, departamento_id: 
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al leer de Mongo: {str(e)}")
+    
+    
+# 🚀 6. NUEVA RUTA DELETE: Para "des-publicar" documentos revocados
+@app.delete("/api/docs/index/{doc_id}")
+async def eliminar_documento(doc_id: int):
+    try:
+        # Buscamos y eliminamos el documento usando el ID de SQL Server
+        resultado = await coleccion_docs.delete_one({"documento_id": doc_id})
+        
+        # Verificamos si realmente se borró algo
+        if resultado.deleted_count == 1:
+            return {
+                "success": True,
+                "message": f"Documento {doc_id} eliminado exitosamente de MongoDB. Ya no es público."
+            }
+        else:
+            # Si Python no lo encuentra, no hay problema, significa que ya no estaba publicado
+            return {
+                "success": True,
+                "message": f"El documento {doc_id} no estaba indexado en MongoDB."
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al eliminar en Mongo: {str(e)}")

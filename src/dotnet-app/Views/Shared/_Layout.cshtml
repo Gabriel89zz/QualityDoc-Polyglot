@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using QualityDoc.API.Data
+@inject QualityDocDbContext _dbContext
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -18,6 +21,9 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
     <script>
     tailwind.config = {
         darkMode: 'class', 
@@ -30,176 +36,198 @@
                     brand: {
                         DEFAULT: 'var(--color-primary)', 
                         hover: 'var(--color-primary-hover)', 
+                    },
+                    darkbg: {
+                        base: '#2a2b2e',    
+                        card: '#323338',    
+                        border: '#4a4b50'   
                     }
+                },
+                boxShadow: {
+                    'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    'hover-soft': '0 10px 30px -4px rgba(0, 0, 0, 0.1)',
                 }
             }
         }
     }
     </script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
         .main-content {
-            margin-left: 16rem; /* 256px */
+            margin-left: 16rem;
+            transition: all 0.3s ease-in-out;
         }
         @@media (max-width: 768px) {
             .main-content { margin-left: 0; }
         }
     </style>
 </head>
-<body class="antialiased font-sans leading-normal tracking-normal bg-[#FAFAFA] dark:bg-[#2a2b2e] transition-colors duration-300">
+<body class="antialiased font-sans leading-normal tracking-normal bg-[#FAFAFA] dark:bg-darkbg-base text-slate-800 dark:text-slate-200 transition-colors duration-300 flex">
 
     @{
-        // Roles
-        var esSuper = User.IsInRole("Super Admin") || User.IsInRole("Super Administrador");
         var esAdminEmpresa = User.IsInRole("Admin de Empresa");
-        var esLector = User.IsInRole("Lector");
+        var esSuper = User.IsInRole("Super Admin") || User.IsInRole("Super Administrador");
         var esPersonalWorkflow = User.IsInRole("Creador de Doc") || User.IsInRole("Revisor") || User.IsInRole("Aprobador");
+        var esLector = User.IsInRole("Lector");
+        var companiaNombre = User.FindFirst("CompanyName")?.Value ?? "SGC System";
 
-        // 🧠 HELPER C#: Detecta la página actual para pintar el botón del menú
+        // --- 🚀 NUEVA LÓGICA GLOBAL PARA BUBBLES DEL MENÚ ---
+        int flujosActivosGlobal = 0;
+        if (esAdminEmpresa)
+        {
+            var claimCompany = User.FindFirst("CompanyId")?.Value;
+            int cId = string.IsNullOrEmpty(claimCompany) ? 0 : int.Parse(claimCompany);
+            
+            // Contamos los flujos que están "Pending" y en estatus "En Revisión" (2)
+            flujosActivosGlobal = _dbContext.DocumentApprovals
+                .Count(a => a.DocumentVersion.Document.CompanyId == cId 
+                         && a.ApprovalStatus == "Pending" 
+                         && a.DocumentVersion.StatusId == 2);
+        }
+
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
 
-        string GetActiveClass(string c, string a = "Index") {
-            return (currentController == c && currentAction == a) 
-                ? "text-brand dark:text-brand bg-brand/5 dark:bg-brand/10 font-medium border-r-4 border-brand" 
-                : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] hover:text-brand dark:hover:text-brand border-r-4 border-transparent hover:border-brand/50 transition-colors";
+        string GetLinkClass(string c, string a = "Index") {
+            return (currentController == c && currentAction == a)
+                ? "flex items-center px-4 py-3 rounded-xl bg-brand text-white font-medium shadow-md shadow-brand/20 transition-all"
+                : "group flex items-center px-4 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-darkbg-base hover:text-slate-900 dark:hover:text-white transition-all duration-200";
+        }
+
+        string GetIconClass(string c, string a = "Index") {
+            return (currentController == c && currentAction == a)
+                ? "w-6 text-center opacity-90"
+                : "w-6 text-center text-slate-400 group-hover:text-brand transition-colors";
         }
     }
 
-    <nav class="fixed w-full z-20 top-0 bg-white dark:bg-[#323338] border-b border-slate-200 dark:border-[#4a4b50] py-3 px-6 flex justify-between items-center transition-colors duration-300">
-        <div class="flex items-center">
-            <div class="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center mr-3 border border-brand/20">
-                <i class="fa-solid fa-file-circle-check text-brand text-sm"></i>
+    <div class="md:hidden fixed w-full z-30 top-0 bg-white dark:bg-darkbg-card border-b border-slate-200 dark:border-darkbg-border py-3 px-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
+                <i class="fa-solid fa-file-circle-check text-white text-xs"></i>
             </div>
-            <span class="text-brand font-bold text-xl mr-2">QualityDoc</span>
-            <span class="text-slate-400 dark:text-slate-500 text-sm hidden md:inline">| @User.FindFirst("CompanyName")?.Value</span>
+            <span class="text-slate-900 dark:text-white font-bold text-lg tracking-tight">QualityDoc</span>
         </div>
+        <button id="mobileMenuBtn" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-darkbg-base rounded-lg transition-colors">
+            <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+    </div>
 
-        <div class="flex items-center space-x-4">
-            <button id="themeToggleGlobal" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-[#4a4b50] transition-colors focus:outline-none text-slate-500 dark:text-slate-400">
-                <i class="fa-solid fa-moon text-lg" id="moonIconGlobal"></i>
-                <i class="fa-solid fa-sun text-lg hidden" id="sunIconGlobal"></i>
-            </button>
-
-            <div class="text-right hidden md:block border-l border-slate-200 dark:border-[#4a4b50] pl-4">
-                <p class="text-sm font-semibold text-slate-800 dark:text-white">@User.Identity?.Name</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</p>
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-darkbg-card text-slate-600 dark:text-slate-300 pt-20 md:pt-0 border-r border-slate-200 dark:border-darkbg-border overflow-y-auto z-40 transition-transform duration-300 transform -translate-x-full md:translate-x-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col">
+        
+        <div class="hidden md:flex px-6 pt-6 pb-4 items-center border-b border-slate-100 dark:border-darkbg-border/50 mb-4">
+            <div class="w-9 h-9 rounded-xl bg-brand flex items-center justify-center mr-3 shadow-md shadow-brand/20">
+                <i class="fa-solid fa-file-circle-check text-white dark:text-darkbg-card text-sm"></i>
             </div>
-            
-            <form asp-controller="Auth" asp-action="Logout" method="post">
-                <button type="submit" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 p-2.5 rounded-full transition-colors border border-transparent dark:border-[#4a4b50]" title="Cerrar Sesión">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            </form>
-        </div>
-    </nav>
-
-    <aside class="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-[#323338] text-slate-600 dark:text-slate-300 pt-20 hidden md:block border-r border-slate-200 dark:border-[#4a4b50] overflow-y-auto z-10 transition-colors duration-300 shadow-sm">
-        <div class="px-6 mb-6 mt-4">
-            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Menú Principal</p>
+            <div class="flex flex-col">
+                <span class="text-slate-900 dark:text-white font-bold text-xl tracking-tight leading-none">QualityDoc</span>
+                <span class="text-slate-500 dark:text-slate-400 text-[10px] font-semibold uppercase tracking-wider mt-0.5">@companiaNombre</span>
+            </div>
         </div>
         
-        <nav class="space-y-1">
-            <a asp-controller="Home" asp-action="Index" class="flex items-center px-6 py-3.5 @GetActiveClass("Home", "Index")">
-                <i class="fa-solid fa-chart-line w-6"></i>
-                <span class="ml-3">Dashboard</span>
-            </a>
-
-            @if (esSuper)
-            {
-                <div class="px-6 mt-8 mb-3">
-                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Admin Global</p>
-                </div>
-                <a asp-controller="Companies" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Companies")">
-                    <i class="fa-solid fa-building w-6"></i>
-                    <span class="ml-3">Empresas Clientes</span>
-                </a>
-                <a asp-controller="Norms" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Norms")">
-                    <i class="fa-solid fa-scale-balanced w-6"></i>
-                    <span class="ml-3">Normativas ISO</span>
-                </a>
-                <a asp-controller="Roles" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Roles")">
-                    <i class="fa-solid fa-user-shield w-6"></i>
-                    <span class="ml-3">Roles del Sistema</span>
-                </a>
-            }
-            else if (esAdminEmpresa)
-            {
-                <div class="px-6 mt-8 mb-3">
-                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Configuración ISO</p>
-                </div>
-                <a asp-controller="Departments" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Departments")">
-                    <i class="fa-solid fa-sitemap w-6"></i>
-                    <span class="ml-3">Departamentos</span>
-                </a>
-                <a asp-controller="Users" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Users")">
-                    <i class="fa-solid fa-users w-6"></i>
-                    <span class="ml-3">Personal</span>
-                </a>
-                <a asp-controller="DocumentCategories" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("DocumentCategories")">
-                    <i class="fa-solid fa-folder-tree w-6"></i>
-                    <span class="ml-3">Estructura ISO</span>
+        <div class="flex-1 pb-4">
+            <div class="px-6 mb-3 md:mt-0 mt-4">
+                <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Principal</p>
+            </div>
+            <nav class="space-y-1 px-3">
+                <a class="@GetLinkClass("Home", "Index")" href="/Home/Index">
+                    <i class="fa-solid fa-chart-line @GetIconClass("Home", "Index")"></i>
+                    <span class="ml-3">Dashboard</span>
                 </a>
 
-                <div class="px-6 mt-8 mb-3">
-                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Gestión Documental</p>
-                </div>
-                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Documents")">
-                    <i class="fa-solid fa-file-signature w-6"></i>
-                    <span class="ml-3">Master de Docs</span>
-                </a>
-                <a asp-controller="DocumentApprovals" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("DocumentApprovals")">
-                    <i class="fa-solid fa-bars-progress w-6"></i>
-                    <span class="ml-3">Flujos Activos</span>
-                </a>
-            }
-            else if (esPersonalWorkflow)
-            {
-                <div class="px-6 mt-8 mb-3">
-                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Operación</p>
-                </div>
-                
-                <a asp-controller="Documents" asp-action="Create" class="flex items-center px-6 py-3 @GetActiveClass("Documents", "Create")">
-                    <i class="fa-solid fa-file-signature w-6"></i>
-                    <span class="ml-3">Redactar Docs</span>
-                </a>
-                
-                <a asp-controller="Approvals" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Approvals")">
-                    <i class="fa-solid fa-inbox w-6 text-brand"></i>
-                    <span class="ml-3 font-bold">Mis Firmas</span>
-                </a>
-                
-                <a asp-controller="Documents" asp-action="Index" class="flex items-center px-6 py-3 @GetActiveClass("Documents", "Index")">
-                    <i class="fa-solid fa-book-open-reader w-6"></i>
-                    <span class="ml-3">Biblioteca ISO</span>
-                </a>
-            }
-            else if (esLector)
-            {
-                <div class="px-6 mt-8 mb-3">
-                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Piso de Producción</p>
-                </div>
-                <a href="http://tuservidor-php.com/portal" class="flex items-center px-6 py-3 text-brand dark:text-brand hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition-colors border-r-4 border-transparent hover:border-brand/50">
-                    <i class="fa-solid fa-arrow-up-right-from-square w-6"></i>
-                    <span class="ml-3">Portal Operativo</span>
-                </a>
-            }
-        </nav>
+                @if (esAdminEmpresa)
+                {
+                    <div class="px-3 mt-8 mb-3"><p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Configuración ISO</p></div>
+                    <a class="@GetLinkClass("Departments")" href="/Departments/Index">
+                        <i class="fa-solid fa-sitemap @GetIconClass("Departments")"></i><span class="ml-3">Departamentos</span>
+                    </a>
+                    <a class="@GetLinkClass("Users")" href="/Users/Index">
+                        <i class="fa-solid fa-users @GetIconClass("Users")"></i><span class="ml-3">Personal</span>
+                    </a>
+                    <a class="@GetLinkClass("DocumentCategories")" href="/DocumentCategories/Index">
+                        <i class="fa-solid fa-folder-tree @GetIconClass("DocumentCategories")"></i><span class="ml-3">Estructura ISO</span>
+                    </a>
+
+                    <div class="px-3 mt-8 mb-3"><p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Gestión Documental</p></div>
+                    <a class="@GetLinkClass("Documents")" href="/Documents/Index">
+                        <i class="fa-solid fa-file-signature @GetIconClass("Documents")"></i><span class="ml-3">Master de Docs</span>
+                    </a>
+                    <a class="@GetLinkClass("DocumentApprovals") flex justify-between" href="/DocumentApprovals/Index">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-bars-progress @GetIconClass("DocumentApprovals")"></i><span class="ml-3">Flujos Activos</span>
+                        </div>
+                        
+                        @if (flujosActivosGlobal > 0)
+                        {
+                            <span class="bg-brand text-white dark:text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm transition-colors duration-300">
+                                @flujosActivosGlobal
+                            </span>
+                        }
+                    </a>
+                    <a class="@GetLinkClass("QualityTickets")" href="/QualityTickets/Index">
+                        <i class="fa-solid fa-inbox @GetIconClass("QualityTickets")"></i><span class="ml-3">Buzón de Incidencias</span>
+                    </a>
+                }
+                else if (esSuper)
+                {
+                    <div class="px-3 mt-8 mb-3"><p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Host Tenant</p></div>
+    
+                        <a class="@GetLinkClass("Companies")" href="/Companies/Index">
+                            <i class="fa-solid fa-city @GetIconClass("Companies")"></i><span class="ml-3">Empresas</span>
+                        </a>
+    
+                        <a class="@GetLinkClass("Norms")" href="/Norms/Index">
+                            <i class="fa-solid fa-scale-balanced @GetIconClass("Norms")"></i><span class="ml-3">Normativas</span>
+                        </a>
+    
+                        <a class="@GetLinkClass("Users")" href="/Users/Index">
+                            <i class="fa-solid fa-users-gear @GetIconClass("Users")"></i><span class="ml-3">Usuarios Globales</span>
+                        </a>
+                }
+                else if (esPersonalWorkflow)
+                {
+                    <div class="px-3 mt-8 mb-3"><p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Operación</p></div>
+                    
+                    @if (User.IsInRole("Creador de Doc"))
+                    {
+                        <a class="@GetLinkClass("Documents", "Create")" href="/Documents/Create">
+                            <i class="fa-solid fa-file-signature @GetIconClass("Documents", "Create")"></i><span class="ml-3">Redactar Docs</span>
+                        </a>
+                    }
+                    
+                    <a class="@GetLinkClass("Approvals")" href="/Approvals/Index">
+                        <i class="fa-solid fa-inbox @GetIconClass("Approvals")"></i><span class="ml-3">Mis Firmas</span>
+                    </a>
+                    
+                    <a class="@GetLinkClass("Documents", "Index")" href="/Documents/Index">
+                        <i class="fa-solid fa-book-open-reader @GetIconClass("Documents", "Index")"></i><span class="ml-3">Biblioteca ISO</span>
+                    </a>
+                }
+            </nav>
+        </div>
+        
+        <div class="mt-auto p-4 border-t border-slate-100 dark:border-darkbg-border bg-slate-50/50 dark:bg-darkbg-card">
+            <div class="flex items-center justify-between">
+                <button id="themeToggleGlobal" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-darkbg-base hover:text-brand transition-all duration-300" title="Cambiar Apariencia">
+                    <i class="fa-solid fa-moon" id="moonIconGlobal"></i>
+                    <i class="fa-solid fa-sun hidden" id="sunIconGlobal"></i>
+                </button>
+                <form method="post" action="/Auth/Logout">
+                    <button type="submit" class="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 dark:border-[#4a4b50] text-slate-500 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 transition-all duration-300" title="Cerrar Sesión">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
     </aside>
 
-    <main class="main-content pt-20 p-8 min-h-[calc(100vh-3rem)]">
-        <div class="max-w-7xl mx-auto">
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden md:hidden"></div>
+
+    <main class="main-content pt-20 md:pt-8 px-4 md:px-8 pb-10 min-h-screen flex flex-col w-full">
+        <div class="w-full flex-1 flex flex-col">
             @RenderBody()
         </div>
     </main>
-
-    <footer class="main-content px-8 py-5 border-t border-slate-200 dark:border-[#4a4b50] text-slate-500 dark:text-slate-400 text-xs text-center transition-colors duration-300 bg-white dark:bg-[#323338]">
-        &copy; @DateTime.Now.Year - <span class="font-semibold text-brand">QualityDoc</span> - Sistema de Trazabilidad IATF 16949 / ISO 9001
-    </footer>
-
-    @await RenderSectionAsync("Scripts", required: false)
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -208,25 +236,38 @@
             const sunIcon = document.getElementById('sunIconGlobal');
             const moonIcon = document.getElementById('moonIconGlobal');
 
-            if (htmlNode.classList.contains('dark')) {
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-            }
-
-            themeToggleBtn.addEventListener('click', () => {
-                htmlNode.classList.toggle('dark');
-                
+            const updateIcons = () => {
                 if (htmlNode.classList.contains('dark')) {
-                    localStorage.setItem('theme', 'dark');
                     sunIcon.classList.remove('hidden');
                     moonIcon.classList.add('hidden');
                 } else {
-                    localStorage.setItem('theme', 'light');
                     sunIcon.classList.add('hidden');
                     moonIcon.classList.remove('hidden');
                 }
+            };
+            
+            updateIcons();
+
+            themeToggleBtn.addEventListener('click', () => {
+                htmlNode.classList.toggle('dark');
+                localStorage.setItem('theme', htmlNode.classList.contains('dark') ? 'dark' : 'light');
+                updateIcons();
             });
+
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            const toggleMenu = () => {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarOverlay.classList.toggle('hidden');
+            };
+
+            mobileMenuBtn.addEventListener('click', toggleMenu);
+            sidebarOverlay.addEventListener('click', toggleMenu);
         });
     </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

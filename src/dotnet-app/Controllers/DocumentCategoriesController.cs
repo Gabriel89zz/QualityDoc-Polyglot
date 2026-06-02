@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using QualityDoc.API.Data;
 using QualityDoc.API.Models;
+using QualityDoc.API.Helpers;
 
 namespace QualityDoc.API.Controllers
 {
@@ -36,32 +37,33 @@ namespace QualityDoc.API.Controllers
         // ==========================================
         // 1. INDEX: Listar las categorías de SU empresa
         // ==========================================
-        public async Task<IActionResult> Index(int? filterNormId)
+        public async Task<IActionResult> Index(int? filterNormId, int? pageNumber)
         {
+            // 🚀 Definimos 10 registros por página
+            int pageSize = 10;
             var companyId = GetCurrentCompanyId();
 
-            // 🚀 1. Mandamos las normas a la vista para llenar el Dropdown (Menú desplegable)
+            // 1. Mandamos las normas a la vista para llenar el Dropdown
             ViewBag.Norms = new SelectList(_context.Norms.Where(n => n.Status == "Active"), "NormId", "NormName", filterNormId);
-            ViewBag.CurrentFilter = filterNormId; // Para saber cuál está seleccionada
+            ViewBag.CurrentFilter = filterNormId; // Guardamos el filtro para la paginación
 
-            // 🚀 2. Preparamos la consulta base
+            // 2. Preparamos la consulta base
             var query = _context.DocumentCategories
                 .IgnoreQueryFilters()
-                .Include(c => c.Norm) // Traemos la info de la norma
+                .Include(c => c.Norm) 
                 .Where(c => c.CompanyId == companyId);
 
-            // 🚀 3. Si el usuario seleccionó una norma en el Dropdown, filtramos la tabla
+            // 3. Aplicamos el filtro si existe
             if (filterNormId.HasValue)
             {
                 query = query.Where(c => c.NormId == filterNormId.Value);
             }
 
-            // 🚀 4. Ejecutamos la consulta ordenando por jerarquía
-            var categories = await query
-                .OrderBy(c => c.HierarchyLevel)
-                .ToListAsync();
+            // 4. Ordenamos (Importante para que la paginación sea estable)
+            query = query.OrderBy(c => c.HierarchyLevel).ThenBy(c => c.CategoryName);
 
-            return View(categories);
+            // 🚀 Pasamos la consulta a nuestra clase matemática (Sin el ToListAsync)
+            return View(await PaginatedList<DocumentCategory>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
         // ==========================================

@@ -41,9 +41,9 @@ class AuthController extends Controller
 
             // 🚀 5. EL NUEVO CADENERO: Redirección inteligente basada en roles
             if (in_array($decoded->role, ['Administrador', 'Auditor'])) {
-                return redirect()->route('reports'); // Lo manda al Panel Gerencial
+                return redirect()->route('dashboard'); 
             } else {
-                return redirect()->route('dashboard'); // Lo manda al Directorio Operativo
+                return redirect()->route('dashboard'); 
             }
 
         } catch (Exception $e) {

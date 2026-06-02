@@ -1,0 +1,8 @@
+# Ignorar carpetas locales de compilación de .NET
+**/bin/
+**/obj/
+
+# Otros archivos que no deberían subir al contenedor
+.vs/
+.vscode/
+*.user

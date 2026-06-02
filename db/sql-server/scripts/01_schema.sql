@@ -120,12 +120,14 @@ CREATE TABLE DocumentCategories (
     company_id INT NOT NULL,
     norm_id INT NULL, 
     category_name NVARCHAR(100) NOT NULL, 
-    prefix VARCHAR(5) NOT NULL, 
+    prefix VARCHAR(15) NOT NULL, 
     description VARCHAR(255) NULL, 
     hierarchy_level INT NOT NULL CHECK (hierarchy_level BETWEEN 1 AND 10), -- Corregido para empatar con C#
     retention_years INT NOT NULL DEFAULT 3 CHECK (retention_years BETWEEN 1 AND 99), -- 🚀 NUEVO CAMPO ISO
     CONSTRAINT FK_Categories_Company FOREIGN KEY (company_id) REFERENCES Companies(company_id),
     CONSTRAINT FK_Categories_Norm FOREIGN KEY (norm_id) REFERENCES Norms(norm_id),
+    -- 🚀 CANDADO DEFINITIVO: Adentro de la tabla, igual que en Departments
+    CONSTRAINT UQ_Company_Norm_CategoryName UNIQUE (company_id, norm_id, category_name),
     -- Audit Fields
     status NVARCHAR(20) DEFAULT 'Active',
     created_at DATETIME2 DEFAULT GETUTCDATE(),
@@ -221,6 +223,61 @@ CREATE TABLE DocumentApprovals (
     deleted_by INT
 );
 
+CREATE TABLE DocumentAuditLogs (
+    log_id INT IDENTITY(1,1) PRIMARY KEY,
+    company_id INT NOT NULL,              -- 🚀 Clave para el Multi-tenant
+    doc_id INT NOT NULL,                  
+    version_id INT NOT NULL, 
+    version_num NVARCHAR(10) NOT NULL,    -- 🚀 NUEVO: Guarda la "foto exacta" de la versión (Ej: "0.1", "1.5")
+    action_type NVARCHAR(50) NOT NULL,    -- Ej: 'DraftCreated', 'DraftEdited', 'SentToReview', 'Approved', 'Rejected', 'Recalled', 'NewVersionCreated'
+    action_details NVARCHAR(MAX),         -- Texto explicativo para la bitácora
+    
+    -- Relaciones Foráneas
+    CONSTRAINT FK_AuditLogs_Company FOREIGN KEY (company_id) REFERENCES Companies(company_id),
+    CONSTRAINT FK_AuditLogs_Document FOREIGN KEY (doc_id) REFERENCES Documents(doc_id),
+    CONSTRAINT FK_AuditLogs_Version FOREIGN KEY (version_id) REFERENCES DocumentVersions(version_id),
+    
+    -- Campos de Auditoría Estándar (El usuario que hace la acción va en created_by)
+    status NVARCHAR(20) DEFAULT 'Active',
+    created_at DATETIME2 DEFAULT GETUTCDATE(),
+    created_by INT NOT NULL,              
+    updated_at DATETIME2,
+    updated_by INT,
+    deleted_at DATETIME2,
+    deleted_by INT
+);
+
+
+-----------------------------------------------------------
+-- 4.1 TICKETS DE CALIDAD / INCIDENCIAS
+-----------------------------------------------------------
+CREATE TABLE DocumentIssues (
+    issue_id INT IDENTITY(1,1) PRIMARY KEY,
+    company_id INT NOT NULL,
+    doc_code NVARCHAR(50) NOT NULL,
+    issue_type NVARCHAR(100) NOT NULL,
+    details NVARCHAR(MAX) NOT NULL,
+    reported_by INT NOT NULL,
+    
+    issue_status NVARCHAR(30) DEFAULT 'Pending', 
+    
+    -- Relaciones Foráneas
+    CONSTRAINT FK_DocumentIssues_Company FOREIGN KEY (company_id) REFERENCES Companies(company_id),
+    CONSTRAINT FK_DocumentIssues_Reporter FOREIGN KEY (reported_by) REFERENCES Users(user_id),
+    
+    -- Candado de Seguridad
+    CONSTRAINT CHK_IssueStatus CHECK (issue_status IN ('Pending', 'In Review', 'Resolved')),
+
+    -- Campos de Auditoría Estándar
+    status NVARCHAR(20) DEFAULT 'Active',
+    created_at DATETIME2 DEFAULT GETUTCDATE(),
+    created_by INT NULL, 
+    updated_at DATETIME2,
+    updated_by INT,
+    deleted_at DATETIME2,
+    deleted_by INT
+);
+
 -----------------------------------------------------------
 -- 5. RESTRICCIONES DE AUDITORÍA
 -----------------------------------------------------------
@@ -233,7 +290,7 @@ SELECT @sql += 'ALTER TABLE ' + QUOTENAME(t.name) +
                'ALTER TABLE ' + QUOTENAME(t.name) + 
                ' ADD CONSTRAINT FK_' + t.name + '_DeletedBy FOREIGN KEY (deleted_by) REFERENCES Users(user_id);'
 FROM sys.tables t 
-WHERE t.name IN ('Roles', 'Norms', 'DocumentStatus', 'Companies', 'Departments', 'Users', 'DocumentCategories', 'Documents', 'DocumentVersions', 'DocumentApprovals');
+WHERE t.name IN ('Roles', 'Norms', 'DocumentStatus', 'Companies', 'Departments', 'Users', 'DocumentCategories', 'Documents', 'DocumentVersions', 'DocumentApprovals', 'DocumentAuditLogs', 'DocumentIssues');
 EXEC sp_executesql @sql;
 
 -----------------------------------------------------------
@@ -245,11 +302,7 @@ CREATE INDEX IX_Docs_Company_Status ON Documents(company_id, status);
 CREATE INDEX IX_Versions_Doc_Status ON DocumentVersions(doc_id, status_id, status);
 CREATE UNIQUE INDEX UIX_Docs_Code_Company ON Documents(company_id, doc_code) WHERE status <> 'Deleted';
 CREATE INDEX IX_Approvals_Pending ON DocumentApprovals(approver_id, approval_status);
-
--- 🚀 BLINDAJE ANTI-DUPLICADOS PARA CATEGORÍAS (Ideal para Docker y datos semilla)
-CREATE UNIQUE INDEX UQ_Company_CategoryName 
-ON DocumentCategories (company_id, category_name)
-WITH (IGNORE_DUP_KEY = ON);
+CREATE INDEX IX_AuditLogs_Version ON DocumentAuditLogs(company_id, doc_id, version_id, created_at);
 
 -----------------------------------------------------------
 -- 7. TRIGGERS DE AUDITORÍA Y CONTROL
@@ -322,6 +375,7 @@ IF OBJECT_ID('sp_SignDocumentWorkflow', 'P') IS NOT NULL DROP PROCEDURE sp_SignD
 IF OBJECT_ID('sp_GetCompanyQualityKPIs', 'P') IS NOT NULL DROP PROCEDURE sp_GetCompanyQualityKPIs;
 IF OBJECT_ID('sp_DisableCompanyComplete', 'P') IS NOT NULL DROP PROCEDURE sp_DisableCompanyComplete;
 IF OBJECT_ID('sp_SoftDeleteDocument', 'P') IS NOT NULL DROP PROCEDURE sp_SoftDeleteDocument;
+IF OBJECT_ID('sp_RecallDocumentWorkflow', 'P') IS NOT NULL DROP PROCEDURE sp_RecallDocumentWorkflow;
 GO
 
 CREATE PROCEDURE sp_SignDocumentWorkflow
@@ -527,6 +581,138 @@ BEGIN
         UPDATE DocumentVersions
         SET status = 'Deleted', deleted_at = GETUTCDATE(), deleted_by = @UserID
         WHERE doc_id = @DocID;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE sp_RecallDocumentWorkflow
+    @VersionID INT,
+    @ApprovalID INT = NULL, 
+    @UserID INT,
+    @NewVersionNum VARCHAR(15) -- 🚀 1. NUEVO PARÁMETRO QUE RECIBE DESDE C#
+AS
+BEGIN
+    BEGIN TRANSACTION;
+
+    BEGIN TRY
+        DECLARE @CurrentDocStatus INT;
+        
+        -- Obtenemos el estatus actual de la versión
+        SELECT @CurrentDocStatus = status_id 
+        FROM DocumentVersions 
+        WHERE version_id = @VersionID;
+
+        -- =========================================================
+        -- CASO 1: EL CREADOR CANCELA EL FLUJO (Recall General)
+        -- =========================================================
+        IF @ApprovalID IS NULL
+        BEGIN
+            -- Bloqueo 1: Si ya está Aprobado Final
+            IF @CurrentDocStatus = 3
+            BEGIN
+                THROW 50002, 'El documento ya está Aprobado. No se puede cancelar el flujo.', 1;
+            END
+
+            -- Bloqueo 2: Verificar si el Revisor (Paso 1) ya firmó
+            DECLARE @ReviewerStatus NVARCHAR(20);
+            SELECT TOP 1 @ReviewerStatus = approval_status
+            FROM DocumentApprovals
+            WHERE version_id = @VersionID AND step_order = 1;
+
+            IF @ReviewerStatus != 'Pending' AND @ReviewerStatus IS NOT NULL
+            BEGIN
+                THROW 50005, 'Bloqueo ISO: No puedes cancelar el flujo porque el Revisor ya procesó tu documento. Debes esperar a que termine el ciclo.', 1;
+            END
+
+            DELETE FROM DocumentApprovals WHERE version_id = @VersionID;
+
+            -- 🚀 2. REGISTRAMOS LA NUEVA VERSIÓN AL CANCELAR
+            UPDATE DocumentVersions
+            SET status_id = 1,
+                version_num = @NewVersionNum,
+                updated_at = GETUTCDATE(),
+                updated_by = @UserID
+            WHERE version_id = @VersionID;
+        END
+        -- =========================================================
+        -- CASO 2: UN FIRMANTE DESHACE SU DECISIÓN (Reviewer/Approver)
+        -- =========================================================
+        ELSE
+        BEGIN
+            DECLARE @StepOrder INT;
+            DECLARE @ApprovalStatus NVARCHAR(20);
+
+            SELECT 
+                @StepOrder = step_order,
+                @ApprovalStatus = approval_status
+            FROM DocumentApprovals 
+            WHERE approval_id = @ApprovalID AND approver_id = @UserID;
+
+            IF @ApprovalStatus = 'Pending'
+            BEGIN
+                THROW 50003, 'La firma está pendiente, no hay nada que deshacer.', 1;
+            END
+
+            -- ========================================
+            -- Si el REVISOR (Paso 1) deshace su firma
+            -- ========================================
+            IF @StepOrder = 1
+            BEGIN
+                IF @ApprovalStatus = 'Approved'
+                BEGIN
+                    DECLARE @AprobadorStatus NVARCHAR(20);
+                    SELECT @AprobadorStatus = approval_status 
+                    FROM DocumentApprovals 
+                    WHERE version_id = @VersionID AND step_order = 2;
+
+                    IF @AprobadorStatus != 'Pending' AND @AprobadorStatus IS NOT NULL
+                    BEGIN
+                        THROW 50004, 'No puedes deshacer tu revisión porque el Aprobador Final ya procesó el documento.', 1;
+                    END
+
+                    DELETE FROM DocumentApprovals WHERE version_id = @VersionID AND step_order = 2;
+                END
+                
+                -- 🚀 2. REGISTRAMOS LA NUEVA VERSIÓN AL DESHACER REVISIÓN
+                UPDATE DocumentVersions 
+                SET status_id = 2, 
+                    version_num = @NewVersionNum,
+                    updated_at = GETUTCDATE(), 
+                    updated_by = @UserID 
+                WHERE version_id = @VersionID;
+            END
+
+            -- ========================================
+            -- Si el APROBADOR (Paso 2) deshace su firma
+            -- ========================================
+            ELSE IF @StepOrder = 2
+            BEGIN
+                -- 🚀 2. REGISTRAMOS LA NUEVA VERSIÓN AL DESHACER APROBACIÓN
+                UPDATE DocumentVersions 
+                SET status_id = 2, 
+                    version_num = @NewVersionNum,
+                    approved_at = NULL,
+                    updated_at = GETUTCDATE(), 
+                    updated_by = @UserID 
+                WHERE version_id = @VersionID;
+            END
+
+            -- ACCIÓN FINAL: Resetear la firma actual a Pending
+            UPDATE DocumentApprovals
+            SET approval_status = 'Pending',
+                comments = NULL,
+                signature_token = NULL,
+                signed_at = NULL,
+                updated_at = GETUTCDATE(),
+                updated_by = @UserID
+            WHERE approval_id = @ApprovalID;
+        END
 
         COMMIT TRANSACTION;
     END TRY

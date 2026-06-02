@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using QualityDoc.API.Helpers;
 
 namespace QualityDoc.API.Controllers
 {
@@ -27,17 +28,38 @@ namespace QualityDoc.API.Controllers
         private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
         private int CurrentCompanyId => int.Parse(User.FindFirstValue("CompanyId") ?? "0");
 
-        // 1. GET: /Departments
-        public async Task<IActionResult> Index()
+       // 1. GET: /Departments (Paginado y Filtrado)
+        public async Task<IActionResult> Index(string search, string status, int? pageNumber)
         {
+            // Guardamos los valores actuales para que la vista los recuerde
+            ViewData["CurrentSearch"] = search;
+            ViewData["CurrentStatus"] = status;
+
+            // 🚀 Definimos 10 registros por página
+            int pageSize = 10;
+
             // 🔒 FILTRO MULTI-TENANT: Solo los departamentos de mi empresa
-            var departments = await _context.Departments
+            var query = _context.Departments
                 .IgnoreQueryFilters()
                 .Where(d => d.CompanyId == CurrentCompanyId)
-                .OrderBy(d => d.DeptName)
-                .ToListAsync();
+                .AsQueryable();
 
-            return View(departments);
+            // 🔍 Filtro por texto libre (Nombre del Departamento)
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(d => d.DeptName.Contains(search));
+            }
+
+            // 🏷️ Filtro por Estado
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(d => d.Status == status);
+            }
+
+            query = query.OrderBy(d => d.DeptName);
+
+            // 🚀 Pasamos la consulta a nuestra clase matemática
+            return View(await PaginatedList<Department>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
         // 2. GET: /Departments/Details/5

@@ -69,69 +69,104 @@
                 <a href="{{ route('reports.history') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">Ver todo <i class="fa-solid fa-arrow-right ml-1"></i></a>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-100">
-                    <thead class="bg-white sticky top-0 shadow-sm z-10">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Fecha y Hora</th>
-                            <th class="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Usuario / IP</th>
-                            <th class="px-6 py-4 text-left text-xs font-black text-gray-400 uppercase tracking-wider">Acción Registrada</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-50">
-                        @forelse($historial as $log)
-                            <tr class="hover:bg-indigo-50/50 transition">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
-                                    {{ $log->created_at->format('d/m/Y H:i') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <p class="text-sm font-bold text-gray-800">{{ $log->user_name }}</p>
-                                    <p class="text-xs text-gray-400 font-mono">{{ $log->user_role }} | {{ $log->ip_address }}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($log->document_code == 'DASHBOARD_VIEW')
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">
-                                                <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Inicio de Sesión
-                                            </span>
-                                            <span class="text-xs text-gray-500 font-medium">Acceso al portal operativo</span>
-                                        </div>
-                                    @elseif(str_contains($log->document_title, '[FIRMA DE ENTERADO]'))
-                                        <div class="mb-1.5">
-                                            <span class="text-sm font-black text-gray-800">{{ $log->document_code }}</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-green-50 text-green-700 border border-green-100 shadow-sm">
-                                                <i class="fa-solid fa-file-signature mr-1.5"></i> Acuse de Lectura
-                                            </span>
-                                            <span class="text-xs text-gray-500 truncate max-w-xs font-medium" title="{{ str_replace('[FIRMA DE ENTERADO] ', '', $log->document_title) }}">
+                <!-- 🚀 FIX: Quitamos table-fixed y usamos table-auto con Columna Fantasma -->
+            <table class="w-full text-left border-collapse table-auto min-w-[800px]">
+                <thead class="bg-slate-50 dark:bg-[#2a2b2e] text-slate-500 dark:text-slate-400 text-xs uppercase font-semibold border-b border-slate-100 dark:border-darkbg-border">
+                    <tr>
+                        <!-- Anchos estrictos para mantener los datos agrupados -->
+                        <th class="p-5 w-40 whitespace-nowrap">Fecha y Hora</th>
+                        <th class="p-5 w-56 whitespace-nowrap">Usuario / IP</th>
+                        <th class="p-5 w-80 whitespace-nowrap">Documento Afectado</th>
+                        <th class="p-5 w-56 whitespace-nowrap">Acción Registrada</th>
+                        <!-- 🚀 COLUMNA FANTASMA: Se expande y absorbe el espacio muerto -->
+                        <th class="p-0 w-full"></th> 
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-darkbg-border text-sm">
+                    @forelse($historial as $log)
+                        <tr class="hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition-colors">
+                            
+                            <!-- 1. FECHA Y HORA -->
+                            <td class="p-5 align-top whitespace-nowrap">
+                                <div class="font-bold text-slate-700 dark:text-slate-300">{{ $log->created_at->format('d M Y') }}</div>
+                                <div class="text-xs text-slate-400">{{ $log->created_at->format('H:i:s') }} hrs</div>
+                            </td>
+                            
+                            <!-- 2. USUARIO -->
+                            <td class="p-5 align-top whitespace-nowrap">
+                                <p class="text-sm font-bold text-slate-800 dark:text-white truncate" title="{{ $log->user_name }}">{{ $log->user_name }}</p>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 flex items-center">
+                                    <i class="fa-solid fa-desktop mr-1.5 opacity-70"></i> {{ $log->ip_address }}
+                                </p>
+                            </td>
+                            
+                            <!-- 3. DOCUMENTO -->
+                            <td class="p-5 align-top">
+                                @if($log->document_code == 'DASHBOARD_VIEW')
+                                    <span class="text-xs text-slate-400 dark:text-slate-500 font-medium italic">-- Sistema Central --</span>
+                                @else
+                                    <div class="flex flex-col items-start gap-1.5 overflow-hidden">
+                                        <span class="text-xs font-black text-brand bg-brand/5 dark:bg-brand/10 border border-brand/20 dark:border-brand/20 px-2 py-0.5 rounded truncate max-w-full" title="{{ $log->document_code }}">{{ $log->document_code }}</span>
+                                        
+                                        @if(str_contains($log->document_title, '[REPORTE DE INCIDENCIA]'))
+                                            <span class="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate max-w-full">Revisión de calidad / Incidencia</span>
+                                        @else
+                                            <!-- Truncamos el título largo para que no rompa la tabla -->
+                                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[280px]" title="{{ str_replace('[FIRMA DE ENTERADO] ', '', $log->document_title) }}">
                                                 v{{ $log->version_num }} - {{ str_replace('[FIRMA DE ENTERADO] ', '', $log->document_title) }}
                                             </span>
+                                        @endif
+                                    </div>
+                                @endif
+                            </td>
+                            
+                            <!-- 4. ACCIÓN REGISTRADA -->
+                            <td class="p-5 align-top whitespace-nowrap">
+                                @if($log->document_code == 'DASHBOARD_VIEW')
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-[#323338] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-darkbg-border shadow-sm">
+                                        <i class="fa-solid fa-right-to-bracket mr-1.5 opacity-70"></i> Ingreso al Portal
+                                    </span>
+
+                                @elseif(str_contains($log->document_title, '[REPORTE DE INCIDENCIA]'))
+                                    <!-- 🚀 DISEÑO MINIMALISTA PARA ERROR (Alineado perfecto) -->
+                                    <div class="flex flex-col items-start gap-1.5 overflow-hidden">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-500/20 shadow-sm shrink-0">
+                                            <i class="fa-solid fa-flag mr-1.5 opacity-80"></i> Reporte de Error
+                                        </span>
+                                        <div class="flex items-center text-[11px] text-slate-500 dark:text-slate-400 font-medium w-full" title="{{ str_replace('[REPORTE DE INCIDENCIA] ', '', $log->document_title) }}">
+                                            <div class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 mr-1.5 shrink-0"></div>
+                                            <span class="truncate max-w-[180px]">{{ str_replace('[REPORTE DE INCIDENCIA] ', '', $log->document_title) }}</span>
                                         </div>
-                                    @else
-                                        <div class="mb-1.5">
-                                            <span class="text-sm font-black text-gray-800">{{ $log->document_code }}</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm">
-                                                <i class="fa-solid fa-eye mr-1.5"></i> Consulta
-                                            </span>
-                                            <span class="text-xs text-gray-500 truncate max-w-xs font-medium" title="{{ $log->document_title }}">
-                                                v{{ $log->version_num }} - {{ $log->document_title }}
-                                            </span>
-                                        </div>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="px-6 py-12 text-center text-gray-400 text-sm">
-                                    <i class="fa-solid fa-clipboard-check text-4xl mb-3 block text-gray-200"></i>
-                                    No hay registros de auditoría recientes.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                    </div>
+
+                                @elseif(str_contains($log->document_title, '[FIRMA DE ENTERADO]'))
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-500/20 shadow-sm shrink-0">
+                                        <i class="fa-solid fa-file-signature mr-1.5 opacity-80"></i> Acuse Firmado
+                                    </span>
+
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-500/20 shadow-sm shrink-0">
+                                        <i class="fa-solid fa-eye mr-1.5 opacity-80"></i> Lectura de Doc
+                                    </span>
+                                @endif
+                            </td>
+
+                            <!-- 5. COLUMNA FANTASMA DE RELLENO -->
+                            <td class="p-0"></td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-16 text-center">
+                                <div class="w-20 h-20 mx-auto bg-slate-50 dark:bg-[#2a2b2e] rounded-full flex items-center justify-center mb-4 border border-slate-100 dark:border-darkbg-border">
+                                    <i class="fa-solid fa-database text-4xl text-slate-300 dark:text-slate-600"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300">Buzón Vacío</h3>
+                                <p class="text-slate-500 text-sm mt-1">No hay registros de auditoría para estos filtros.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
             </div>
         </div>
 

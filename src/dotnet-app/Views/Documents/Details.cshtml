@@ -1,7 +1,6 @@
 @model QualityDoc.API.Models.Document
 @using QualityDoc.API.Models
-
-@{
+@using System.Security.Claims @{
     ViewData["Title"] = "Expediente del Documento";
     var versiones = ViewBag.Versions as IEnumerable<DocumentVersion>;
     var creators = ViewBag.Creators as Dictionary<int, string>;
@@ -10,6 +9,14 @@
     bool isAdmin = User.IsInRole("Admin de Empresa");
     bool isCreator = User.IsInRole("Creador de Doc");
     int myDeptId = ViewBag.UserDeptId ?? 0;
+
+    // 🚀 NUEVO: Capturamos el ID del usuario actual
+    int currentUserId = 0;
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+    if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int uid))
+    {
+        currentUserId = uid;
+    }
 
     bool hasPowerOverDoc = isAdmin || (isCreator && Model.DeptId == myDeptId);
 
@@ -63,13 +70,6 @@
             <a asp-action="Index" class="bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors text-sm flex items-center">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver
             </a>
-            
-            @if (hasPowerOverDoc && isDraft)
-            {
-                <a asp-action="Edit" asp-route-id="@Model.DocId" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-5 rounded-xl shadow-md shadow-brand/20 transition-colors inline-flex items-center text-sm">
-                    <i class="fa-solid fa-pen mr-2"></i> Editar Metadatos
-                </a>
-            }
         </div>
     </div>
 
@@ -77,7 +77,13 @@
         <div class="p-6 md:p-8">
             <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6 border-b border-slate-100 dark:border-[#4a4b50] pb-3">Información Estructural</h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-y-6 gap-x-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-8">
+                <div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Normativa</p>
+                    <p class="mt-1 text-base text-slate-900 dark:text-white font-bold">
+                        <i class="fa-solid fa-book-bookmark text-amber-500 dark:text-amber-400 mr-2"></i>@(Model.Category?.Norm?.NormName ?? "No Asignada")
+                    </p>
+                </div>
                 <div>
                     <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Categoría</p>
                     <p class="mt-1 text-base text-slate-900 dark:text-white font-bold"><i class="fa-solid fa-folder-tree text-brand mr-2"></i>@Model.Category?.CategoryName</p>
@@ -99,7 +105,7 @@
                         }
                     </p>
                 </div>
-                <div class="md:col-span-3">
+                <div class="md:col-span-4">
                     <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mb-2">Descripción / Objetivo</p>
                     <div class="bg-slate-50 dark:bg-[#2a2b2e] border-l-4 border-slate-300 dark:border-[#4a4b50] p-4 rounded-r-xl text-slate-700 dark:text-slate-300 text-sm font-medium">
                         @(string.IsNullOrEmpty(Model.Description) ? "No se ha proporcionado un objetivo para este documento." : Model.Description)
@@ -127,7 +133,7 @@
                     <tr>
                         <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Versión</th>
                         <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Estatus</th>
-                        <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Motivo del Cambio</th>
+                        <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Descripción de la Versión</th>
                         <th class="px-6 md:px-8 py-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Fecha</th>
                         <th class="px-6 md:px-8 py-4 text-right text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Acciones de Archivo</th>
                     </tr>
@@ -139,7 +145,6 @@
                         {
                             bool isLatest = version.VersionId == lastVersion?.VersionId;
                             
-                            // 🚀 Clases iniciales dinámicas para el JS
                             string activeClasses = "bg-brand/5 dark:bg-brand/10 border-brand";
                             string inactiveClasses = "hover:bg-slate-50 dark:hover:bg-[#2a2b2e] border-transparent";
                             string rowClass = isLatest ? activeClasses : inactiveClasses;
@@ -180,35 +185,54 @@
                                 <td class="px-6 md:px-8 py-5 whitespace-nowrap text-sm font-bold text-slate-500 dark:text-slate-400">
                                     @version.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")
                                 </td>
-                                <td class="px-6 md:px-8 py-5 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2">
+                                <td class="px-6 md:px-8 py-5 whitespace-nowrap text-right text-sm font-medium flex justify-end items-center gap-2">
                                     
-                                    <button type="button" onclick="showComments(@version.VersionId)" class="text-brand hover:text-brand-hover bg-brand/10 hover:bg-brand/20 dark:text-brand-light dark:bg-brand/20 dark:hover:bg-brand/30 px-3.5 py-2 rounded-lg transition-colors" title="Ver comentarios / historial">
-                                        <i class="fa-solid fa-comments text-base"></i>
-                                    </button>
-
-                                    <a href="@version.FilePath" target="_blank" class="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 px-3.5 py-2 rounded-lg transition-colors" title="Ver archivo PDF original">
-                                        <i class="fa-solid fa-file-pdf text-base"></i>
+                                    <a href="@version.FilePath" target="_blank" class="text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20 dark:border-blue-800/30 dark:hover:bg-blue-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Ver archivo PDF">
+                                        <i class="fa-solid fa-eye mr-1.5 text-base"></i> Ver Documento
                                     </a>
 
-                                    @if (version.StatusId == 1 && hasPowerOverDoc)
+                                    @if (hasPowerOverDoc && isLatest)
                                     {
-                                        <form asp-action="ReplaceDraftFile" method="post" enctype="multipart/form-data" class="inline" id="form-replace-@version.VersionId">
-                                            <input type="hidden" name="versionId" value="@version.VersionId" />
-                                            <input type="hidden" name="docId" value="@Model.DocId" />
-                                            <input type="file" name="newFile" id="file-@version.VersionId" accept=".pdf" class="hidden" onchange="if(confirm('¿Estás seguro de que deseas sobreescribir el borrador actual con este nuevo archivo PDF?')) { document.getElementById('form-replace-@version.VersionId').submit(); } else { this.value = ''; }" />
-                                            
-                                            <button type="button" onclick="document.getElementById('file-@version.VersionId').click();" class="text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 px-3.5 py-2 rounded-lg transition-colors" title="Corregir y reemplazar archivo PDF">
-                                                <i class="fa-solid fa-file-arrow-up text-base"></i>
-                                            </button>
-                                        </form>
+                                        <div class="hidden sm:block w-px h-6 bg-slate-200 dark:bg-[#4a4b50] mx-1"></div>
 
-                                        <form asp-action="SendToReview" method="post" class="inline ml-2" onsubmit="return confirm('¿Iniciar el flujo de revisión para esta versión?');">
-                                            <input type="hidden" name="versionId" value="@version.VersionId" />
-                                            <input type="hidden" name="docId" value="@Model.DocId" />
-                                            <button type="submit" class="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40 px-3.5 py-2 rounded-lg transition-colors" title="Solicitar Firmas (Iniciar Flujo)">
-                                                <i class="fa-solid fa-paper-plane text-base"></i>
-                                            </button>
-                                        </form>
+                                        <div class="inline-flex items-center gap-2">
+                                            @if (version.StatusId == 1)
+                                            {
+                                               <a asp-action="Edit" asp-route-id="@Model.DocId" class="text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 dark:text-amber-500 dark:bg-amber-900/20 dark:border-amber-800/30 dark:hover:bg-amber-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Modificar los detalles o reemplazar el archivo PDF">
+                                                    <i class="fa-solid fa-file-pen mr-1.5 text-base"></i> Editar Borrador
+                                                </a>
+
+                                                <form asp-action="SendToReview" method="post" class="inline" onsubmit="return confirm('¿Iniciar el flujo de revisión para esta versión?');">
+                                                    <input type="hidden" name="versionId" value="@version.VersionId" />
+                                                    <input type="hidden" name="docId" value="@Model.DocId" />
+                                                    <button type="submit" class="text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800/30 dark:hover:bg-emerald-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Solicitar Firmas (Iniciar Flujo)">
+                                                        <i class="fa-solid fa-file-signature mr-1.5 text-base"></i> Solicitar Firmas
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (version.StatusId == 2)
+                                            {
+                                                // 🚀 LÓGICA MAESTRA: Verificamos si el Revisor (Paso 1) aún no firma
+                                                bool isPendingRevisor = version.Approvals != null && version.Approvals.Any(a => a.StepOrder == 1 && a.ApprovalStatus == "Pending");
+
+                                                if (isPendingRevisor)
+                                                {
+                                                    <form asp-action="RecallWorkflow" method="post" class="inline" onsubmit="return confirm('¿Estás seguro de cancelar el envío? El documento regresará a Borrador de forma segura.');">
+                                                        <input type="hidden" name="versionId" value="@version.VersionId" />
+                                                        <input type="hidden" name="docId" value="@Model.DocId" />
+                                                        <button type="submit" class="inline-flex items-center px-3.5 py-1.5 text-xs font-bold rounded-lg bg-transparent border border-slate-300 dark:border-[#4a4b50] text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shadow-sm" title="Cancelar Envío (Regresar a Borrador)">
+                                                            <i class="fa-solid fa-rotate-left mr-1.5 text-base"></i> Cancelar Envío
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <button disabled class="text-slate-500 bg-slate-100 border border-slate-200 dark:text-slate-400 dark:bg-[#2a2b2e] dark:border-[#4a4b50] px-3 py-1.5 rounded-lg font-bold text-xs flex items-center cursor-not-allowed shadow-sm" title="Bloqueado: El Revisor ya autorizó este documento">
+                                                        <i class="fa-solid fa-lock mr-1.5 text-base"></i> Bloqueado
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
                                     }
                                 </td>
                             </tr>
@@ -232,118 +256,210 @@
     <div id="seccion-bitacora" class="bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300 overflow-hidden mb-8">
         <div class="px-6 md:px-8 py-5 border-b border-slate-200 dark:border-[#4a4b50] bg-slate-50/50 dark:bg-[#2a2b2e]/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <h3 class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest"><i class="fa-solid fa-comments mr-2"></i> Bitácora de Aprobaciones</h3>
-            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-[#323338] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] shadow-sm">
-                <i class="fa-solid fa-mouse-pointer mr-1 text-brand"></i> Haz clic en una versión arriba
-            </span>
+            
+            <div class="flex items-center gap-2">
+                <label for="versionSelector" class="text-xs font-bold text-slate-500 dark:text-slate-400">Ver versión:</label>
+                <select id="versionSelector" onchange="showComments(this.value)" class="text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-lg px-3 py-1.5 shadow-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand cursor-pointer">
+                    @if (versiones != null) {
+                        foreach (var v in versiones) {
+                            <option value="@v.VersionId" selected="@(v.VersionId == lastVersion?.VersionId)">v @v.VersionNum</option>
+                        }
+                    }
+                </select>
+            </div>
         </div>
-        <div class="p-6 md:p-8">
+
+       <div class="p-6 md:p-8">
             @if (versiones != null && versiones.Any())
             {
-                <div class="space-y-6 relative">
+                <div class="relative">
                     @foreach (var version in versiones)
                     {
-                        // 🚀 Solo mostramos el bloque si es la última versión
+                        // 🚀 Lógica de visualización de pestañas dinámicas
                         bool isLatest = version.VersionId == lastVersion?.VersionId;
                         string displayClass = isLatest ? "block" : "hidden";
 
                         <div id="comments-@version.VersionId" class="comments-section @displayClass animate-fade-in">
-                            <div class="border-l-2 border-brand/30 dark:border-brand/50 pl-6 ml-2">
-                                <h4 class="text-sm font-bold text-brand dark:text-brand-light mb-6 bg-brand/5 dark:bg-brand/10 inline-block px-4 py-1.5 rounded-full border border-brand/20 dark:border-brand/30">
-                                    Historial de la <span class="font-black">Versión @version.VersionNum</span>
-                                </h4>
-                                
-                                <div class="space-y-5">
-                                    
-                                    @{
-                                        int creatorId = (int?)version.CreatedBy ?? 0;
-                                        string creatorName = creators != null && creators.ContainsKey(creatorId) ? creators[creatorId] : "Autor Desconocido";
-                                    }
-                                    
-                                    <div class="bg-slate-50 dark:bg-[#2a2b2e] p-5 rounded-2xl border border-slate-200 dark:border-[#4a4b50] flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm relative overflow-hidden transition-colors">
-                                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-300 dark:bg-slate-600"></div>
-                                        <div class="flex-shrink-0 mt-1">
-                                            <i class="fa-solid fa-file-pen text-slate-400 dark:text-slate-500 text-2xl"></i>
-                                        </div>
-                                        <div class="flex-grow w-full">
-                                            <div class="flex flex-wrap justify-between items-start mb-2 gap-2">
-                                                <div>
-                                                    <span class="font-bold text-slate-900 dark:text-white text-sm">@creatorName</span>
-                                                    <span class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-2 font-bold bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] px-2 py-1 rounded-md">Autor</span>
-                                                </div>
-                                                <span class="text-xs font-bold text-slate-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> @version.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")</span>
-                                            </div>
-                                            <p class="text-sm font-bold text-slate-600 dark:text-slate-400 mb-3">Acción: Creó el borrador inicial</p>
-                                            <div class="bg-white dark:bg-[#323338] p-4 rounded-xl border border-slate-200 dark:border-[#4a4b50] text-sm text-slate-700 dark:text-slate-300 relative shadow-sm">
-                                                <i class="fa-solid fa-quote-left text-slate-100 dark:text-[#4a4b50] absolute top-3 left-3 text-2xl opacity-50"></i>
-                                                <p class="pl-8 relative z-10 italic font-medium leading-relaxed">
-                                                    @(string.IsNullOrEmpty(version.ChangeDescription) ? "Creación inicial del documento." : version.ChangeDescription)
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    @if (version.StatusId >= 2)
-                                    {
-                                        <div class="bg-brand/5 dark:bg-brand/10 p-5 rounded-2xl border border-brand/20 dark:border-brand/30 flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm relative overflow-hidden transition-colors">
-                                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand"></div>
-                                            <div class="flex-shrink-0 mt-1">
-                                                <i class="fa-solid fa-paper-plane text-brand text-2xl"></i>
-                                            </div>
-                                            <div class="flex-grow w-full">
-                                                <div class="flex flex-wrap justify-between items-start mb-2 gap-2">
-                                                    <div>
-                                                        <span class="font-bold text-slate-900 dark:text-white text-sm">@creatorName</span>
-                                                        <span class="text-[10px] uppercase tracking-wider text-brand dark:text-brand-light ml-2 font-bold bg-white dark:bg-[#323338] border border-brand/20 dark:border-brand/40 px-2 py-1 rounded-md">Emisor</span>
-                                                    </div>
-                                                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> @(version.UpdatedAt?.ToLocalTime().ToString("dd/MMM/yyyy HH:mm") ?? version.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm"))</span>
-                                                </div>
-                                                <p class="text-sm font-bold text-brand dark:text-brand-light">Acción: Finalizó borrador y solicitó revisión formal en sistema</p>
-                                            </div>
-                                        </div>
-                                    }
-
-                                    @if (version.Approvals != null && version.Approvals.Any(a => a.ApprovalStatus != "Pending"))
-                                    {
-                                        foreach (var approval in version.Approvals.Where(a => a.ApprovalStatus != "Pending").OrderBy(a => a.UpdatedAt ?? a.CreatedAt))
-                                        {
-                                            bool isApproved = approval.ApprovalStatus == "Approved";
-                                            
-                                            // Clases dinámicas adaptadas al modo oscuro
-                                            string statusColor = isApproved ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400";
-                                            string bgCard = isApproved ? "bg-green-50 dark:bg-green-900/10" : "bg-red-50 dark:bg-red-900/10";
-                                            string borderColor = isApproved ? "border-green-200 dark:border-green-900/30" : "border-red-200 dark:border-red-900/30";
-                                            string leftBorderColor = isApproved ? "bg-green-500" : "bg-red-500";
-                                            string statusIcon = isApproved ? "fa-circle-check" : "fa-circle-xmark";
-                                            string statusText = isApproved ? "Aprobó" : "Rechazó";
-
-                                            <div class="@bgCard p-5 rounded-2xl border @borderColor flex flex-col sm:flex-row sm:items-start gap-4 shadow-sm relative overflow-hidden transition-colors">
-                                                <div class="absolute left-0 top-0 bottom-0 w-1 @leftBorderColor"></div>
-                                                <div class="flex-shrink-0 mt-1">
-                                                    <i class="fa-solid @statusIcon @statusColor text-2xl"></i>
-                                                </div>
-                                                <div class="flex-grow w-full">
-                                                    <div class="flex flex-wrap justify-between items-start mb-2 gap-2">
-                                                        <div>
-                                                            <span class="font-bold text-slate-900 dark:text-white text-sm">@approval.Approver?.FullName</span>
-                                                            <span class="text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-300 ml-2 font-bold bg-white dark:bg-[#323338] border @borderColor px-2 py-1 rounded-md shadow-sm">Paso @approval.StepOrder: @approval.StepType</span>
-                                                        </div>
-                                                        <span class="text-xs font-bold text-slate-400 dark:text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> @(approval.UpdatedAt?.ToLocalTime().ToString("dd/MMM/yyyy HH:mm") ?? approval.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm"))</span>
-                                                    </div>
-                                                    <p class="text-sm font-bold @statusColor mb-3">Dictamen: @statusText el documento</p>
-                                                    
-                                                    <div class="bg-white dark:bg-[#323338] p-4 rounded-xl border @borderColor text-sm text-slate-700 dark:text-slate-300 relative shadow-sm">
-                                                        <i class="fa-solid fa-quote-left @(isApproved ? "text-green-100 dark:text-green-900/20" : "text-red-100 dark:text-red-900/20") absolute top-3 left-3 text-2xl opacity-70"></i>
-                                                        <p class="pl-8 relative z-10 italic font-medium leading-relaxed">
-                                                            @(string.IsNullOrEmpty(approval.Comments) ? "Sin comentarios adicionales." : approval.Comments)
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
+                            
+                            <div class="max-h-[600px] overflow-y-auto pr-2 sm:pr-4 custom-scrollbar">
+                            
+                                <div class="mb-2 flex items-center justify-between bg-slate-50 dark:bg-[#2a2b2e] p-4 rounded-xl border border-slate-200 dark:border-[#4a4b50] sticky top-0 z-10 shadow-sm">
+                                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                        <i class="fa-solid fa-timeline text-brand mr-2"></i> Ruta Cronológica del Documento
+                                    </h4>
+                                    <span class="text-xs font-bold px-3 py-1 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-full text-slate-500 shadow-sm">
+                                        Versión de Control: <span class="font-black text-brand">v @version.VersionNum</span>
+                                   </span>
                                 </div>
+
+                                <div class="relative border-l-2 border-slate-200 dark:border-[#4a4b50] ml-4 md:ml-6 space-y-8 pb-4 mt-8">
+                                    
+    @{
+        int creatorId = (int?)version.CreatedBy ?? 0;
+        string creatorName = creators != null && creators.ContainsKey(creatorId) ? creators[creatorId] : "Autor Desconocido";
+    }
+
+    @if (version.AuditLogs != null && version.AuditLogs.Any())
+    {
+        var sortedLogs = version.AuditLogs.OrderBy(l => l.CreatedAt).ToList();
+        foreach (var log in sortedLogs)
+        {
+            string colorNodo = "border-slate-400";
+            string colorIcono = "text-slate-500 dark:text-slate-400";
+            string fondoIcono = "bg-slate-100 dark:bg-[#2a2b2e]";
+            string claseIcono = "fa-circle-info";
+            string tituloEstatus = "Evento Registrado";
+
+            switch (log.ActionType)
+            {
+                case "DraftCreated":
+                    colorNodo = "border-slate-400"; colorIcono = "text-slate-500 dark:text-slate-400"; fondoIcono = "bg-slate-100 dark:bg-[#2a2b2e]"; claseIcono = "fa-file-pen"; tituloEstatus = "Borrador Inicial Creado"; break;
+                case "NewVersionCreated":
+                    colorNodo = "border-purple-500"; colorIcono = "text-purple-500 dark:text-purple-400"; fondoIcono = "bg-purple-50 dark:bg-purple-900/20"; claseIcono = "fa-code-branch"; tituloEstatus = "Nueva Revisión Iniciada"; break;
+                case "DraftEdited":
+                    colorNodo = "border-amber-500"; colorIcono = "text-amber-500"; fondoIcono = "bg-amber-50 dark:bg-amber-900/20"; claseIcono = "fa-file-arrow-up"; tituloEstatus = "Borrador Editado / Actualizado"; break;
+                case "SentToReview":
+                    colorNodo = "border-blue-400"; colorIcono = "text-blue-500 dark:text-blue-400"; fondoIcono = "bg-blue-50 dark:bg-blue-900/20"; claseIcono = "fa-paper-plane"; tituloEstatus = "Enviado a Flujo de Firmas"; break;
+                case "Approved":
+                    colorNodo = "border-green-500"; colorIcono = "text-green-500 dark:text-green-400"; fondoIcono = "bg-green-50 dark:bg-green-900/20"; claseIcono = "fa-check-double"; tituloEstatus = "Firma Autorizada"; break;
+                case "Rejected":
+                    colorNodo = "border-red-500"; colorIcono = "text-red-500 dark:text-red-400"; fondoIcono = "bg-red-50 dark:bg-red-900/20"; claseIcono = "fa-circle-xmark"; tituloEstatus = "Documento Rechazado"; break;
+                case "Recalled":
+                    colorNodo = "border-red-500"; colorIcono = "text-red-500 dark:text-red-400"; fondoIcono = "bg-red-50 dark:bg-red-900/20"; claseIcono = "fa-rotate-left"; tituloEstatus = "Envío Revocado (Recall)"; break;
+                case "SignatureRevoked":
+                    colorNodo = "border-orange-500"; colorIcono = "text-orange-500 dark:text-orange-400"; fondoIcono = "bg-orange-50 dark:bg-orange-900/20"; claseIcono = "fa-arrow-rotate-left"; tituloEstatus = "Firma Revocada / Retractada"; break;
+            }
+
+            string authorName = creators != null && creators.ContainsKey(log.CreatedBy) ? creators[log.CreatedBy] : "Usuario del Sistema";
+            bool isLastLog = log.LogId == sortedLogs.Last().LogId;
+            
+            string userComment = null;
+            DocumentApproval matchingApproval = null;
+            if (log.ActionType == "Approved" || log.ActionType == "Rejected")
+            {
+                string targetStatus = log.ActionType == "Approved" ? "Approved" : "Rejected";
+                
+                // 🚀 FIX SÚPER CRÍTICO: Filtramos por el ID del usuario Y por el estatus de la acción para eliminar comentarios fantasmas
+                matchingApproval = version.Approvals?.FirstOrDefault(a => a.ApproverId == log.CreatedBy && a.ApprovalStatus == targetStatus);
+                userComment = matchingApproval?.Comments;
+            }
+
+            <div class="relative pl-8 md:pl-10 group">
+                <span class="absolute -left-[11px] top-4 flex items-center justify-center w-5 h-5 rounded-full bg-white dark:bg-[#323338] border-4 @colorNodo shadow-sm transition-transform group-hover:scale-125"></span>
+
+                <div class="bg-white dark:bg-[#323338] p-5 rounded-2xl border border-slate-200 dark:border-[#4a4b50] shadow-sm hover:shadow-md transition-all">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="@fondoIcono p-2.5 rounded-xl @colorIcono">
+                                <i class="fa-solid @claseIcono text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">@tituloEstatus</p>
+                                    <span class="text-[10px] font-black px-2 py-0.5 bg-brand/10 text-brand rounded dark:bg-brand/20 dark:text-brand-light">v @(log.VersionNum ?? version.VersionNum)</span>
+                                </div>
+                                <p class="text-xs font-medium text-slate-500 mt-0.5">Por <span class="font-bold">@authorName</span></p>
                             </div>
                         </div>
+                        <span class="text-xs font-bold text-slate-400 bg-slate-50 dark:bg-[#2a2b2e] px-2.5 py-1 rounded-lg border border-slate-100 dark:border-[#4a4b50]"><i class="fa-regular fa-calendar mr-1"></i> @log.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")</span>
+                    </div>
+
+                    <div class="pl-14">
+                        <p class="text-sm text-slate-600 dark:text-slate-400 italic">@log.ActionDetails</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(userComment))
+                    {
+                        <div class="pl-14 mt-3">
+                            <div class="bg-slate-50 dark:bg-[#2a2b2e] p-3 rounded-xl border border-slate-200 dark:border-[#4a4b50] text-sm text-slate-600 dark:text-slate-300 relative">
+                                <i class="fa-solid fa-quote-left text-slate-200 dark:text-slate-600 absolute top-2 left-2 text-xl opacity-50"></i>
+                                <p class="pl-6 relative z-10 font-medium italic">@userComment</p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (isLatest && isLastLog && (log.ActionType == "Approved" || log.ActionType == "Rejected") && log.CreatedBy == currentUserId && matchingApproval != null)
+                    {
+                        <div class="pl-14 mt-4">
+                            <form asp-controller="Approvals" asp-action="RevertSignature" method="post" class="inline-block" onsubmit="return confirm('¿Estás seguro de revocar tu decisión? El flujo retrocederá a este paso de forma automática.');">
+                                <input type="hidden" name="versionId" value="@version.VersionId" />
+                                <input type="hidden" name="approvalId" value="@matchingApproval.ApprovalId" />
+                                <input type="hidden" name="docId" value="@Model.DocId" />
+                                <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-[#323338] text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-[#4a4b50] hover:bg-slate-50 dark:hover:bg-[#2a2b2e] hover:text-red-500 dark:hover:text-red-400 transition-colors shadow-sm">
+                                    <i class="fa-solid fa-arrow-rotate-left mr-1.5"></i> Revocar mi firma
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="relative pl-8 md:pl-10 group">
+            <span class="absolute -left-[11px] top-4 flex items-center justify-center w-5 h-5 rounded-full bg-white dark:bg-[#323338] border-4 border-slate-400 shadow-sm transition-transform group-hover:scale-125"></span>
+            <div class="bg-white dark:bg-[#323338] p-5 rounded-2xl border border-slate-200 dark:border-[#4a4b50] shadow-sm hover:shadow-md transition-all">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-slate-100 dark:bg-[#2a2b2e] p-2.5 rounded-xl text-slate-500 dark:text-slate-400">
+                            <i class="fa-solid fa-file-pen text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <p class="text-sm font-bold text-slate-900 dark:text-white">Borrador Inicial Creado</p>
+                                <span class="text-[10px] font-black px-2 py-0.5 bg-slate-100 text-slate-600 dark:bg-[#2a2b2e] dark:text-slate-400 rounded">v @version.VersionNum</span>
+                            </div>
+                            <p class="text-xs font-medium text-slate-500 mt-0.5">Por <span class="font-bold">@creatorName</span></p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400 bg-slate-50 dark:bg-[#2a2b2e] px-2.5 py-1 rounded-lg border border-slate-100 dark:border-[#4a4b50]"><i class="fa-regular fa-calendar mr-1"></i> @version.CreatedAt.ToLocalTime().ToString("dd/MMM/yyyy HH:mm")</span>
+                </div>
+                <div class="pl-14">
+                    <p class="text-sm text-slate-600 dark:text-slate-400 italic">Los detalles históricos de este documento antiguo no están disponibles en la nueva bitácora.</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (version.StatusId == 2 && version.Approvals != null && version.Approvals.Any(a => a.ApprovalStatus == "Pending"))
+    {
+        var pendingApprovals = version.Approvals.Where(a => a.ApprovalStatus == "Pending").OrderBy(a => a.StepOrder);
+        foreach (var pending in pendingApprovals)
+        {
+            <div class="relative pl-8 md:pl-10 group mt-4">
+                <span class="absolute -left-[11px] top-4 flex w-5 h-5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full w-5 h-5 bg-white dark:bg-[#323338] border-4 border-amber-400 shadow-sm"></span>
+                </span>
+
+                <div class="p-5 rounded-2xl border-dashed border-2 border-slate-300 dark:border-[#4a4b50] bg-slate-50/50 dark:bg-[#2a2b2e]/30 shadow-sm transition-all">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-amber-50 dark:bg-amber-900/20 p-2.5 rounded-xl text-amber-500 dark:text-amber-400">
+                                <i class="fa-solid fa-hourglass-half text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">Firma Pendiente</p>
+                                    <span class="text-[10px] uppercase tracking-wider font-bold text-slate-500 bg-slate-100 dark:bg-[#2a2b2e] px-2 py-0.5 rounded-md">Paso @pending.StepOrder: @pending.StepType</span>
+                                </div>
+                                <p class="text-xs font-medium text-slate-500 mt-0.5">Asignado a: <span class="font-bold">@pending.Approver?.FullName</span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col items-end gap-2 mt-3 sm:mt-0">
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800/30">
+                                <i class="fa-solid fa-hourglass-half mr-1"></i> En Espera de Acción
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+                                </div> </div> </div>
                     }
                 </div>
             }
@@ -377,6 +493,13 @@
     <style>
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         @@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 🚀 NUEVO: Scrollbar personalizada para la bitácora */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
     </style>
 
     <script>

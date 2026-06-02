@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using QualityDoc.API.Helpers;
 
 namespace QualityDoc.API.Controllers
 {
@@ -35,14 +36,18 @@ namespace QualityDoc.API.Controllers
         private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1");
 
         // 1. GET: /Roles
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber)
         {
-            var roles = await _context.Roles
-                .IgnoreQueryFilters()
-                .OrderBy(r => r.RoleName)
-                .ToListAsync();
+            // 🚀 Definimos 10 registros por página
+            int pageSize = 10;
 
-            return View(roles);
+            // ⚠️ OJO: Le quitamos el .ToListAsync() para no saturar memoria
+            var query = _context.Roles
+                .IgnoreQueryFilters()
+                .OrderBy(r => r.RoleName);
+
+            // 🚀 Pasamos la consulta a nuestra clase matemática
+            return View(await PaginatedList<Role>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
         // 2. GET: /Roles/Details/5
