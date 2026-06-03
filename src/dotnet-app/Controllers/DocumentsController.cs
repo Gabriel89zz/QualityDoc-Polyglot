@@ -39,41 +39,98 @@ namespace QualityDoc.API.Controllers
             return string.IsNullOrEmpty(claim) ? 0 : int.Parse(claim);
         }
 
+       // ==========================================
+        // 1. INDEX: Listar Documentos (Filtros Avanzados)
         // ==========================================
-        // 1. INDEX: Listar Documentos
-        // ==========================================
-        public async Task<IActionResult> Index(int? pageNumber)
+        public async Task<IActionResult> Index(string search, int? deptId, int? categoryId, string origin, string status, int? pageNumber)
         {
+            // 🚀 Guardar filtros para la paginación
+            ViewData["CurrentSearch"] = search;
+            ViewData["CurrentStatus"] = status;
+            ViewData["CurrentOrigin"] = origin;
+            ViewBag.CurrentCategory = categoryId;
+            ViewBag.CurrentDept = deptId;
+
             var companyId = GetCurrentCompanyId();
             var currentUserId = GetCurrentUserId();
-
             var currentUser = await _context.Users.FindAsync(currentUserId);
+            
             ViewBag.UserDeptId = currentUser?.DeptId ?? 0;
+            bool isAdmin = User.IsInRole("Admin de Empresa");
+            ViewBag.IsAdmin = isAdmin; // Lo mandamos a la vista para ocultar/mostrar el filtro de Depto
 
-            // 🚀 Definimos 10 registros por página
+            // 🏢 1. Dropdown de Departamentos (Solo para Admin)
+            ViewBag.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == companyId && d.Status == "Active"), "DeptId", "DeptName", deptId);
+
+            // 📚 2. Dropdown de Categorías (Agrupadas por Norma)
+            var categoriasActivas = await _context.DocumentCategories
+                .Include(c => c.Norm)
+                .Where(c => c.CompanyId == companyId && c.Status == "Active")
+                .ToListAsync();
+
+            ViewBag.Categories = categoriasActivas.Select(c => new SelectListItem {
+                Value = c.CategoryId.ToString(),
+                Text = c.CategoryName,
+                Group = new SelectListGroup { Name = c.Norm?.NormName ?? "Norma General" },
+                Selected = categoryId.HasValue && c.CategoryId == categoryId.Value
+            }).ToList();
+
             int pageSize = 10;
 
-            // 🚀 1. Iniciamos la consulta base (Solo filtramos por empresa)
+            // 🚀 3. Iniciamos la consulta base
             var query = _context.Documents
                 .IgnoreQueryFilters()
                 .Include(d => d.Category)
                 .Include(d => d.Department)
-                .Where(d => d.CompanyId == companyId);
+                .Where(d => d.CompanyId == companyId)
+                .AsQueryable();
 
-            // 🚀 2. EL BLINDAJE: Si no es Admin, filtramos por su departamento
-            if (!User.IsInRole("Admin de Empresa"))
+            // 🛡️ EL BLINDAJE DE DEPARTAMENTO
+            if (!isAdmin)
             {
+                // Si no es admin, está bloqueado a ver solo los de su departamento
                 query = query.Where(d => d.DeptId == currentUser.DeptId);
             }
+            else if (deptId.HasValue)
+            {
+                // Si es admin y usó el filtro, filtramos por ese departamento
+                query = query.Where(d => d.DeptId == deptId.Value);
+            }
 
-            // Ordenamos para que los más nuevos salgan arriba
+            // 🔍 Filtro por texto libre
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(d => d.DocCode.Contains(search) || d.DocName.Contains(search));
+
+            // 🏷️ Filtro por Estado (Activo/Inactivo)
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(d => d.Status == status);
+
+           // 🌍 Filtro por Origen (Usando tu propiedad booleana IsExternal)
+            if (!string.IsNullOrEmpty(origin))
+            {
+                if (origin == "Externo")
+                {
+                    query = query.Where(d => d.IsExternal == true);
+                }
+                else if (origin == "Interno")
+                {
+                    query = query.Where(d => d.IsExternal == false);
+                }
+            }
+
+            // 📁 Filtro por Categoría
+            if (categoryId.HasValue)
+                query = query.Where(d => d.CategoryId == categoryId.Value);
+
             query = query.OrderByDescending(d => d.CreatedAt);
 
+            // Trazabilidad de Versiones (Código Original)
             var latestStatuses = await _context.DocumentVersions
                 .Where(v => v.Document.CompanyId == companyId)
                 .GroupBy(v => v.DocId)
                 .Select(g => new { DocId = g.Key, StatusId = g.OrderByDescending(v => v.VersionId).FirstOrDefault().StatusId })
                 .ToDictionaryAsync(x => x.DocId, x => x.StatusId);
+
             ViewBag.LatestStatuses = latestStatuses;
 
             var hasAdvancedVersions = await _context.DocumentVersions
@@ -81,9 +138,9 @@ namespace QualityDoc.API.Controllers
                 .Select(v => v.DocId)
                 .Distinct()
                 .ToListAsync();
+
             ViewBag.HasAdvancedVersions = hasAdvancedVersions;
 
-            // 🚀 3. Pasamos la consulta a nuestra clase matemática (Sin el ToListAsync)
             return View(await PaginatedList<Document>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 

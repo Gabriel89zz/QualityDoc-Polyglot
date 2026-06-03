@@ -35,34 +35,47 @@ namespace QualityDoc.API.Controllers
         }
 
         // ==========================================
-        // 1. INDEX: Listar las categorías de SU empresa
+        // 1. INDEX: Listar las categorías de SU empresa (Paginado y Filtrado)
         // ==========================================
-        public async Task<IActionResult> Index(int? filterNormId, int? pageNumber)
+        public async Task<IActionResult> Index(string search, string status, int? filterNormId, int? pageNumber)
         {
-            // 🚀 Definimos 10 registros por página
+            // 🚀 Guardamos los filtros actuales para que la vista los recuerde
+            ViewData["CurrentSearch"] = search;
+            ViewData["CurrentStatus"] = status;
+            ViewBag.CurrentFilter = filterNormId; 
+
             int pageSize = 10;
             var companyId = GetCurrentCompanyId();
 
-            // 1. Mandamos las normas a la vista para llenar el Dropdown
+            // Llenar el Dropdown de Normas
             ViewBag.Norms = new SelectList(_context.Norms.Where(n => n.Status == "Active"), "NormId", "NormName", filterNormId);
-            ViewBag.CurrentFilter = filterNormId; // Guardamos el filtro para la paginación
 
-            // 2. Preparamos la consulta base
             var query = _context.DocumentCategories
                 .IgnoreQueryFilters()
                 .Include(c => c.Norm) 
-                .Where(c => c.CompanyId == companyId);
+                .Where(c => c.CompanyId == companyId)
+                .AsQueryable();
 
-            // 3. Aplicamos el filtro si existe
+            // 🔍 Filtro por texto libre (Nombre de Categoría o Prefijo)
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c => c.CategoryName.Contains(search) || c.Prefix.Contains(search));
+            }
+
+            // 🏷️ Filtro por Estado
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(c => c.Status == status);
+            }
+
+            // 📚 Filtro por Norma Aplicable
             if (filterNormId.HasValue)
             {
                 query = query.Where(c => c.NormId == filterNormId.Value);
             }
 
-            // 4. Ordenamos (Importante para que la paginación sea estable)
             query = query.OrderBy(c => c.HierarchyLevel).ThenBy(c => c.CategoryName);
 
-            // 🚀 Pasamos la consulta a nuestra clase matemática (Sin el ToListAsync)
             return View(await PaginatedList<DocumentCategory>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 

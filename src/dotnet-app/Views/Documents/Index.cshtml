@@ -16,7 +16,7 @@
 
 <div class="w-full max-w-6xl mx-auto space-y-6">
     
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-[#4a4b50] transition-colors duration-300 mb-6">
         <div>
             <h2 class="text-2xl font-bold text-slate-800 dark:text-white flex items-center">
                 <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center mr-3 border border-brand/20">
@@ -35,6 +35,105 @@
             }
         </div>
     </div>
+
+    <form method="get" asp-action="Index" id="searchForm" class="flex flex-col lg:flex-row gap-3 mb-6 relative z-40 animate-fade-up">
+        
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+            </span>
+            <input type="text" name="search" value="@ViewData["CurrentSearch"]" autocomplete="off" placeholder="Buscar por folio o título..." 
+                   class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-sm focus:outline-none focus:border-brand dark:focus:border-brand shadow-sm transition-all text-slate-700 dark:text-slate-200" />
+        </div>
+
+        @if (ViewBag.IsAdmin == true)
+        {
+            <div class="relative group w-full lg:w-48 shrink-0">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                    <i class="fa-solid fa-users-rectangle text-slate-400 group-hover:text-brand transition-colors"></i>
+                </div>
+                <select name="deptId" asp-items="ViewBag.Departments" onchange="this.form.submit()" 
+                        class="appearance-none bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl focus:ring-2 focus:ring-brand/20 focus:border-brand block w-full pl-10 pr-10 py-2.5 transition-all cursor-pointer outline-none hover:border-slate-300 dark:hover:border-[#5a5b60] shadow-sm">
+                    <option value="">Todos los Deptos</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors"></i>
+                </div>
+            </div>
+        }
+
+        <div class="relative group w-full lg:w-56 shrink-0">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                <i class="fa-solid fa-folder-tree text-slate-400 group-hover:text-brand transition-colors"></i>
+            </div>
+            <select name="categoryId" asp-items="ViewBag.Categories" onchange="this.form.submit()" 
+                    class="appearance-none bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl focus:ring-2 focus:ring-brand/20 focus:border-brand block w-full pl-10 pr-10 py-2.5 transition-all cursor-pointer outline-none hover:border-slate-300 dark:hover:border-[#5a5b60] shadow-sm">
+                <option value="">Todas las Categorías</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
+                <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors"></i>
+            </div>
+        </div>
+
+        <div class="relative inline-block text-left shrink-0" id="filterDropdownContainer">
+            <button type="button" id="btnFilterToggle" class="w-full md:w-auto h-full inline-flex justify-center items-center gap-2 rounded-xl border border-slate-200 dark:border-[#4a4b50] shadow-sm px-4 py-2.5 bg-white dark:bg-[#323338] text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] transition-colors focus:outline-none focus:ring-2 focus:ring-brand/20">
+                <i class="fa-solid fa-sliders text-slate-400"></i> Filtros 
+                @if(!string.IsNullOrEmpty((string)ViewData["CurrentStatus"]) || !string.IsNullOrEmpty((string)ViewData["CurrentOrigin"]))
+                {
+                    <span class="ml-1 bg-brand text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm">
+                        @( (string.IsNullOrEmpty((string)ViewData["CurrentStatus"]) ? 0 : 1) + (string.IsNullOrEmpty((string)ViewData["CurrentOrigin"]) ? 0 : 1) )
+                    </span>
+                }
+                <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+            </button>
+
+            <div id="filterMenu" class="hidden absolute right-0 sm:right-0 mt-2 w-72 rounded-2xl shadow-xl bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] z-50 p-5 transform origin-top-right transition-all">
+                
+                <div class="mb-4 pb-4 border-b border-slate-100 dark:border-[#4a4b50]">
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Origen del Documento</span>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="origin" value="" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @(string.IsNullOrEmpty((string)ViewData["CurrentOrigin"]) ? "checked" : "")>
+                            <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">Todos</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="origin" value="Interno" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @((string)ViewData["CurrentOrigin"] == "Interno" ? "checked" : "")>
+                            <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">Internos</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="origin" value="Externo" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @((string)ViewData["CurrentOrigin"] == "Externo" ? "checked" : "")>
+                            <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">Externos</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Estado</span>
+                    <div class="flex flex-wrap gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="status" value="" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @(string.IsNullOrEmpty((string)ViewData["CurrentStatus"]) ? "checked" : "")>
+                            <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">Todos</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="status" value="Active" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @((string)ViewData["CurrentStatus"] == "Active" ? "checked" : "")>
+                            <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">Vigentes</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="status" value="Inactive" class="peer sr-only" onchange="document.getElementById('searchForm').submit();" @((string)ViewData["CurrentStatus"] == "Inactive" ? "checked" : "")>
+                            <div class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#4a4b50] bg-slate-50 dark:bg-[#2a2b2e] text-slate-600 dark:text-slate-400 text-xs font-bold transition-colors peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:text-brand shadow-sm">Suspendidos</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if(!string.IsNullOrEmpty((string)ViewData["CurrentSearch"]) || !string.IsNullOrEmpty((string)ViewData["CurrentStatus"]) || !string.IsNullOrEmpty((string)ViewData["CurrentOrigin"]) || ViewBag.CurrentCategory != null || ViewBag.CurrentDept != null)
+        {
+            <a asp-action="Index" class="shrink-0 bg-slate-100 hover:bg-red-50 dark:bg-[#323338] dark:hover:bg-red-500/10 text-slate-500 hover:text-red-500 dark:text-slate-400 px-4 py-2.5 rounded-xl font-bold shadow-sm transition-colors flex items-center justify-center border border-slate-200 dark:border-[#4a4b50]" title="Limpiar filtros">
+                <i class="fa-solid fa-xmark"></i>
+            </a>
+        }
+    </form>
 
     @if (TempData["ErrorMessage"] != null)
     {
@@ -185,7 +284,13 @@
             </div>
             
             <div class="flex space-x-2">
-                <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                <a asp-action="Index" 
+                   asp-route-pageNumber="@(Model.PageIndex - 1)" 
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-status="@ViewData["CurrentStatus"]"
+                   asp-route-origin="@ViewData["CurrentOrigin"]"
+                   asp-route-categoryId="@ViewBag.CurrentCategory"
+                   asp-route-deptId="@ViewBag.CurrentDept"
                    class="px-4 py-2 text-xs font-bold rounded-lg border transition-colors shadow-sm
                    @(Model.HasPreviousPage 
                         ? "text-slate-600 bg-white border-slate-300 hover:bg-slate-50 hover:text-brand dark:bg-[#323338] dark:border-[#4a4b50] dark:text-slate-300 dark:hover:bg-brand/20 dark:hover:border-brand" 
@@ -193,7 +298,13 @@
                     <i class="fa-solid fa-chevron-left mr-1"></i> Anterior
                 </a>
 
-                <a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                <a asp-action="Index" 
+                   asp-route-pageNumber="@(Model.PageIndex + 1)" 
+                   asp-route-search="@ViewData["CurrentSearch"]"
+                   asp-route-status="@ViewData["CurrentStatus"]"
+                   asp-route-origin="@ViewData["CurrentOrigin"]"
+                   asp-route-categoryId="@ViewBag.CurrentCategory"
+                   asp-route-deptId="@ViewBag.CurrentDept"
                    class="px-4 py-2 text-xs font-bold rounded-lg border transition-colors shadow-sm
                    @(Model.HasNextPage 
                         ? "text-slate-600 bg-white border-slate-300 hover:bg-slate-50 hover:text-brand dark:bg-[#323338] dark:border-[#4a4b50] dark:text-slate-300 dark:hover:bg-brand/20 dark:hover:border-brand" 
@@ -204,3 +315,30 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnFilterToggle = document.getElementById('btnFilterToggle');
+            const filterMenu = document.getElementById('filterMenu');
+
+            if(btnFilterToggle && filterMenu) {
+                // Abrir/Cerrar menú
+                btnFilterToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    filterMenu.classList.toggle('hidden');
+                });
+
+                // Cerrar al dar click afuera
+                document.addEventListener('click', (e) => {
+                    if (!filterMenu.contains(e.target) && !btnFilterToggle.contains(e.target)) {
+                        filterMenu.classList.add('hidden');
+                    }
+                });
+
+                // Prevenir que se cierre al dar click adentro
+                filterMenu.addEventListener('click', (e) => e.stopPropagation());
+            }
+        });
+    </script>
+}
