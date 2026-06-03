@@ -53,6 +53,9 @@ namespace QualityDoc.API.Services
 
                 using (var client = new SmtpClient(smtpServer, port))
                 {
+                    // 🚀 ESTA LÍNEA ES OBLIGATORIA PARA GMAIL:
+                    client.UseDefaultCredentials = false; 
+                    
                     client.Credentials = new NetworkCredential(username, password);
                     client.EnableSsl = true;
                     await client.SendMailAsync(message);

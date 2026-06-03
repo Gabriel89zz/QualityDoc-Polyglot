@@ -379,7 +379,11 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
                         resetLink,
                         "Crear Nueva Contraseña"
                     );
-                } catch(Exception) {}
+                } 
+                catch(Exception ex) 
+                {
+                    throw new Exception("Error de Gmail: " + ex.Message);
+                }
             }
 
             // ISO 27001: Siempre mostrar éxito para no revelar qué correos existen
