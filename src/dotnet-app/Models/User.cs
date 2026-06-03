@@ -36,11 +36,20 @@ namespace QualityDoc.API.Models
         [Column("password_hash")]
         public string PasswordHash { get; set; }
 
-        // ==========================================
-        // PROPIEDADES DE NAVEGACIÓN
-        // ==========================================
+       // 🚀 NUEVOS CAMPOS PARA SEGURIDAD POR CORREO
+       // 🚀 Mapeo exacto a las columnas de SQL Server
+        [Column("password_reset_token")]
+        public string? PasswordResetToken { get; set; }
+
+        [Column("reset_token_expiry")]
+        public DateTime? ResetTokenExpiry { get; set; }
         
-        // 🚀 MODIFICACIÓN 2: La relación con la Empresa ahora es opcional (Company?)
+        [Column("two_factor_code")]
+        public string? TwoFactorCode { get; set; }
+
+        [Column("two_factor_expiry")]
+        public DateTime? TwoFactorExpiry { get; set; }
+
         [ForeignKey("CompanyId")]
         public virtual Company? Company { get; set; }
 

@@ -11,6 +11,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<QualityDocDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<QualityDoc.API.Services.IEmailService, QualityDoc.API.Services.EmailService>();
+
 // 2. CONFIGURACIÓN DEL GUARDIA DE SEGURIDAD (Cookies)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

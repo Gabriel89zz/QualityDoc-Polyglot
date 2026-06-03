@@ -17,10 +17,12 @@ namespace QualityDoc.API.Controllers
     public class UsersController : Controller
     {
         private readonly QualityDocDbContext _context;
+        private readonly Services.IEmailService _emailService; // 🚀 INYECTAMOS EL SERVICIO DE CORREOS
 
-        public UsersController(QualityDocDbContext context)
+        public UsersController(QualityDocDbContext context, Services.IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // ==========================================
@@ -142,13 +144,16 @@ namespace QualityDoc.API.Controllers
         // 4. POST: /Users/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserId,CompanyId,DeptId,RoleId,FullName,Email,PasswordHash")] User user)
+        // 🚀 Quitamos "PasswordHash" del Bind porque ya no se la pediremos al Admin
+        public async Task<IActionResult> Create([Bind("UserId,CompanyId,DeptId,RoleId,FullName,Email")] User user)
         {
-            // 🛡️ FORZADO DE DATOS: Si no es SuperAdmin, obligamos a que el CompanyId sea el suyo
             if (!IsSuperAdmin)
             {
                 user.CompanyId = CurrentCompanyId;
             }
+
+            // Ignoramos la validación del password en el modelo
+            ModelState.Remove("PasswordHash");
 
             if (ModelState.IsValid)
             {
@@ -158,13 +163,34 @@ namespace QualityDoc.API.Controllers
                 }
                 else
                 {
-                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+                    // 1. Contraseña Basura (Nadie la sabrá jamás, asegura la BD)
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString());
                     user.Status = "Active"; 
-                    
                     user.CreatedBy = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1");
+
+                    // 2. 🚀 GENERAMOS EL TOKEN DE CONFIGURACIÓN (Válido por 3 días)
+                    user.PasswordResetToken = Guid.NewGuid().ToString();
+                    user.ResetTokenExpiry = DateTime.UtcNow.AddDays(3);
 
                     _context.Add(user);
                     await _context.SaveChangesAsync();
+
+                    // 3. 🚀 DISPARAMOS EL CORREO DE BIENVENIDA
+                    try
+                    {
+                        string setupLink = Url.Action("ResetPassword", "Auth", new { token = user.PasswordResetToken }, Request.Scheme);
+                        await _emailService.SendEmailAsync(
+                            user.Email,
+                            "👋 Bienvenido a QualityDoc - Configura tu cuenta",
+                            "¡Tu cuenta ha sido creada!",
+                            $"Hola <b>{user.FullName}</b>,<br><br>Tu administrador te ha dado de alta en la plataforma de calidad QualityDoc Polyglot. Para activar tu cuenta y acceder a los documentos, necesitas establecer tu contraseña privada. Este enlace de seguridad caducará en 3 días.",
+                            setupLink,
+                            "Configurar Mi Contraseña"
+                        );
+                    }
+                    catch (Exception) { /* Evitamos que truene si falla Mailtrap */ }
+
+                    TempData["SuccessMessage"] = "Usuario creado exitosamente. Se ha enviado un correo con las instrucciones de acceso.";
                     return RedirectToAction(nameof(Index));
                 }
             }

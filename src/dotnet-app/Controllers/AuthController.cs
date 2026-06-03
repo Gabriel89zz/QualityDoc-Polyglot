@@ -20,11 +20,12 @@ namespace QualityDoc.API.Controllers
     {
         private readonly QualityDocDbContext _context;
         private readonly IConfiguration _config; 
-
-        public AuthController(QualityDocDbContext context, IConfiguration config)
+        private readonly Services.IEmailService _emailService; 
+        public AuthController(QualityDocDbContext context, IConfiguration config, Services.IEmailService emailService)
         {
             _context = context;
             _config = config;
+            _emailService = emailService;
         }
 
         // =======================================================
@@ -66,6 +67,37 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
                 ModelState.AddModelError(string.Empty, "Credenciales incorrectas o usuario dado de baja.");
                 return View(model);
             }
+
+            // =======================================================
+            // 🚀 INTERCEPCIÓN PARA 2FA DE ADMINISTRADORES
+            // =======================================================
+            if (user.Role.RoleName == "Super Administrador" || user.Role.RoleName == "Super Admin" || user.Role.RoleName == "Admin de Empresa")
+            {
+                // 1. Generar código OTP de 6 dígitos
+                string code = new Random().Next(100000, 999999).ToString();
+                user.TwoFactorCode = code;
+                user.TwoFactorExpiry = DateTime.UtcNow.AddMinutes(10);
+                
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+
+                // 2. Disparar correo con el OTP
+                try
+                {
+                    await _emailService.SendEmailAsync(
+                        user.Email,
+                        "🔒 Código de Seguridad 2FA - QualityDoc",
+                        "Autenticación en Dos Pasos",
+                        $"Hola <b>{user.FullName}</b>,<br><br>Se requiere verificación adicional para ingresar al panel de administración. Ingresa el siguiente código de seguridad (válido por 10 minutos):<br><br><div style='text-align:center; font-size:32px; font-weight:bold; letter-spacing:10px; background:#F1F5F9; color:#4F46E5; padding:20px; border-radius:12px; margin:20px 0;'>{code}</div>"
+                    );
+                }
+                catch (Exception) { }
+
+                // 3. Guardar en memoria temporal quién intentó entrar y mandarlo a la vista del PIN
+                TempData["Pending2FAUserId"] = user.UserId;
+                return RedirectToAction("Verify2FA");
+            }
+            // =======================================================
 
             var claims = new List<Claim>
             {
@@ -166,9 +198,34 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
+                // =======================================================
+                // 🚀 NUEVO: GENERAR 2FA PARA SU PRIMER INGRESO (ONBOARDING)
+                // =======================================================
+                string code = new Random().Next(100000, 999999).ToString();
+                newUser.TwoFactorCode = code;
+                newUser.TwoFactorExpiry = DateTime.UtcNow.AddMinutes(10);
+                
+                _context.Update(newUser);
+                await _context.SaveChangesAsync();
+
+                try
+                {
+                    await _emailService.SendEmailAsync(
+                        newUser.Email,
+                        "🎉 Bienvenido a QualityDoc - Confirma tu cuenta",
+                        "Registro Exitoso",
+                        $"Hola <b>{newUser.FullName}</b>,<br><br>Tu empresa <b>{newCompany.LegalName}</b> ha sido registrada con éxito en QualityDoc Polyglot. Para verificar tu correo e ingresar por primera vez, utiliza el siguiente código de seguridad:<br><br><div style='text-align:center; font-size:32px; font-weight:bold; letter-spacing:10px; background:#F1F5F9; color:#4F46E5; padding:20px; border-radius:12px; margin:20px 0;'>{code}</div>"
+                    );
+                }
+                catch (Exception) { /* Ignoramos fallos del SMTP */ }
+
                 await transaction.CommitAsync();
 
-                return RedirectToAction("Login");
+                // 🚀 REDIRIGIMOS A LA VISTA DE 2FA DIRECTAMENTE
+                TempData["Pending2FAUserId"] = newUser.UserId;
+                TempData["SuccessMessage"] = "¡Cuenta creada! Revisa tu correo electrónico para obtener el código de acceso inicial.";
+                
+                return RedirectToAction("Verify2FA");
             }
             catch (Exception ex)
             {
@@ -249,6 +306,121 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        // =======================================================
+        // 5. ZONA DE SEGURIDAD Y CORREOS (2FA & RESET)
+        // =======================================================
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Verify2FA()
+        {
+            if (TempData["Pending2FAUserId"] == null) return RedirectToAction("Login");
+            TempData.Keep("Pending2FAUserId"); // Mantenemos el ID vivo en memoria
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Verify2FA(string code)
+        {
+            var userIdStr = TempData["Pending2FAUserId"]?.ToString();
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login");
+
+            var user = await _context.Users.Include(u => u.Role).Include(u => u.Company).FirstOrDefaultAsync(u => u.UserId == int.Parse(userIdStr));
+            
+            if (user == null || user.TwoFactorCode != code || user.TwoFactorExpiry < DateTime.UtcNow)
+            {
+                TempData.Keep("Pending2FAUserId"); // Le damos otra oportunidad
+                ModelState.AddModelError(string.Empty, "El código es incorrecto o ha expirado.");
+                return View();
+            }
+
+            // ÉXITO: Limpiamos el código y logueamos al Admin
+            user.TwoFactorCode = null;
+            user.TwoFactorExpiry = null;
+            await _context.SaveChangesAsync();
+
+            // Firmamos las cookies (Igual que en el Login normal)
+            var claims = new List<Claim> {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role.RoleName),
+                new Claim("CompanyId", user.CompanyId.HasValue ? user.CompanyId.Value.ToString() : "0"), 
+                new Claim("CompanyName", user.Company != null ? user.Company.LegalName : "Sistema (Super Admin)")
+            };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.Status == "Active");
+            if (user != null)
+            {
+                user.PasswordResetToken = Guid.NewGuid().ToString();
+                user.ResetTokenExpiry = DateTime.UtcNow.AddHours(2);
+                await _context.SaveChangesAsync();
+
+                string resetLink = Url.Action("ResetPassword", "Auth", new { token = user.PasswordResetToken }, Request.Scheme);
+                
+                try {
+                    await _emailService.SendEmailAsync(
+                        user.Email,
+                        "🔑 Restablecer tu contraseña - QualityDoc",
+                        "Solicitud de Recuperación",
+                        $"Hola <b>{user.FullName}</b>,<br><br>Recibimos una solicitud para restablecer tu contraseña. Si no la solicitaste, ignora este correo de forma segura.<br><br>Da clic en el siguiente botón para crear una nueva contraseña:",
+                        resetLink,
+                        "Crear Nueva Contraseña"
+                    );
+                } catch(Exception) {}
+            }
+
+            // ISO 27001: Siempre mostrar éxito para no revelar qué correos existen
+            TempData["SuccessMessage"] = "Si el correo está registrado, recibirás las instrucciones en breve.";
+            return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(string token)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "El enlace es inválido o ha expirado. Por favor, solicita uno nuevo.";
+                return RedirectToAction("Login");
+            }
+            ViewBag.Token = token;
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(string token, string newPassword)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "El enlace ha expirado.";
+                return RedirectToAction("Login");
+            }
+
+            // Actualizamos la contraseña y quemamos el token para que no se re-use
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.PasswordResetToken = null;
+            user.ResetTokenExpiry = null;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "¡Tu contraseña ha sido actualizada con éxito! Ya puedes iniciar sesión.";
+            return RedirectToAction("Login");
         }
     }
 }

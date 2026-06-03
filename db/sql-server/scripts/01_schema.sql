@@ -98,9 +98,17 @@ CREATE TABLE Users (
     full_name NVARCHAR(200) NOT NULL,
     email NVARCHAR(150) NOT NULL UNIQUE,
     password_hash NVARCHAR(MAX) NOT NULL,
+    
+    -- 🚀 NUEVOS CAMPOS PARA SEGURIDAD POR CORREO (2FA y Recuperación)
+    password_reset_token NVARCHAR(255) NULL,
+    reset_token_expiry DATETIME2 NULL,
+    two_factor_code NVARCHAR(10) NULL,
+    two_factor_expiry DATETIME2 NULL,
+
     CONSTRAINT FK_Users_Company FOREIGN KEY (company_id) REFERENCES Companies(company_id),
     CONSTRAINT FK_Users_Dept FOREIGN KEY (dept_id) REFERENCES Departments(dept_id),
     CONSTRAINT FK_Users_Role FOREIGN KEY (role_id) REFERENCES Roles(role_id),
+    
     -- Audit Fields
     status NVARCHAR(20) DEFAULT 'Active',
     created_at DATETIME2 DEFAULT GETUTCDATE(),

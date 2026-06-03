@@ -146,10 +146,25 @@
 
         <div class="flex-1 flex flex-col justify-center max-w-md w-full mx-auto">
             
-            <div class="mb-10 mt-20 lg:mt-0"> 
-                <h1 class="text-5xl font-bold tracking-tight mb-3">Iniciar sesión</h1>
-                <p class="text-base text-slate-500 dark:text-slate-400">Accede a tu panel de control de calidad.</p>
+            <div class="mb-8 mt-20 lg:mt-0"> 
+                <h1 class="text-4xl lg:text-5xl font-bold tracking-tight mb-3" id="formTitle">Iniciar sesión</h1>
+                <p class="text-base text-slate-500 dark:text-slate-400" id="formSubtitle">Accede a tu panel de control de calidad.</p>
             </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800/30 text-sm font-bold mb-6 flex items-start shadow-sm">
+                    <i data-lucide="check-circle" class="w-5 h-5 mr-2 shrink-0 mt-0.5"></i> 
+                    <span>@TempData["SuccessMessage"]</span>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl border border-red-200 dark:border-red-800/30 text-sm font-bold mb-6 flex items-start shadow-sm">
+                    <i data-lucide="alert-circle" class="w-5 h-5 mr-2 shrink-0 mt-0.5"></i>
+                    <span>@TempData["ErrorMessage"]</span>
+                </div>
+            }
 
             <div asp-validation-summary="ModelOnly" class="text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-sm mb-4 font-semibold"></div>
 
@@ -159,14 +174,7 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i data-lucide="mail" class="w-6 h-6 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
                         </div>
-                        <input 
-                            asp-for="Email" 
-                            type="email" 
-                            id="email" 
-                            placeholder="tu.correo@empresa.com" 
-                            class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
-                            required
-                        >
+                        <input asp-for="Email" type="email" id="email" placeholder="tu.correo@empresa.com" class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white" required>
                     </div>
                     <span asp-validation-for="Email" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                 </div>
@@ -176,14 +184,7 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i data-lucide="lock" class="w-6 h-6 text-slate-400 group-focus-within:text-brand transition-colors duration-300"></i>
                         </div>
-                        <input 
-                            asp-for="Password"
-                            type="password" 
-                            id="password" 
-                            placeholder="••••••••••••" 
-                            class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white"
-                            required
-                        >
+                        <input asp-for="Password" type="password" id="password" placeholder="••••••••••••" class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent transition-all duration-300 dark:text-white" required>
                     </div>
                     <span asp-validation-for="Password" class="text-red-500 text-xs mt-1 block font-semibold"></span>
                 </div>
@@ -193,19 +194,34 @@
                         <input type="checkbox" class="w-5 h-5 rounded border-slate-300 text-brand focus:ring-brand dark:border-slate-600 dark:bg-slate-800 transition-colors duration-300">
                         <span class="text-sm text-slate-500 dark:text-slate-400">Recordarme</span>
                     </label>
-                    <a href="#" class="text-sm font-medium text-brand hover:text-brand-hover transition-colors duration-300">¿Olvidaste tu contraseña?</a>
+                    <button type="button" onclick="toggleForgotForm()" class="text-sm font-medium text-brand hover:text-brand-hover transition-colors duration-300">¿Olvidaste tu contraseña?</button>
                 </div>
 
                 <p id="errorMessage" class="text-sm text-red-500 hidden mt-1"><i data-lucide="alert-circle" class="w-4 h-4 inline mr-1"></i> Por favor, completa ambos campos correctamente.</p>
 
-                <button 
-                    type="submit" 
-                    id="submitBtn"
-                    class="w-full py-4 px-4 bg-brand hover:bg-brand-hover text-white dark:text-slate-900 rounded-xl text-base font-medium shadow-md shadow-brand/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand dark:focus:ring-offset-[#2a2b2e] flex justify-center items-center gap-2"
-                >
+                <button type="submit" id="submitBtn" class="w-full py-4 px-4 bg-brand hover:bg-brand-hover text-white dark:text-slate-900 rounded-xl text-base font-medium shadow-md shadow-brand/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand dark:focus:ring-offset-[#2a2b2e] flex justify-center items-center gap-2">
                     <span>Comenzar gestión</span>
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </button>
+            </form>
+
+            <form asp-controller="Auth" asp-action="ForgotPassword" method="post" id="forgotForm" class="hidden space-y-6 transition-all duration-300">
+                <div>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="send" class="w-6 h-6 text-slate-400 group-focus-within:text-slate-700 dark:group-focus-within:text-white transition-colors duration-300"></i>
+                        </div>
+                        <input type="email" name="email" placeholder="Ingresa tu correo registrado" class="block w-full pl-12 pr-4 py-4 bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-base placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all duration-300 dark:text-white" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-4 px-4 bg-slate-800 hover:bg-slate-900 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl text-base font-medium shadow-md transition-all duration-300 flex justify-center items-center gap-2">
+                    <span>Enviar enlace de recuperación</span>
+                </button>
+
+                <div class="text-center mt-4">
+                    <button type="button" onclick="toggleForgotForm()" class="text-sm font-medium text-slate-500 hover:text-brand transition-colors"><i data-lucide="arrow-left" class="w-4 h-4 inline -mt-0.5"></i> Volver al inicio de sesión</button>
+                </div>
             </form>
 
         </div>
@@ -293,6 +309,25 @@
                 errorMessage.classList.add('hidden');
             });
         });
+
+        function toggleForgotForm() {
+            const loginForm = document.getElementById('loginForm');
+            const forgotForm = document.getElementById('forgotForm');
+            const title = document.getElementById('formTitle');
+            const subtitle = document.getElementById('formSubtitle');
+
+            if (loginForm.classList.contains('hidden')) {
+                loginForm.classList.remove('hidden');
+                forgotForm.classList.add('hidden');
+                title.innerText = 'Iniciar sesión';
+                subtitle.innerText = 'Accede a tu panel de control de calidad.';
+            } else {
+                loginForm.classList.add('hidden');
+                forgotForm.classList.remove('hidden');
+                title.innerText = 'Recuperar acceso';
+                subtitle.innerText = 'Te enviaremos un enlace seguro a tu correo.';
+            }
+        }
     </script>
 </body>
 </html>

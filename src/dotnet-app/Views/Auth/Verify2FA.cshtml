@@ -1,0 +1,73 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación 2FA - QualityDoc</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Google Sans Flex', 'sans-serif'] },
+                    colors: { brand: { DEFAULT: '#754ee5', hover: '#5e3ab8' } }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #FAFAFA; color: #0f172a; transition: background-color 0.3s, color 0.3s; }
+        html.dark body { background-color: #2a2b2e; color: #f8fafc; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-md w-full bg-white dark:bg-[#323338] rounded-3xl shadow-2xl border border-slate-200 dark:border-[#4a4b50] overflow-hidden relative z-10">
+        <div class="bg-brand/5 dark:bg-brand/10 p-8 flex flex-col items-center border-b border-brand/10 dark:border-[#4a4b50]">
+            <div class="w-16 h-16 bg-brand text-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand/30 mb-4">
+                <i data-lucide="shield-check" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Doble Verificación</h2>
+            <p class="text-sm text-center text-slate-500 dark:text-slate-400 mt-2">Hemos enviado un PIN seguro a tu correo electrónico para verificar tu identidad.</p>
+        </div>
+
+        <form asp-action="Verify2FA" method="post" class="p-8 space-y-6">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl border border-red-200 dark:border-red-800/30 text-sm font-bold text-center flex items-center justify-center">
+                    <i data-lucide="alert-circle" class="w-4 h-4 mr-2"></i> Código incorrecto o expirado
+                </div>
+            }
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 text-center uppercase tracking-widest">Ingresa el código</label>
+                <input type="text" name="code" maxlength="6" autocomplete="off" class="w-full text-center text-3xl tracking-[0.5em] font-black py-4 rounded-xl bg-slate-50 dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] text-brand focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none dark:text-white" placeholder="••••••" required autofocus />
+            </div>
+
+            <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-bold py-4 rounded-xl shadow-md shadow-brand/20 transition-all flex justify-center items-center">
+                <i data-lucide="unlock" class="w-5 h-5 mr-2"></i> Autenticar
+            </button>
+            
+            <div class="text-center mt-4">
+                <a asp-action="Login" class="text-sm font-medium text-slate-400 hover:text-brand transition-colors">Cancelar y volver al Login</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>
