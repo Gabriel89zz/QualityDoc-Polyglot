@@ -4,7 +4,7 @@
     ViewData["Title"] = "Editar Empresa";
 }
 
-<div class="max-w-3xl mx-auto space-y-6 mt-4">
+<div class="w-full max-w-4xl mx-auto space-y-6">
     <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-2">
             <li>
@@ -28,10 +28,7 @@
                 </div>
             </div>
             
-            <div class="text-xs text-slate-500 dark:text-slate-400 text-left md:text-right bg-white dark:bg-[#2a2b2e] px-4 py-2 rounded-lg border border-slate-200 dark:border-[#4a4b50] shadow-sm">
-                <p class="font-semibold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-fingerprint mr-1 text-brand"></i> ID Sistema: #@Model.CompanyId</p>
-                <p class="mt-1"><i class="fa-regular fa-calendar mr-1"></i> Registrada: @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
-            </div>
+            
         </div>
 
         <form asp-action="Edit" class="p-8 space-y-6">

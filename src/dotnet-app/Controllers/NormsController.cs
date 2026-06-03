@@ -25,18 +25,34 @@ namespace QualityDoc.API.Controllers
         // Helper para sacar tu ID de usuario logueado
         private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "1");
 
-        // 1. GET: /Norms
-        public async Task<IActionResult> Index(int? pageNumber)
+        // ==========================================
+        // 1. GET: /Norms (Paginado y Filtrado)
+        // ==========================================
+        public async Task<IActionResult> Index(string search, string status, int? pageNumber)
         {
+            // 🚀 Guardar filtros para la paginación
+            ViewData["CurrentSearch"] = search;
+            ViewData["CurrentStatus"] = status;
+
             // 🚀 Definimos 10 registros por página
             int pageSize = 10;
 
-            // Traemos TODAS las normas (Activas e Inactivas)
-            // ⚠️ OJO: Le quitamos el .ToListAsync()
-            var query = _context.Norms
-                .IgnoreQueryFilters()
-                .OrderBy(n => n.NormName)
-                .ThenByDescending(n => n.ReleaseYear); // Las más recientes primero
+            var query = _context.Norms.IgnoreQueryFilters().AsQueryable();
+
+            // 🔍 Filtro por texto libre (Nombre de la Norma o Año)
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(n => n.NormName.Contains(search) || n.ReleaseYear.ToString().Contains(search));
+            }
+
+            // 🏷️ Filtro por Estado (Active/Inactive)
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(n => n.Status == status);
+            }
+
+            // Ordenamiento por defecto: Alfabético y luego las más recientes primero
+            query = query.OrderBy(n => n.NormName).ThenByDescending(n => n.ReleaseYear);
 
             // 🚀 Pasamos la consulta a nuestra clase matemática
             return View(await PaginatedList<Norm>.CreateAsync(query, pageNumber ?? 1, pageSize));

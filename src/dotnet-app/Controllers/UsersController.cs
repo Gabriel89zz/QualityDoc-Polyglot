@@ -29,27 +29,80 @@ namespace QualityDoc.API.Controllers
         private bool IsSuperAdmin => User.IsInRole("Super Admin");
         private int CurrentCompanyId => int.Parse(User.FindFirstValue("CompanyId") ?? "0");
 
-       // 1. GET: /Users
-        public async Task<IActionResult> Index(int? pageNumber)
+       // ==========================================
+        // 1. GET: /Users (Paginado y Filtrado)
+        // ==========================================
+        public async Task<IActionResult> Index(string search, int? roleId, int? deptId, string status, int? pageNumber)
         {
-            // 🚀 Definimos 8 usuarios por página
-            int pageSize = 8;
+            // 🚀 Guardar filtros para la paginación
+            ViewData["CurrentSearch"] = search;
+            ViewData["CurrentStatus"] = status;
+            ViewBag.CurrentRole = roleId;
+            ViewBag.CurrentDept = deptId;
 
+            // 🚀 Definimos 10 usuarios por página
+            int pageSize = 10;
+
+            // 🚀 Combos para los filtros (Respetando Multi-tenant y Seguridad)
+            var rolesQuery = _context.Roles.AsQueryable();
+            var deptsQuery = _context.Departments.Where(d => d.Status == "Active").AsQueryable();
+
+            if (IsSuperAdmin)
+            {
+                // El Super Admin no necesita filtrar por su propio rol, pero sí ve el resto
+                rolesQuery = rolesQuery.Where(r => r.RoleName != "Super Administrador");
+            }
+            else
+            {
+                // 🔒 Candado de Seguridad: El Admin de Empresa NO verá los roles superiores en el filtro
+                rolesQuery = rolesQuery.Where(r => r.RoleName != "Super Administrador" && r.RoleName != "Admin de Empresa");
+                
+                // Además, blindamos los departamentos a solo los de su empresa
+                deptsQuery = deptsQuery.Where(d => d.CompanyId == CurrentCompanyId);
+            }
+
+            ViewBag.Roles = new SelectList(await rolesQuery.OrderBy(r => r.RoleName).ToListAsync(), "RoleId", "RoleName", roleId);
+            ViewBag.Departments = new SelectList(await deptsQuery.OrderBy(d => d.DeptName).ToListAsync(), "DeptId", "DeptName", deptId);
+
+            // 🚀 Iniciamos la consulta base
             var query = _context.Users
                 .IgnoreQueryFilters()
                 .Include(u => u.Role)
                 .Include(u => u.Department)
-                .Include(u => u.Company)
-                .OrderBy(u => u.FullName) // 🚀 FIX: Siempre debemos ordenar antes de paginar
                 .AsQueryable();
 
-            // 🕵️ LÓGICA MULTI-TENANT: Si no eres SuperAdmin, filtramos por tu empresa
+            // 🔒 Filtro Multi-tenant de Seguridad
             if (!IsSuperAdmin)
             {
                 query = query.Where(u => u.CompanyId == CurrentCompanyId);
             }
 
-            // 🚀 Pasamos la consulta a nuestra clase matemática (nota que ya no lleva el ToListAsync)
+            // 🔍 Filtro por texto libre (Nombre o Correo)
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u => u.FullName.Contains(search) || u.Email.Contains(search));
+            }
+
+            // 🎭 Filtro por Rol
+            if (roleId.HasValue)
+            {
+                query = query.Where(u => u.RoleId == roleId.Value);
+            }
+
+            // 🏢 Filtro por Departamento
+            if (deptId.HasValue)
+            {
+                query = query.Where(u => u.DeptId == deptId.Value);
+            }
+
+            // 🏷️ Filtro por Estado
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(u => u.Status == status);
+            }
+
+            query = query.OrderBy(u => u.FullName);
+
             return View(await PaginatedList<User>.CreateAsync(query, pageNumber ?? 1, pageSize));
         }
 
@@ -259,12 +312,25 @@ namespace QualityDoc.API.Controllers
                 ViewData["CompanyId"] = new SelectList(myCompany, "CompanyId", "LegalName", CurrentCompanyId);
             }
 
-            // 2. Combo de Roles
+           // ==========================================
+            // 2. Combo de Roles (NIVELES DE SEGURIDAD APLICADOS)
+            // ==========================================
             var rolesQuery = _context.Roles.AsQueryable();
-            if (!IsSuperAdmin)
+            
+            if (IsSuperAdmin)
             {
-                rolesQuery = rolesQuery.Where(r => r.RoleName != "Super Administrador");
+                // El Super Admin puede crear a los "Admin de Empresa", pero no a otro Super Admin
+                rolesQuery = rolesQuery.Where(r => r.RoleName != "Super Admin");
             }
+            else
+            {
+                // El Admin de Empresa NO puede crear ni Super Admins ni otros Admins de Empresa
+                rolesQuery = rolesQuery.Where(r => r.RoleName != "Super Admin" && r.RoleName != "Admin de Empresa");
+            }
+
+            // Ordenamos alfabéticamente para que el menú se vea más limpio
+            rolesQuery = rolesQuery.OrderBy(r => r.RoleName);
+            
             ViewData["RoleId"] = new SelectList(rolesQuery, "RoleId", "RoleName", user?.RoleId);
             
             // 🚀 3. Combo de Departamentos (BLINDAJE MULTI-TENANT APLICADO)
