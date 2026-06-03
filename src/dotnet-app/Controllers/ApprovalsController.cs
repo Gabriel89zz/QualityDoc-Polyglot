@@ -125,7 +125,7 @@ namespace QualityDoc.API.Controllers
                 );
 
                 // ====================================================================
-                // 🚀 LÓGICA DE VERSIONAMIENTO PROFESIONAL (ISO ÁGIL)
+                // 🚀 LÓGICA DE VERSIONAMIENTO: REGLA DEL ENTERO SAGRADO
                 // ====================================================================
                 var updatedVersion = await _context.DocumentVersions
                     .Include(v => v.Document).ThenInclude(d => d.Category)
@@ -139,33 +139,24 @@ namespace QualityDoc.API.Controllers
 
                     if (isApproved && updatedVersion.StatusId == 3)
                     {
-                        // 🟢 ES LA FIRMA DEL APROBADOR FINAL
-                        if (versionActual < 1.0m)
-                        {
-                            // Si viene de borradores iniciales (Ej: 0.3), lo "graduamos" a 1.0
-                            versionActual = 1.0m;
-                        }
-                        // 🧠 SI YA ERA MAYOR A 1.0 (Ej: Venía de un Recall y estaba en 1.2):
-                        // NO HACEMOS NADA. Se queda en su decimal actual y se publica como 1.2
-                        // Esto evita que salte a 2.0 por un simple error de dedo.
+                        // 🟢 FIRMA FINAL: EL DOCUMENTO SE GRADÚA
+                        // Usamos Math.Floor para sacar la base (Ej: 0.3 -> 0) y le sumamos 1.0 = 1.0
+                        // O si venía de (1.2 -> 1) + 1.0 = 2.0
+                        versionActual = Math.Floor(versionActual) + 1.0m;
                     }
-                    else
-                    {
-                        // 🟠 MIENTRAS ESTÉ EN BORRADOR, REVISIÓN O RECHAZO:
-                        // Siempre sumamos 0.1 al historial (Ej: 0.1 -> 0.2, o 1.1 -> 1.2)
-                        versionActual += 0.1m;
-                    }
+                    // 🔴 SI FUE RECHAZADO, O SOLO ES EL REVISOR (Status 2): 
+                    // NO SE SUMAN DECIMALES. La versión se queda intacta porque el archivo físico no se modificó.
 
                     updatedVersion.VersionNum = versionActual.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
                     _context.DocumentVersions.Update(updatedVersion);
 
-                    // 🚀 NUEVO: Registro en la Bitácora Inmutable
+                    // 🚀 Registro en la Bitácora Inmutable
                     var auditLog = new DocumentAuditLog {
                         CompanyId = updatedVersion.Document.CompanyId,
                         DocId = updatedVersion.DocId,
                         VersionId = updatedVersion.VersionId,
                         ActionType = isApproved ? "Approved" : "Rejected",
-                        ActionDetails = isApproved ? "Firma Autorizada exitosamente." : "El documento fue rechazado y devuelto al autor.",
+                        ActionDetails = isApproved ? "Firma Autorizada exitosamente." : "El documento fue rechazado y devuelto al autor. No hubo salto de versión.",
                         VersionNum = versionActual.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture),
                         CreatedBy = userId,
                         CreatedAt = DateTime.UtcNow
@@ -251,7 +242,7 @@ namespace QualityDoc.API.Controllers
                 }
                 else
                 {
-                    TempData["SuccessMessage"] = $"Documento devuelto al creador con observaciones. La versión aumentó a {updatedVersion?.VersionNum}.";
+                    TempData["SuccessMessage"] = $"Documento devuelto al creador con observaciones. Se mantuvo la versión {updatedVersion?.VersionNum} para correcciones.";
                 }
             }
             catch (Exception ex)
@@ -264,88 +255,63 @@ namespace QualityDoc.API.Controllers
 
 
         // ==========================================
-        // 4. DESHACER FIRMA / REVERTIR DECISIÓN (ACTUALIZADO)
+        // 4. DESHACER FIRMA / REVERTIR DECISIÓN (BLINDADO ISO 9001)
         // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RevertSignature(int versionId, int approvalId, int docId)
         {
             var userId = GetCurrentUserId();
-
             try
             {
-                // 1. OBTENEMOS LOS DATOS DE LA VERSIÓN ANTES DE RETROCEDER
+                // 1. OBTENEMOS LOS DATOS DE LA VERSIÓN
                 var versionData = await _context.DocumentVersions
-                    .Include(v => v.Document) // 🚀 NUEVO: Necesario para el CompanyId
+                    .Include(v => v.Document)
                     .FirstOrDefaultAsync(v => v.VersionId == versionId);
 
                 if (versionData == null) return NotFound();
 
-                // Guardamos si estaba aprobado para saber si hay que borrarlo de MongoDB
-                bool estabaAprobado = (versionData.StatusId == 3);
+                // 🚀 BLINDAJE ISO 9001: REGLA DE INMUTABILIDAD FINAL
+                // Si el documento ya alcanzó la versión oficial (Status 3 = Aprobado), 
+                // el flujo ya no se puede deshacer.
+                if (versionData.StatusId == 3)
+                {
+                    TempData["ErrorMessage"] = "Bloqueo de Calidad: No puedes revocar la firma de un documento que ya fue publicado (v" + versionData.VersionNum + "). Si detectaste un error, debes crear una 'Nueva Versión'.";
+                    return RedirectToAction("Details", "Documents", new { id = docId });
+                }
 
-                // // 2. LÓGICA DE VERSIONAMIENTO (CEREBRO EN C#)
-                // // Siempre sumamos 0.1 al deshacer para dejar evidencia en el historial ISO/IATF
-                // decimal versionActual = 0.0m;
-                // decimal.TryParse(versionData.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out versionActual);
-                
-                // string newVersionNum = (versionActual + 0.1m).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+                // Si aún está en revisión, mantenemos el número actual (Ej. 0.3)
                 string newVersionNum = versionData.VersionNum;
-                // 3. EJECUTAMOS EL SP
+
+                // 2. EJECUTAMOS EL SP PARA RETROCEDER EL FLUJO
                 await _context.Database.ExecuteSqlRawAsync(
                     "EXEC sp_RecallDocumentWorkflow @VersionID = {0}, @ApprovalID = {1}, @UserID = {2}, @NewVersionNum = {3}",
                     versionId, approvalId, userId, newVersionNum
                 );
 
-                // 🚀 NUEVO: Registro en la Bitácora Inmutable
+                // 3. REGISTRO EN LA BITÁCORA INMUTABLE
                 var auditLog = new DocumentAuditLog {
                     CompanyId = versionData.Document.CompanyId, 
                     DocId = docId,
                     VersionId = versionId,
                     ActionType = "SignatureRevoked",
-                    ActionDetails = "El firmante canceló su dictamen previo. El flujo operativo se ha pausado y retrocedido.",
+                    ActionDetails = "El firmante canceló su dictamen previo. El flujo operativo ha retrocedido a revisión.",
                     VersionNum = newVersionNum,
                     CreatedBy = userId,
                     CreatedAt = DateTime.UtcNow
                 };
+                
                 _context.DocumentAuditLogs.Add(auditLog);
                 await _context.SaveChangesAsync();
-
-                // 4. 🔥 SINCRO DE MICROSERVICIOS: BAJAR DOCUMENTO DE INTERNET (MONGO / PHP)
-                // Si el documento ya estaba publicado (Estatus 3), le ordenamos a Python que lo elimine
-                if (estabaAprobado)
-                {
-                    using var httpClient = new HttpClient();
-                    try
-                    {
-                        var pythonApiUrl = _config["Microservices:PythonSearchApi"];
-                        
-                        // Enviamos un DELETE al endpoint de indexación en FastAPI con el ID del documento
-                        var response = await httpClient.DeleteAsync($"{pythonApiUrl}/api/docs/index/{docId}");
-                        
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            TempData["ErrorMessage"] = "Firma revocada en SQL, pero ocurrió un problema al intentar ocultar el documento en el portal operativo (MongoDB).";
-                            return RedirectToAction("Details", "Documents", new { id = docId });
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        TempData["ErrorMessage"] = "Firma revocada, pero el motor de búsqueda (FastAPI) está fuera de línea. El documento podría seguir visible en el portal de PHP.";
-                        return RedirectToAction("Details", "Documents", new { id = docId });
-                    }
-                }
 
                 TempData["SuccessMessage"] = $"¡Firma revocada con éxito! El documento ha regresado a revisión bajo la versión {newVersionNum}.";
             }
             catch (Exception ex)
             {
-                // Extraemos el mensaje exacto enviado por el THROW de SQL Server
                 string errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 TempData["ErrorMessage"] = "No se pudo revertir el flujo: " + errorReal;
             }
 
-            // Redirigimos de vuelta al expediente de Detalles para ver los cambios en la bitácora
             return RedirectToAction("Details", "Documents", new { id = docId });
         }
     }

@@ -738,16 +738,16 @@ namespace QualityDoc.API.Controllers
                     return RedirectToAction(nameof(Details), new { id = model.DocId });
                 }
 
-                string newVersionNum = "0.1"; // Por si no hubiera versión anterior
+               string newVersionNum = "0.1"; // Por si no hubiera versión anterior
                 if (lastVersion != null && !string.IsNullOrEmpty(lastVersion.VersionNum))
                 {
                     if (decimal.TryParse(lastVersion.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal versionActual))
                     {
-                        // LÓGICA DE VERSIONAMIENTO MAYOR PROFESIONAL (ISO ÁGIL)
-                        // Extraemos el entero (Ej: 1.5 -> 1) y le sumamos 1 entero (1 + 1.0 = 2.0)
-                        // El documento nacerá como un borrador de la siguiente versión mayor "2.0"
-                        decimal nextMajorVersion = Math.Floor(versionActual) + 1.0m;
-                        newVersionNum = nextMajorVersion.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+                        // 🚀 LÓGICA DE VERSIONAMIENTO: REGLA DEL ENTERO SAGRADO
+                        // Extraemos el entero base (Ej: 1.0 -> 1) y le sumamos 0.1 para que nazca como borrador.
+                        // (1 + 0.1 = 1.1) o (2.0 -> 2.1)
+                        decimal nextDraftVersion = Math.Floor(versionActual) + 0.1m;
+                        newVersionNum = nextDraftVersion.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
                     }
                 }
 
@@ -1024,11 +1024,7 @@ namespace QualityDoc.API.Controllers
 
                 if (versionData == null) return NotFound();
 
-                // // 2. LÓGICA DE VERSIONAMIENTO (CEREBRO EN C#)
-                // // Al deshacer el envío, sumamos 0.1 para que quede rastro en el historial
-                // decimal versionActual = 0.0m;
-                // decimal.TryParse(versionData.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out versionActual);
-                
+               
                 // string newVersionNum = (versionActual + 0.1m).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
                 string newVersionNum = versionData.VersionNum;
                 // 3. EJECUTAMOS EL SP PASANDO EL NUEVO NÚMERO DE VERSIÓN
