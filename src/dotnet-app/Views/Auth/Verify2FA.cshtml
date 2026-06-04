@@ -7,67 +7,174 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificación 2FA - QualityDoc</title>
+    
+    <!-- Fuente oficial de Android / Google -->
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Google Sans Flex', 'sans-serif'] },
-                    colors: { brand: { DEFAULT: '#754ee5', hover: '#5e3ab8' } }
+                    fontFamily: { 
+                        sans: ['Google Sans Flex', 'sans-serif'] 
+                    },
+                    colors: { 
+                        // Colores específicos solicitados
+                        primary: { 
+                            DEFAULT: '#754ee5', // Morado modo claro
+                            dark: '#baa5ff',    // Morado modo oscuro
+                        },
+                        darkTheme: {
+                            bg: '#2a2b2e',
+                            card: '#323338',
+                            border: '#4a4b50'
+                        }
+                    }
                 }
             }
         }
     </script>
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #FAFAFA; color: #0f172a; transition: background-color 0.3s, color 0.3s; }
-        html.dark body { background-color: #2a2b2e; color: #f8fafc; }
+        /* Transiciones base suaves estilo Android */
+        body { 
+            background-color: #FAFAFA; 
+            color: #1e293b; 
+            transition: background-color 0.3s ease, color 0.3s ease; 
+        }
+        html.dark body { 
+            background-color: #2a2b2e; 
+            color: #e2e8f0; 
+        }
+        
+        /* Ocultar scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* Efecto Ripple (onda) para botones */
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
+            transform: translate3d(0, 0, 0);
+        }
+        .btn-ripple:active::after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: inherit;
+            animation: ripple 0.4s ease-out;
+        }
+        html.dark .btn-ripple:active::after {
+            background-color: rgba(0,0,0,0.15);
+        }
+        @@keyframes ripple {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* Quitar flechas del input numérico si cambias el type a number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
     </style>
 </head>
-<body class="antialiased min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-    
-    <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-md w-full bg-white dark:bg-[#323338] rounded-3xl shadow-2xl border border-slate-200 dark:border-[#4a4b50] overflow-hidden relative z-10">
-        <div class="bg-brand/5 dark:bg-brand/10 p-8 flex flex-col items-center border-b border-brand/10 dark:border-[#4a4b50]">
-            <div class="w-16 h-16 bg-brand text-white rounded-2xl flex items-center justify-center shadow-lg shadow-brand/30 mb-4">
-                <i data-lucide="shield-check" class="w-8 h-8"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Doble Verificación</h2>
-            <p class="text-sm text-center text-slate-500 dark:text-slate-400 mt-2">Hemos enviado un PIN seguro a tu correo electrónico para verificar tu identidad.</p>
+<body class="antialiased min-h-screen flex items-center justify-center p-4 relative">
+    
+    <!-- Tarjeta estilo Material 3 -->
+    <div class="max-w-md w-full bg-white dark:bg-darkTheme-card rounded-[2rem] shadow-sm border border-slate-100 dark:border-darkTheme-border overflow-hidden relative z-10 transition-colors duration-300 p-8 sm:p-10">
+        
+        <!-- Icono flotante con fondo tenue -->
+        <div class="w-14 h-14 rounded-full bg-primary/10 dark:bg-primary-dark/15 flex items-center justify-center mb-6 transition-colors duration-300">
+            <i data-lucide="shield-check" class="w-7 h-7 text-primary dark:text-primary-dark transition-colors duration-300"></i>
         </div>
 
-        <form asp-action="Verify2FA" method="post" class="p-8 space-y-6">
+        <!-- Títulos alineados a la izquierda -->
+        <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 transition-colors duration-300">
+            Doble Verificación
+        </h2>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8 transition-colors duration-300">
+            Hemos enviado un PIN seguro a tu correo electrónico para verificar tu identidad.
+        </p>
+
+        <form asp-controller="Auth" asp-action="Verify2FA" method="post" class="space-y-6">
+            
+            <!-- Mensaje de Error (Se respeta la lógica de ASP.NET) -->
             @if (!ViewData.ModelState.IsValid)
             {
-                <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl border border-red-200 dark:border-red-800/30 text-sm font-bold text-center flex items-center justify-center">
-                    <i data-lucide="alert-circle" class="w-4 h-4 mr-2"></i> Código incorrecto o expirado
+                <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-2xl flex items-start gap-3 font-medium text-sm transition-colors border border-transparent dark:border-red-900/30">
+                    <i data-lucide="alert-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+                    <p>El código ingresado es incorrecto o ha expirado. Inténtalo de nuevo.</p>
                 </div>
             }
 
-            <div>
-                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 text-center uppercase tracking-widest">Ingresa el código</label>
-                <input type="text" name="code" maxlength="6" autocomplete="off" class="w-full text-center text-3xl tracking-[0.5em] font-black py-4 rounded-xl bg-slate-50 dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] text-brand focus:border-brand focus:ring-2 focus:ring-brand/20 transition outline-none dark:text-white" placeholder="••••••" required autofocus />
+            <!-- Campo de PIN -->
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 ml-2 transition-colors">
+                    Código de 6 dígitos
+                </label>
+                <input type="text" name="code" maxlength="6" autocomplete="off" 
+                       class="block w-full py-4 text-center text-3xl tracking-[0.5em] font-bold rounded-2xl bg-slate-50 dark:bg-darkTheme-bg border-2 border-transparent text-slate-800 dark:text-white focus:bg-white dark:focus:bg-darkTheme-card focus:border-primary dark:focus:border-primary-dark transition-all outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600" 
+                       placeholder="••••••" required autofocus />
             </div>
 
-            <button type="submit" class="w-full bg-brand hover:bg-brand-hover text-white font-bold py-4 rounded-xl shadow-md shadow-brand/20 transition-all flex justify-center items-center">
-                <i data-lucide="unlock" class="w-5 h-5 mr-2"></i> Autenticar
-            </button>
+            <div class="flex items-center justify-center pt-2">
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" name="rememberDevice" value="true" class="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary dark:border-darkTheme-border dark:bg-darkTheme-bg transition-colors">
+                    <span class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-primary dark:group-hover:text-primary-dark transition-colors">Recordar este dispositivo por 30 días</span>
+                </label>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="btn-ripple w-full bg-primary dark:bg-primary-dark text-white dark:text-darkTheme-bg font-semibold text-lg py-4 rounded-full transition-colors flex justify-center items-center gap-2">
+                    Autenticar
+                </button>
+            </div>
             
-            <div class="text-center mt-4">
-                <a asp-action="Login" class="text-sm font-medium text-slate-400 hover:text-brand transition-colors">Cancelar y volver al Login</a>
+            <div class="text-center mt-6">
+                 <a asp-controller="Auth" asp-action="Login" class="text-sm font-medium text-primary dark:text-primary-dark hover:underline transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Cancelar y volver
+                </a>
             </div>
         </form>
     </div>
 
+    <!-- Botón flotante para cambiar tema (Para pruebas) -->
+    <button id="themeToggle" class="absolute bottom-6 right-6 p-4 bg-white dark:bg-darkTheme-card rounded-full shadow-lg border border-slate-100 dark:border-darkTheme-border text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary-dark transition-colors z-50">
+        <i data-lucide="moon" class="w-6 h-6 dark:hidden"></i>
+        <i data-lucide="sun" class="w-6 h-6 hidden dark:block"></i>
+    </button>
+
     <script>
+        // Inicializar iconos
         lucide.createIcons();
+
+        // Lógica de cambio de tema
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
+            html.classList.add('dark');
         }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+        
+        // Opcional: Auto-formateo para forzar solo números en el input
+        const codeInput = document.querySelector('input[name="code"]');
+        codeInput.addEventListener('input', function (e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
     </script>
 </body>
 </html>

@@ -71,7 +71,24 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
             // =======================================================
             // 🚀 INTERCEPCIÓN PARA 2FA DE ADMINISTRADORES
             // =======================================================
+            bool requires2FA = false;
             if (user.Role.RoleName == "Super Administrador" || user.Role.RoleName == "Super Admin" || user.Role.RoleName == "Admin de Empresa")
+            {
+                requires2FA = true; // Por defecto asumimos que sí lo necesita
+
+                // 🧠 LÓGICA DE DISPOSITIVO DE CONFIANZA
+                var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(user.UserId.ToString() + user.PasswordHash);
+                var expectedToken = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(plainTextBytes));
+                var trustedCookie = Request.Cookies["QualityDoc2FA_Trusted_" + user.UserId];
+
+                // Si la cookie existe en su navegador y coincide con la firma secreta, lo dejamos pasar
+                if (trustedCookie == expectedToken)
+                {
+                    requires2FA = false; 
+                }
+            }
+
+            if (requires2FA)
             {
                 // 1. Generar código OTP de 6 dígitos
                 string code = new Random().Next(100000, 999999).ToString();
@@ -91,7 +108,7 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
                         $"Hola <b>{user.FullName}</b>,<br><br>Se requiere verificación adicional para ingresar al panel de administración. Ingresa el siguiente código de seguridad (válido por 10 minutos):<br><br><div style='text-align:center; font-size:32px; font-weight:bold; letter-spacing:10px; background:#F1F5F9; color:#4F46E5; padding:20px; border-radius:12px; margin:20px 0;'>{code}</div>"
                     );
                 }
-                catch (Exception) { }
+                catch (Exception) { /* Ignoramos fallo smtp */ }
 
                 // 3. Guardar en memoria temporal quién intentó entrar y mandarlo a la vista del PIN
                 TempData["Pending2FAUserId"] = user.UserId;
@@ -323,7 +340,7 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Verify2FA(string code)
+        public async Task<IActionResult> Verify2FA(string code, bool rememberDevice = false) // 🚀 Parámetro nuevo
         {
             var userIdStr = TempData["Pending2FAUserId"]?.ToString();
             if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login");
@@ -332,15 +349,34 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
             
             if (user == null || user.TwoFactorCode != code || user.TwoFactorExpiry < DateTime.UtcNow)
             {
-                TempData.Keep("Pending2FAUserId"); // Le damos otra oportunidad
+                TempData.Keep("Pending2FAUserId"); 
                 ModelState.AddModelError(string.Empty, "El código es incorrecto o ha expirado.");
                 return View();
             }
 
-            // ÉXITO: Limpiamos el código y logueamos al Admin
+            // ÉXITO: Limpiamos el código 
             user.TwoFactorCode = null;
             user.TwoFactorExpiry = null;
             await _context.SaveChangesAsync();
+
+            // =======================================================
+            // 🚀 NUEVO: GUARDAR DISPOSITIVO DE CONFIANZA POR 30 DÍAS
+            // =======================================================
+            if (rememberDevice)
+            {
+                // Creamos una firma única encriptada usando su ID y el Hash de su contraseña
+                var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(user.UserId.ToString() + user.PasswordHash);
+                var trustedToken = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(plainTextBytes));
+                
+                var cookieOptions = new CookieOptions {
+                    Expires = DateTime.UtcNow.AddDays(30),
+                    HttpOnly = true, // Evita hackeos por JavaScript (XSS)
+                    Secure = true,   // Solo viaja por HTTPS
+                    SameSite = SameSiteMode.Strict
+                };
+                Response.Cookies.Append("QualityDoc2FA_Trusted_" + user.UserId, trustedToken, cookieOptions);
+            }
+            // =======================================================
 
             // Firmamos las cookies (Igual que en el Login normal)
             var claims = new List<Claim> {
