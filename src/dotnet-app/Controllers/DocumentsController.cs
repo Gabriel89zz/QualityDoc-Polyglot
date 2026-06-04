@@ -529,7 +529,9 @@ namespace QualityDoc.API.Controllers
 
                             if (!string.IsNullOrEmpty(latestVersion.FilePath))
                             {
-                                string oldPathPhysical = _env.WebRootPath + latestVersion.FilePath.Replace("/", "\\");
+                                // string oldPathPhysical = _env.WebRootPath + latestVersion.FilePath.Replace("/", "\\");
+                                // Forma segura y multiplataforma:
+                                string oldPathPhysical = Path.Combine(_env.WebRootPath, latestVersion.FilePath.TrimStart('/'));
                                 if (System.IO.File.Exists(oldPathPhysical))
                                 {
                                     System.IO.File.Delete(oldPathPhysical);
@@ -1043,7 +1045,8 @@ namespace QualityDoc.API.Controllers
 
                 if (!string.IsNullOrEmpty(version.FilePath))
                 {
-                    string oldPathPhysical = _env.WebRootPath + version.FilePath.Replace("/", "\\");
+                    // Forma segura y multiplataforma:
+                    string oldPathPhysical = Path.Combine(_env.WebRootPath, version.FilePath.TrimStart('/'));
                     if (System.IO.File.Exists(oldPathPhysical))
                     {
                         System.IO.File.Delete(oldPathPhysical);

@@ -1,0 +1,5 @@
+# 🚀 Asegura que los scripts de bash siempre usen el formato de Linux (LF)
+*.sh text eol=lf
+
+# Comportamiento automático para el resto de archivos
+* text=auto

@@ -29,7 +29,7 @@ services:
       interval: 10s
       retries: 5
     volumes:
-      - ./db/sql-server/data:/var/opt/mssql/data
+      - sql_data:/var/opt/mssql/data
       - ./db/sql-server/scripts:/usr/config/scripts:ro
       - ./db/sql-server/entrypoint.sh:/usr/config/entrypoint.sh:ro
     command: /bin/bash /usr/config/entrypoint.sh
@@ -52,9 +52,7 @@ services:
       interval: 10s
       retries: 5
     volumes:
-      # Guarda los binarios pesados en /data
-      - ./db/postgresql/data:/var/lib/postgresql/data
-      # Ejecuta los scripts iniciales (esquemas/semillas) desde /scripts
+      - postgres_data:/var/lib/postgresql/data
       - ./db/postgresql/scripts:/docker-entrypoint-initdb.d
     networks:
       - quality-net
@@ -68,9 +66,7 @@ services:
     ports: 
       - "27017:27017"
     volumes:
-      # Guarda los binarios pesados en /data
-      - ./db/mongodb/data:/data/db
-      # Ejecuta scripts iniciales (si tienes alguno) desde /scripts
+      - mongo_data:/data/db
       - ./db/mongodb/scripts:/docker-entrypoint-initdb.d
     networks:
       - quality-net
@@ -137,3 +133,9 @@ services:
 networks:
   quality-net:
     driver: bridge
+
+# 🚀 NUEVO: Volúmenes gestionados por Docker (Anti-errores de Linux)
+volumes:
+  sql_data:
+  postgres_data:
+  mongo_data:
