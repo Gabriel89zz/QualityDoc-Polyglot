@@ -44,7 +44,6 @@ db/postgresql/data/
 db/sql-server/data/
 
 # --- Configuraciones Locales y Secretos (.NET) ---
-appsettings.Development.json
 appsettings.Local.json
 secrets.json
 *.pubxml

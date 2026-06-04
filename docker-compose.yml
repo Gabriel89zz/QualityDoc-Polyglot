@@ -21,6 +21,7 @@ services:
   sql-server:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sql_server_admin
+    user: root
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${SQL_SERVER_PASSWORD}
@@ -88,6 +89,9 @@ services:
       # 🚀 Variable para que C# encuentre a Python dentro de la red de Docker
       - Microservices__PythonSearchApi=http://python-app:8000
       - TZ=America/Monterrey
+      - EmailSettings__SenderEmail=${SMTP_EMAIL}
+      - EmailSettings__Username=${SMTP_EMAIL}
+      - EmailSettings__Password=${SMTP_PASSWORD}
     depends_on:
       sql-server:
         condition: service_healthy
