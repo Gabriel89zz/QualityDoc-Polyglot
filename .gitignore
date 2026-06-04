@@ -59,5 +59,20 @@ src/dotnet-app/wwwroot/uploads/
 *.pfx
 *.crt
 
+# --- Caché y Logs de Laravel ---
+src/php-app/storage/logs/
+src/php-app/storage/framework/
+src/php-app/bootstrap/cache/
+src/php-app/public/storage
+
+# --- Python (Servicio de Búsqueda FastAPI) ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.pytest_cache/
+
 # --- Otros IDEs ---
 .idea/
