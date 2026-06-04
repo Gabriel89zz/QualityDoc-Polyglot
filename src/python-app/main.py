@@ -4,7 +4,10 @@ from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
 
-app = FastAPI(title="QualityDoc Polyglot - Motor de Búsqueda")
+app = FastAPI(
+    title="QualityDoc Polyglot - Motor de Búsqueda",
+    root_path="/api/search" 
+)
 
 # 1. Credenciales y Conexión
 MONGO_USER = os.getenv("MONGO_INITDB_ROOT_USERNAME", "admin_mongo")
