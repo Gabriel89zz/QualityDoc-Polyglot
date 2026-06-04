@@ -76,12 +76,12 @@
                                 </div>
                                 <label for="NewFile" class="block text-base font-bold text-slate-700 dark:text-slate-300 mb-2 cursor-pointer hover:text-brand transition-colors">Seleccionar Nuevo Documento <span class="text-red-500">*</span></label>
                                 
-                                <input type="file" name="NewFile" id="NewFile" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" required />
+                                <input type="file" name="NewFile" id="NewFile" class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.zip,.rar,.png,.jpg,.jpeg" required />
                                 
                                 <button type="button" onclick="document.getElementById('NewFile').click();" class="mt-4 bg-brand/10 text-brand hover:bg-brand/20 dark:bg-brand/20 dark:text-brand-light font-bold py-2.5 px-6 rounded-xl text-sm transition shadow-sm">
                                     Explorar Archivos
                                 </button>
-                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-5 font-medium">PDF, Word, Excel o Imágenes. Máx: 10MB.</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-5 font-medium">PDF, Word, Excel, PPT, ZIP o Imágenes. Máx: 25MB.</p>
                             </div>
 
                             <div id="previewContainer" class="hidden w-full h-full flex flex-col absolute inset-0 p-4">
@@ -145,6 +145,18 @@
                 fileInput.addEventListener('change', function() {
                     const file = this.files[0];
                     if (file) {
+                        // ==========================================
+                        // 🚀 1. RESTRICCIÓN DE PESO REAL (25 MB)
+                        // ==========================================
+                        const maxSizeInMB = 25;
+                        const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+                        
+                        if (file.size > maxSizeInBytes) {
+                            alert(`El archivo "${file.name}" es demasiado grande.\n\nEl tamaño actual es de ${(file.size / (1024 * 1024)).toFixed(2)} MB.\nEl límite máximo permitido es de ${maxSizeInMB} MB.`);
+                            this.value = ''; // Vacía el input
+                            return; // Detiene la ejecución
+                        }
+
                         fileNameDisplay.textContent = file.name;
                         fileSizeDisplay.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
 
@@ -162,16 +174,21 @@
                             filePreview.innerHTML = `<img src="${currentObjectUrl}" class="absolute inset-0 w-full h-full object-contain bg-slate-100 dark:bg-[#2a2b2e] p-2" alt="Vista previa" />`;
                         } 
                         else {
+                            // 🚀 2. LÓGICA DE ÍCONOS PARA LOS NUEVOS ARCHIVOS
                             let iconClass = 'fa-file-lines text-slate-400';
                             let fileTypeName = 'Documento';
+                            const ext = file.name.toLowerCase();
 
-                            if(file.name.toLowerCase().endsWith('.doc') || file.name.toLowerCase().endsWith('.docx')) {
-                                iconClass = 'fa-file-word text-blue-500';
-                                fileTypeName = 'Word';
-                            }
-                            if(file.name.toLowerCase().endsWith('.xls') || file.name.toLowerCase().endsWith('.xlsx')) {
-                                iconClass = 'fa-file-excel text-emerald-500';
-                                fileTypeName = 'Excel';
+                            if(ext.endsWith('.doc') || ext.endsWith('.docx')) {
+                                iconClass = 'fa-file-word text-[#1a73e8]'; fileTypeName = 'Word';
+                            } else if(ext.endsWith('.xls') || ext.endsWith('.xlsx')) {
+                                iconClass = 'fa-file-excel text-[#188038]'; fileTypeName = 'Excel';
+                            } else if(ext.endsWith('.ppt') || ext.endsWith('.pptx')) {
+                                iconClass = 'fa-file-powerpoint text-[#d93025]'; fileTypeName = 'PowerPoint';
+                            } else if(ext.endsWith('.csv')) {
+                                iconClass = 'fa-file-csv text-emerald-600'; fileTypeName = 'Datos (CSV)';
+                            } else if(ext.endsWith('.zip') || ext.endsWith('.rar')) {
+                                iconClass = 'fa-file-zipper text-slate-500'; fileTypeName = 'Comprimido';
                             }
                             
                             filePreview.innerHTML = `
@@ -179,7 +196,7 @@
                                     <i class="fa-solid ${iconClass} text-6xl mb-4 opacity-90 drop-shadow-sm"></i>
                                     <p class="text-sm font-bold text-slate-700 dark:text-slate-200">Archivo de ${fileTypeName} Listo</p>
                                     <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 px-4">
-                                        Los navegadores web no previsualizan archivos de Office localmente. Tu nueva versión está lista para ser guardada.
+                                        Tu nueva versión está lista para ser guardada.
                                     </p>
                                 </div>
                             `;

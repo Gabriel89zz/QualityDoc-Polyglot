@@ -13,6 +13,23 @@ builder.Services.AddDbContext<QualityDocDbContext>(options =>
 
 builder.Services.AddScoped<QualityDoc.API.Services.IEmailService, QualityDoc.API.Services.EmailService>();
 
+// ==============================================================
+// 🚀 NUEVO: LÍMITE GLOBAL DE SUBIDA DE ARCHIVOS (Desde appsettings.json)
+// Le sumamos 5MB extra de margen para los textos del formulario
+// ==============================================================
+var maxFileSizeMB = builder.Configuration.GetValue<long>("DocumentSettings:MaxFileSizeMB", 25);
+var maxServerLimitBytes = (maxFileSizeMB + 5) * 1024 * 1024; 
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = maxServerLimitBytes;
+});
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = maxServerLimitBytes;
+});
+// ==============================================================
+
 // 2. CONFIGURACIÓN DEL GUARDIA DE SEGURIDAD (Cookies)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

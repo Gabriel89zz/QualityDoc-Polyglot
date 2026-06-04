@@ -20,11 +20,13 @@ namespace QualityDoc.API.Controllers
     {
         private readonly QualityDocDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _config; 
 
-        public DocumentsController(QualityDocDbContext context, IWebHostEnvironment env)
+        public DocumentsController(QualityDocDbContext context, IWebHostEnvironment env, IConfiguration config) 
         {
             _context = context;
             _env = env;
+            _config = config; 
         }
 
         private int GetCurrentCompanyId()
@@ -226,9 +228,27 @@ namespace QualityDoc.API.Controllers
                 model.DeptId = currentUser.DeptId ?? 0;
             }
 
+            // 🚀 1. Validar que el archivo exista
             if (uploadedFile == null || uploadedFile.Length == 0)
             {
-                ModelState.AddModelError("uploadedFile", "Es obligatorio adjuntar el archivo PDF del documento.");
+                ModelState.AddModelError("uploadedFile", "Es obligatorio adjuntar el archivo base del documento.");
+            }
+            else
+            {
+                // 🚀 2. Leer tamaño máximo desde appsettings.json
+                long maxFileSizeMB = _config.GetValue<long>("DocumentSettings:MaxFileSizeMB", 25);
+                if (uploadedFile.Length > (maxFileSizeMB * 1024 * 1024))
+                {
+                    ModelState.AddModelError("uploadedFile", $"El archivo excede el límite permitido de {maxFileSizeMB} MB.");
+                }
+
+                // 🚀 3. Leer extensiones válidas desde appsettings.json
+                var allowedExtensions = _config.GetSection("DocumentSettings:AllowedExtensions").Get<string[]>();
+                var extension = Path.GetExtension(uploadedFile.FileName).ToLowerInvariant();
+                if (allowedExtensions == null || !allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("uploadedFile", "Formato no permitido. Consulta la lista de extensiones autorizadas.");
+                }
             }
 
             ModelState.Remove("DocCode");
@@ -480,8 +500,24 @@ namespace QualityDoc.API.Controllers
 
                         if (newFile != null && newFile.Length > 0)
                         {
+                            // 🚀 VALIDACIÓN DE SEGURIDAD (Peso y Extensión)
+                            long maxFileSizeMB = _config.GetValue<long>("DocumentSettings:MaxFileSizeMB", 25);
+                            if (newFile.Length > (maxFileSizeMB * 1024 * 1024))
+                            {
+                                TempData["ErrorMessage"] = $"El archivo excede el límite permitido de {maxFileSizeMB} MB.";
+                                return RedirectToAction(nameof(Edit), new { id = model.DocId });
+                            }
+
+                            var allowedExtensions = _config.GetSection("DocumentSettings:AllowedExtensions").Get<string[]>();
+                            var extension = Path.GetExtension(newFile.FileName).ToLowerInvariant();
+                            if (allowedExtensions == null || !allowedExtensions.Contains(extension))
+                            {
+                                TempData["ErrorMessage"] = "Formato de archivo no permitido.";
+                                return RedirectToAction(nameof(Edit), new { id = model.DocId });
+                            }
+
                             string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "documents");
-                            string fileExtension = Path.GetExtension(newFile.FileName).ToLower();
+                            string fileExtension = extension; // Ya lo calculamos arriba
                             
                             string uniqueFileName = $"{existingDoc.DocCode}_v{latestVersion.VersionNum}_corregido_{Guid.NewGuid().ToString().Substring(0,8)}{fileExtension}";
                             string filePathPhysical = Path.Combine(uploadsFolder, uniqueFileName);
@@ -751,6 +787,30 @@ namespace QualityDoc.API.Controllers
                     }
                 }
 
+                // 🚀 VALIDACIÓN DE SEGURIDAD (Peso y Extensión)
+                if (model.NewFile != null && model.NewFile.Length > 0)
+                {
+                    long maxFileSizeMB = _config.GetValue<long>("DocumentSettings:MaxFileSizeMB", 25);
+                    if (model.NewFile.Length > (maxFileSizeMB * 1024 * 1024))
+                    {
+                        ModelState.AddModelError("", $"El archivo excede el límite permitido de {maxFileSizeMB} MB.");
+                        return View(model);
+                    }
+
+                    var allowedExtensions = _config.GetSection("DocumentSettings:AllowedExtensions").Get<string[]>();
+                    var extension = Path.GetExtension(model.NewFile.FileName).ToLowerInvariant();
+                    if (allowedExtensions == null || !allowedExtensions.Contains(extension))
+                    {
+                        ModelState.AddModelError("", "Formato de archivo no permitido por las políticas de la empresa.");
+                        return View(model);
+                    }
+                }
+                else 
+                {
+                    ModelState.AddModelError("", "Debe adjuntar un archivo válido.");
+                    return View(model);
+                }
+
                 string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "documents");
                 if (!Directory.Exists(uploadsFolder))
                 {
@@ -947,6 +1007,22 @@ namespace QualityDoc.API.Controllers
 
             if (newFile != null && newFile.Length > 0)
             {
+                // 🚀 VALIDACIÓN DE SEGURIDAD (Peso y Extensión)
+                long maxFileSizeMB = _config.GetValue<long>("DocumentSettings:MaxFileSizeMB", 25);
+                if (newFile.Length > (maxFileSizeMB * 1024 * 1024))
+                {
+                    TempData["ErrorMessage"] = $"El archivo excede el límite permitido de {maxFileSizeMB} MB.";
+                    return RedirectToAction(nameof(Details), new { id = docId });
+                }
+
+                var allowedExtensions = _config.GetSection("DocumentSettings:AllowedExtensions").Get<string[]>();
+                var extension = Path.GetExtension(newFile.FileName).ToLowerInvariant();
+                if (allowedExtensions == null || !allowedExtensions.Contains(extension))
+                {
+                    TempData["ErrorMessage"] = "Formato de archivo no permitido.";
+                    return RedirectToAction(nameof(Details), new { id = docId });
+                }
+
                 // 🚀 LÓGICA DE SUMAR DECIMAL AL REEMPLAZAR ARCHIVO
                 decimal versionActual = 0.0m;
                 decimal.TryParse(version.VersionNum, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out versionActual);
