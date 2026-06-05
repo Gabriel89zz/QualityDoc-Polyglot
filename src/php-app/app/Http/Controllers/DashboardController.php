@@ -77,11 +77,13 @@ class DashboardController extends Controller
                                         ->get();
 
         } else {
-            // LÓGICA DE OPERARIO
-            $kpiDocsLeidos = AccessLog::where('company_id', $myCompany)
-                                ->where('user_id', $myUserId)
-                                ->where('document_title', 'LIKE', '%[FIRMA DE ENTERADO]%')
-                                ->count();
+            // ==========================================
+            // 🚀 LÓGICA DE OPERARIO OPTIMIZADA (V2)
+            // ==========================================
+            $kpiDocsLeidos = 0;
+            $kpiPorFirmar = 0;
+            $kpiCumplimiento = 100;
+            
             try {
                 $pythonApiUrl = env('PYTHON_API_URL', 'http://python-app:8000');
                 $response = \Illuminate\Support\Facades\Http::timeout(5)->get($pythonApiUrl . '/api/docs/approved', [
@@ -90,10 +92,35 @@ class DashboardController extends Controller
                 ]);
 
                 if ($response->successful()) {
-                    $totalDocs = count($response->json()['data'] ?? []);
-                    $kpiPorFirmar = max(0, $totalDocs - $kpiDocsLeidos);
+                    $documentosVigentes = $response->json()['data'] ?? [];
+                    $totalDocs = count($documentosVigentes);
+
                     if ($totalDocs > 0) {
-                        $kpiCumplimiento = round(($kpiDocsLeidos / $totalDocs) * 100);
+                        // 1. Traemos TODAS las firmas históricas del usuario de un solo golpe (Ahorra memoria y consultas)
+                        $firmasUsuario = AccessLog::where('company_id', $myCompany)
+                                            ->where('user_id', $myUserId)
+                                            ->where('document_title', 'LIKE', '%[FIRMA DE ENTERADO]%')
+                                            ->get(['document_code', 'version_num']);
+
+                        // 2. Evaluamos contra la FUENTE DE VERDAD (Los documentos actuales)
+                        foreach ($documentosVigentes as $doc) {
+                            $codigoDoc = $doc['codigo'] ?? '';
+                            $versionActual = $doc['version'] ?? '';
+
+                            // 3. Verificamos si existe la firma para esta versión exacta
+                            $yaFirmo = $firmasUsuario->contains(function ($firma) use ($codigoDoc, $versionActual) {
+                                return $firma->document_code === $codigoDoc && $firma->version_num === $versionActual;
+                            });
+
+                            if ($yaFirmo) {
+                                $kpiDocsLeidos++;
+                            } else {
+                                $kpiPorFirmar++;
+                            }
+                        }
+
+                        // 4. Calculamos el porcentaje real (tope a 100 para evitar errores matemáticos raros)
+                        $kpiCumplimiento = min(100, round(($kpiDocsLeidos / $totalDocs) * 100));
                     }
                 }
             } catch (Exception $e) {}

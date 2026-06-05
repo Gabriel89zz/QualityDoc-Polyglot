@@ -240,7 +240,6 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
 
                 // 🚀 REDIRIGIMOS A LA VISTA DE 2FA DIRECTAMENTE
                 TempData["Pending2FAUserId"] = newUser.UserId;
-                TempData["SuccessMessage"] = "¡Cuenta creada! Revisa tu correo electrónico para obtener el código de acceso inicial.";
                 
                 return RedirectToAction("Verify2FA");
             }
