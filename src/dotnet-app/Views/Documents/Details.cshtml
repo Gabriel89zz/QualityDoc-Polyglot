@@ -144,10 +144,18 @@
                         foreach (var version in versiones)
                         {
                             bool isLatest = version.VersionId == lastVersion?.VersionId;
-                            
                             string activeClasses = "bg-brand/5 dark:bg-brand/10 border-brand";
                             string inactiveClasses = "hover:bg-slate-50 dark:hover:bg-[#2a2b2e] border-transparent";
                             string rowClass = isLatest ? activeClasses : inactiveClasses;
+
+                            // 🚀 NUEVA LÓGICA: Determinar permisos para revocar/recall desde la tabla
+                            var miAprobacion = version.Approvals?.OrderByDescending(a => a.UpdatedAt)
+                                                .FirstOrDefault(a => a.ApproverId == currentUserId && (a.ApprovalStatus == "Approved" || a.ApprovalStatus == "Rejected"));
+
+                            bool canRevokeNormal = (miAprobacion != null && version.StatusId == 2);
+                            bool canRecallEmergencia = (isAdmin && version.StatusId == 3);
+                            bool showRevokeButton = isLatest && (canRevokeNormal || canRecallEmergencia);
+                            int targetApprovalId = miAprobacion?.ApprovalId ?? 0;
 
                             <tr id="row-@version.VersionId" class="transition-colors duration-200 version-row border-l-4 @rowClass">
                                 <td class="px-6 md:px-8 py-5 whitespace-nowrap text-base font-black text-slate-900 dark:text-white">
@@ -198,30 +206,30 @@
                                         <div class="inline-flex items-center gap-2">
                                             @if (version.StatusId == 1)
                                             {
-                                                // 🚀 LÓGICA POKA-YOKE: Verificar si el último movimiento fue un rechazo
-                                                var ultimoMovimiento = version.AuditLogs?.OrderByDescending(l => l.CreatedAt).FirstOrDefault()?.ActionType;
-                                                bool estaBloqueadoPorRechazo = (ultimoMovimiento == "Rejected");
+                                                // 🚀 LÓGICA POKA-YOKE: Verificar si el último movimiento fue un rechazo o un Recall
+var ultimoMovimiento = version.AuditLogs?.OrderByDescending(l => l.CreatedAt).FirstOrDefault()?.ActionType;
+bool estaBloqueadoPorRechazo = (ultimoMovimiento == "Rejected" || ultimoMovimiento == "SignatureRevoked");
 
-                                                <a asp-action="Edit" asp-route-id="@Model.DocId" class="text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 dark:text-amber-500 dark:bg-amber-900/20 dark:border-amber-800/30 dark:hover:bg-amber-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Modificar los detalles o reemplazar el archivo PDF">
-                                                    <i class="fa-solid fa-file-pen mr-1.5 text-base"></i> Editar Borrador
-                                                </a>
+<a asp-action="Edit" asp-route-id="@Model.DocId" class="text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 dark:text-amber-500 dark:bg-amber-900/20 dark:border-amber-800/30 dark:hover:bg-amber-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Modificar los detalles o reemplazar el archivo PDF">
+    <i class="fa-solid fa-file-pen mr-1.5 text-base"></i> Editar Borrador
+</a>
 
-                                                @if (estaBloqueadoPorRechazo)
-                                                {
-                                                    <button disabled type="button" class="text-slate-500 bg-slate-100 border border-slate-200 dark:text-slate-400 dark:bg-[#2a2b2e] dark:border-[#4a4b50] px-3 py-1.5 rounded-lg font-bold text-xs flex items-center cursor-not-allowed shadow-sm" title="Bloqueado: El documento fue rechazado. Debes hacer clic en 'Editar Borrador' para hacer correcciones antes de volver a solicitar firmas.">
-                                                        <i class="fa-solid fa-lock mr-1.5 text-base"></i> Bloqueado por Rechazo
-                                                    </button>
-                                                }
-                                                else
-                                                {
-                                                    <form asp-action="SendToReview" method="post" class="inline" onsubmit="return confirm('¿Iniciar el flujo de revisión para esta versión?');">
-                                                        <input type="hidden" name="versionId" value="@version.VersionId" />
-                                                        <input type="hidden" name="docId" value="@Model.DocId" />
-                                                        <button type="submit" class="text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800/30 dark:hover:bg-emerald-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Solicitar Firmas (Iniciar Flujo)">
-                                                            <i class="fa-solid fa-file-signature mr-1.5 text-base"></i> Solicitar Firmas
-                                                        </button>
-                                                    </form>
-                                                }
+@if (estaBloqueadoPorRechazo)
+{
+    <button disabled type="button" class="text-slate-500 bg-slate-100 border border-slate-200 dark:text-slate-400 dark:bg-[#2a2b2e] dark:border-[#4a4b50] px-3 py-1.5 rounded-lg font-bold text-xs flex items-center cursor-not-allowed shadow-sm" title="Bloqueado: El documento fue rechazado o retirado por un Recall. Debes hacer clic en 'Editar Borrador' para hacer correcciones antes de volver a solicitar firmas.">
+        <i class="fa-solid fa-lock mr-1.5 text-base"></i> Bloqueado por Corrección
+    </button>
+}
+else
+{
+    <form asp-action="SendToReview" method="post" class="inline" onsubmit="return confirm('¿Iniciar el flujo de revisión para esta versión?');">
+        <input type="hidden" name="versionId" value="@version.VersionId" />
+        <input type="hidden" name="docId" value="@Model.DocId" />
+        <button type="submit" class="text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800/30 dark:hover:bg-emerald-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Solicitar Firmas (Iniciar Flujo)">
+            <i class="fa-solid fa-file-signature mr-1.5 text-base"></i> Solicitar Firmas
+        </button>
+    </form>
+}
                                             }
                                             else if (version.StatusId == 2)
                                             {
@@ -246,6 +254,30 @@
                                                 }
                                             }
                                         </div>
+                                    }
+
+                                    @if (showRevokeButton)
+                                    {
+                                        <div class="hidden sm:block w-px h-6 bg-slate-200 dark:bg-[#4a4b50] mx-1"></div>
+                                        <form asp-controller="Approvals" asp-action="RevertSignature" method="post" class="inline-flex" onsubmit="return confirm('@(canRecallEmergencia ? "¡ALERTA CRÍTICA! Vas a ejecutar un RECALL DE EMERGENCIA. El documento desaparecerá de la vista de los operarios de inmediato. ¿Proceder?" : "¿Estás seguro de revocar tu decisión? El flujo retrocederá a este paso de forma automática.")');">
+                                            
+                                            <input type="hidden" name="versionId" value="@version.VersionId" />
+                                            <input type="hidden" name="approvalId" value="@targetApprovalId" />
+                                            <input type="hidden" name="docId" value="@Model.DocId" />
+                                            
+                                            @if (canRecallEmergencia)
+                                            {
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/30 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors shadow-sm animate-pulse hover:animate-none" title="Retirar documento de producción">
+                                                    <i class="fa-solid fa-triangle-exclamation mr-1.5 text-base"></i> Recall de Emergencia
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-[#323338] text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-[#4a4b50] hover:bg-slate-50 dark:hover:bg-[#2a2b2e] hover:text-red-500 dark:hover:text-red-400 transition-colors shadow-sm" title="Revocar mi dictamen">
+                                                    <i class="fa-solid fa-arrow-rotate-left mr-1.5 text-base"></i> Revocar firma
+                                                </button>
+                                            }
+                                        </form>
                                     }
                                 </td>
                             </tr>
@@ -391,19 +423,7 @@
                         </div>
                     }
 
-                    @if (isLatest && isLastLog && (log.ActionType == "Approved" || log.ActionType == "Rejected") && log.CreatedBy == currentUserId && matchingApproval != null && version.StatusId != 3)
-                    {
-                        <div class="pl-14 mt-4">
-                            <form asp-controller="Approvals" asp-action="RevertSignature" method="post" class="inline-block" onsubmit="return confirm('¿Estás seguro de revocar tu decisión? El flujo retrocederá a este paso de forma automática.');">
-                                <input type="hidden" name="versionId" value="@version.VersionId" />
-                                <input type="hidden" name="approvalId" value="@matchingApproval.ApprovalId" />
-                                <input type="hidden" name="docId" value="@Model.DocId" />
-                                <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg bg-white dark:bg-[#323338] text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-[#4a4b50] hover:bg-slate-50 dark:hover:bg-[#2a2b2e] hover:text-red-500 dark:hover:text-red-400 transition-colors shadow-sm">
-                                    <i class="fa-solid fa-arrow-rotate-left mr-1.5"></i> Revocar mi firma
-                                </button>
-                            </form>
-                        </div>
-                    }
+                    
                 </div>
             </div>
         }

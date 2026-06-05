@@ -603,7 +603,8 @@ CREATE PROCEDURE sp_RecallDocumentWorkflow
     @VersionID INT,
     @ApprovalID INT = NULL, 
     @UserID INT,
-    @NewVersionNum VARCHAR(15) -- 🚀 1. NUEVO PARÁMETRO QUE RECIBE DESDE C#
+    @NewVersionNum VARCHAR(15),
+    @IsAdminBypass BIT = 0 -- 🚀 1. LA LLAVE MAESTRA DEL ADMIN (Por defecto es 0)
 AS
 BEGIN
     BEGIN TRANSACTION;
@@ -617,30 +618,34 @@ BEGIN
         WHERE version_id = @VersionID;
 
         -- =========================================================
-        -- CASO 1: EL CREADOR CANCELA EL FLUJO (Recall General)
+        -- CASO 1: EL CREADOR CANCELA O EL ADMIN HACE RECALL DE EMERGENCIA
         -- =========================================================
         IF @ApprovalID IS NULL
         BEGIN
-            -- Bloqueo 1: Si ya está Aprobado Final
-            IF @CurrentDocStatus = 3
+            -- Bloqueo 1: Si ya está Aprobado, solo el Admin puede pasar
+            IF @CurrentDocStatus = 3 AND @IsAdminBypass = 0
             BEGIN
-                THROW 50002, 'El documento ya está Aprobado. No se puede cancelar el flujo.', 1;
+                THROW 50002, 'Bloqueo ISO: El documento ya está Aprobado. Solo un Administrador puede ejecutar un Recall de Emergencia.', 1;
             END
 
-            -- Bloqueo 2: Verificar si el Revisor (Paso 1) ya firmó
-            DECLARE @ReviewerStatus NVARCHAR(20);
-            SELECT TOP 1 @ReviewerStatus = approval_status
-            FROM DocumentApprovals
-            WHERE version_id = @VersionID AND step_order = 1;
-
-            IF @ReviewerStatus != 'Pending' AND @ReviewerStatus IS NOT NULL
+            -- Bloqueo 2: Si el revisor ya firmó, el creador no puede cancelar (Pero el Admin SÍ puede)
+            IF @IsAdminBypass = 0
             BEGIN
-                THROW 50005, 'Bloqueo ISO: No puedes cancelar el flujo porque el Revisor ya procesó tu documento. Debes esperar a que termine el ciclo.', 1;
+                DECLARE @ReviewerStatus NVARCHAR(20);
+                SELECT TOP 1 @ReviewerStatus = approval_status
+                FROM DocumentApprovals
+                WHERE version_id = @VersionID AND step_order = 1;
+
+                IF @ReviewerStatus != 'Pending' AND @ReviewerStatus IS NOT NULL
+                BEGIN
+                    THROW 50005, 'Bloqueo ISO: No puedes cancelar el flujo porque el Revisor ya procesó tu documento.', 1;
+                END
             END
 
+            -- 🚀 LIMPIEZA TOTAL: Arrasamos con las firmas contaminadas para reiniciar el ciclo
             DELETE FROM DocumentApprovals WHERE version_id = @VersionID;
 
-            -- 🚀 2. REGISTRAMOS LA NUEVA VERSIÓN AL CANCELAR
+            -- 🚀 REGISTRAMOS LA NUEVA VERSIÓN Y REGRESAMOS A BORRADOR (Status 1)
             UPDATE DocumentVersions
             SET status_id = 1,
                 version_num = @NewVersionNum,
@@ -687,7 +692,6 @@ BEGIN
                     DELETE FROM DocumentApprovals WHERE version_id = @VersionID AND step_order = 2;
                 END
                 
-                -- 🚀 2. REGISTRAMOS LA NUEVA VERSIÓN AL DESHACER REVISIÓN
                 UPDATE DocumentVersions 
                 SET status_id = 2, 
                     version_num = @NewVersionNum,
@@ -695,13 +699,11 @@ BEGIN
                     updated_by = @UserID 
                 WHERE version_id = @VersionID;
             END
-
             -- ========================================
             -- Si el APROBADOR (Paso 2) deshace su firma
             -- ========================================
             ELSE IF @StepOrder = 2
             BEGIN
-                -- 🚀 2. REGISTRAMOS LA NUEVA VERSIÓN AL DESHACER APROBACIÓN
                 UPDATE DocumentVersions 
                 SET status_id = 2, 
                     version_num = @NewVersionNum,

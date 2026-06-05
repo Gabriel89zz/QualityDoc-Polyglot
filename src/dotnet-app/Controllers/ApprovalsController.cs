@@ -254,65 +254,89 @@ namespace QualityDoc.API.Controllers
         }
 
 
-        // ==========================================
-        // 4. DESHACER FIRMA / REVERTIR DECISIÓN (BLINDADO ISO 9001)
-        // ==========================================
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RevertSignature(int versionId, int approvalId, int docId)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> RevertSignature(int versionId, int approvalId, int docId)
+{
+    var userId = GetCurrentUserId();
+    bool isAdmin = User.IsInRole("Admin de Empresa"); 
+
+    try
+    {
+        // 🚀 1. AsNoTracking() evita que C# sobreescriba accidentalmente lo que hará SQL Server
+        var versionData = await _context.DocumentVersions
+            .AsNoTracking()
+            .Include(v => v.Document)
+            .FirstOrDefaultAsync(v => v.VersionId == versionId);
+
+        if (versionData == null) return NotFound();
+        string newVersionNum = versionData.VersionNum;
+        bool estabaVigente = versionData.StatusId == 3;
+
+        // 🚀 2. LA DIVISIÓN MAESTRA: Evitamos que EF Core se confunda con valores nulos
+        if (estabaVigente && isAdmin)
         {
-            var userId = GetCurrentUserId();
+            // BYPASS DE EMERGENCIA: Mandamos @ApprovalID = NULL directamente "quemado" en el query de texto.
+            // Esto fuerza a SQL Server a entrar sí o sí al "CASO 1" (Regresar a Borrador)
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC sp_RecallDocumentWorkflow @VersionID = {0}, @ApprovalID = NULL, @UserID = {1}, @NewVersionNum = {2}, @IsAdminBypass = {3}",
+                versionId, userId, newVersionNum, isAdmin
+            );
+        }
+        else
+        {
+            // RECALL NORMAL: Mandamos el ID de la firma para retroceder un solo paso
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC sp_RecallDocumentWorkflow @VersionID = {0}, @ApprovalID = {1}, @UserID = {2}, @NewVersionNum = {3}, @IsAdminBypass = {4}",
+                versionId, approvalId, userId, newVersionNum, isAdmin
+            );
+        }
+
+        // 🚀 3. REGISTRO EN LA BITÁCORA INMUTABLE
+        var auditLog = new DocumentAuditLog {
+            CompanyId = versionData.Document.CompanyId, 
+            DocId = docId,
+            VersionId = versionId,
+            ActionType = "SignatureRevoked",
+            ActionDetails = estabaVigente ? "RECALL DE EMERGENCIA: El administrador retiró el documento vigente de producción y lo regresó a Borrador." : "El firmante canceló su dictamen previo.",
+            VersionNum = newVersionNum,
+            CreatedBy = userId,
+            CreatedAt = DateTime.UtcNow
+        };
+        _context.DocumentAuditLogs.Add(auditLog);
+        await _context.SaveChangesAsync();
+
+        // 🚀 4. ELIMINACIÓN EN MONGODB
+        if (estabaVigente)
+        {
             try
             {
-                // 1. OBTENEMOS LOS DATOS DE LA VERSIÓN
-                var versionData = await _context.DocumentVersions
-                    .Include(v => v.Document)
-                    .FirstOrDefaultAsync(v => v.VersionId == versionId);
+                using var httpClient = new HttpClient();
+                var pythonApiUrl = _config["Microservices:PythonSearchApi"].TrimEnd('/');
+                var response = await httpClient.DeleteAsync($"{pythonApiUrl}/api/docs/index/{docId}");
 
-                if (versionData == null) return NotFound();
-
-                // 🚀 BLINDAJE ISO 9001: REGLA DE INMUTABILIDAD FINAL
-                // Si el documento ya alcanzó la versión oficial (Status 3 = Aprobado), 
-                // el flujo ya no se puede deshacer.
-                if (versionData.StatusId == 3)
+                if (!response.IsSuccessStatusCode)
                 {
-                    TempData["ErrorMessage"] = "Bloqueo de Calidad: No puedes revocar la firma de un documento que ya fue publicado (v" + versionData.VersionNum + "). Si detectaste un error, debes crear una 'Nueva Versión'.";
+                    TempData["ErrorMessage"] = "Recall ejecutado en BD, pero ocurrió un problema al intentar ocultar el documento en MongoDB (Portal Operativo).";
                     return RedirectToAction("Details", "Documents", new { id = docId });
                 }
-
-                // Si aún está en revisión, mantenemos el número actual (Ej. 0.3)
-                string newVersionNum = versionData.VersionNum;
-
-                // 2. EJECUTAMOS EL SP PARA RETROCEDER EL FLUJO
-                await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC sp_RecallDocumentWorkflow @VersionID = {0}, @ApprovalID = {1}, @UserID = {2}, @NewVersionNum = {3}",
-                    versionId, approvalId, userId, newVersionNum
-                );
-
-                // 3. REGISTRO EN LA BITÁCORA INMUTABLE
-                var auditLog = new DocumentAuditLog {
-                    CompanyId = versionData.Document.CompanyId, 
-                    DocId = docId,
-                    VersionId = versionId,
-                    ActionType = "SignatureRevoked",
-                    ActionDetails = "El firmante canceló su dictamen previo. El flujo operativo ha retrocedido a revisión.",
-                    VersionNum = newVersionNum,
-                    CreatedBy = userId,
-                    CreatedAt = DateTime.UtcNow
-                };
-                
-                _context.DocumentAuditLogs.Add(auditLog);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = $"¡Firma revocada con éxito! El documento ha regresado a revisión bajo la versión {newVersionNum}.";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                string errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                TempData["ErrorMessage"] = "No se pudo revertir el flujo: " + errorReal;
+                TempData["ErrorMessage"] = "Recall ejecutado, pero FastAPI está fuera de línea. El documento podría seguir visible temporalmente.";
+                return RedirectToAction("Details", "Documents", new { id = docId });
             }
-
-            return RedirectToAction("Details", "Documents", new { id = docId });
         }
+
+        TempData["SuccessMessage"] = $"¡Acción ejecutada con éxito! El documento (v{newVersionNum}) fue retirado y ha regresado a las etapas iniciales.";
+    }
+    catch (Exception ex)
+    {
+        string errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+        TempData["ErrorMessage"] = "Rechazado por el sistema: " + errorReal;
+    }
+
+    return RedirectToAction("Details", "Documents", new { id = docId });
+}
     }
 }
