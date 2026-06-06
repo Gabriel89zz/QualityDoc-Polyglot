@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies; // 1. Agregamos la librería de seguridad
 using Microsoft.EntityFrameworkCore;
 using QualityDoc.API.Data;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +45,21 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromHours(8); 
     });
 
+// ==============================================================
+// 🛡️ CONFIANZA EN NGINX (PROXY INVERSO)
+// ==============================================================
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Limpiamos las redes conocidas para que acepte el tráfico de la red de Docker
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
