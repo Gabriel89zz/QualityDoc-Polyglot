@@ -9,7 +9,7 @@ use App\Http\Controllers\ReportController;
 // 1. ZONA PÚBLICA / AUTENTICACIÓN
 // ==========================================
 Route::get('/', function () {
-    return redirect('http://127.0.0.1:5269/Auth/Login');
+    return redirect('/Auth/Login'); // ✅ ASÍ DEBE QUEDAR
 });
 
 Route::get('/auth/token', [AuthController::class, 'verifyToken'])->name('auth.token');
