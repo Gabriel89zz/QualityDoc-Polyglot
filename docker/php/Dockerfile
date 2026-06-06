@@ -1,24 +1,30 @@
-# 1. Usamos PHP 8.2 con FPM (Fast Process Manager) para mejor rendimiento
+# 1. Usamos PHP 8.2 con FPM
 FROM php:8.2-fpm
 
-# 2. Instalamos dependencias del sistema (Agregamos libzip-dev)
+# 2. Instalamos dependencias
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    git \
-    curl
+    libpq-dev libzip-dev zip unzip git curl
 
-# 3. Instalamos las extensiones de PHP para PostgreSQL y utilidades de Laravel
+# 3. Instalamos las extensiones de PHP
 RUN docker-php-ext-install pdo pdo_pgsql zip bcmath pcntl
 
-# 4. Instalamos Composer de forma oficial y global
+# 4. Instalamos Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 5. Definimos el directorio de trabajo
 WORKDIR /var/www/html
 
-# 6. Ajustamos permisos (Nota: al montar el volumen, los permisos del host sobrescriben esto, 
-# pero es buena práctica dejarlo en la imagen base)
-RUN chown -R www-data:www-data /var/www/html
+# 🚀 NUEVO PARA PRODUCCIÓN: Copiamos todo el código de Laravel adentro de la imagen
+COPY src/php-app .
+
+# 🚀 NUEVO PARA PRODUCCIÓN: Instalamos dependencias optimizadas (sin paquetes de pruebas)
+RUN composer install --no-dev --optimize-autoloader
+
+# Ajustamos permisos de seguridad para el servidor web
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
+
+# 🚀 NUEVO: Configuramos el script de arranque para producción
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
