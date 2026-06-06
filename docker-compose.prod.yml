@@ -80,8 +80,7 @@ services:
     networks:
       - quality-net
     volumes:
-      # 🚀 CARPETA ABSOLUTA EN DEBIAN PARA LOS PDFS VIGENTES
-      - /var/qualitydoc_data/uploads:/app/wwwroot/uploads
+      - ./datos_produccion/uploads:/app/wwwroot/uploads
 
   php-app:
     build:

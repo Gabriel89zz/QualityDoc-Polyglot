@@ -8,28 +8,6 @@ echo "🚀 PREPARANDO SERVIDOR PARA QUALITYDOC-POLYGLOT"
 echo "========================================================="
 
 # ---------------------------------------------------------
-# PASO 0: VERIFICACIÓN DE DEPENDENCIAS (Git y Docker)
-# ---------------------------------------------------------
-echo "🔍 Verificando herramientas del sistema..."
-
-if ! command -v git &> /dev/null; then
-    echo "⚙️  Git no encontrado. Instalando..."
-    sudo apt update && sudo apt install git curl -y
-else
-    echo "✅ Git ya está instalado."
-fi
-
-if ! command -v docker &> /dev/null; then
-    echo "⚙️  Docker no encontrado. Instalando versión oficial..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
-    sudo usermod -aG docker $USER
-    echo "✅ Docker instalado correctamente."
-else
-    echo "✅ Docker ya está instalado."
-fi
-
-# ---------------------------------------------------------
 # PASO 1: CREAR BÓVEDA DE ARCHIVOS FÍSICOS
 # ---------------------------------------------------------
 echo "📂 1/3 - Creando bóveda segura para PDFs físicos en /var..."

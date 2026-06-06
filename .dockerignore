@@ -1,8 +1,32 @@
-# Ignorar carpetas locales de compilación de .NET
+# --- Git ---
+.git/
+.gitignore
+
+# --- Entorno Local y Secretos ---
+.env
+.env.example
+docker-compose*.yml
+deploy.sh
+deploy.bat
+
+# --- Archivos Físicos y Bases de Datos Locales ---
+datos_produccion/
+db/mongodb/data/
+db/postgresql/data/
+db/sql-server/data/
+
+# --- .NET ---
 **/bin/
 **/obj/
-
-# Otros archivos que no deberían subir al contenedor
 .vs/
 .vscode/
 *.user
+
+# --- PHP ---
+src/php-app/vendor/
+src/php-app/node_modules/
+
+# --- Python ---
+src/python-app/venv/
+src/python-app/.venv/
+src/python-app/__pycache__/

@@ -52,6 +52,7 @@ secrets.json
 # --- Archivos Subidos por Usuarios (Sistema de Gestión) ---
 # Evita que los PDFs, manuales o checklists de prueba se suban al repositorio
 src/dotnet-app/wwwroot/uploads/
+datos_produccion/
 
 # --- Certificados y Llaves ---
 *.pem
