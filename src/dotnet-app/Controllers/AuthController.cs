@@ -52,7 +52,7 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -160,7 +160,7 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -338,7 +338,7 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Verify2FA(string code, bool rememberDevice = false) // 🚀 Parámetro nuevo
         {
             var userIdStr = TempData["Pending2FAUserId"]?.ToString();
@@ -442,7 +442,7 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
 
         [HttpPost]
         [AllowAnonymous]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(string token, string newPassword)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
