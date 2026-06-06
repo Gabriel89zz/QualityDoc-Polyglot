@@ -139,7 +139,7 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
     user.Role.RoleName.Trim().Equals("Auditor", StringComparison.OrdinalIgnoreCase))
 {
     var jwtToken = GenerarTokenParaPhp(user);
-    return Redirect($"http://127.0.0.1/auth/token?token={jwtToken}");
+    return Redirect($"/auth/token?token={jwtToken}");
 }
 
             return RedirectToAction("Index", "Home");
@@ -291,7 +291,7 @@ if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreC
 
             // Generamos el Token y saltamos a Nginx / Laravel
             var jwtToken = GenerarTokenParaPhp(user);
-            return Redirect($"http://127.0.0.1/auth/token?token={jwtToken}");
+            return Redirect($"/auth/token?token={jwtToken}");
         }
 
         private string GenerarTokenParaPhp(User user)

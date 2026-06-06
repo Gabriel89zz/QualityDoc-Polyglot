@@ -17,7 +17,7 @@ class AuthController extends Controller
         if (!$token) {
             // Si alguien entra directo a la ruta sin token, lo pateamos de vuelta al Login de C#
             // Ajusta el puerto 5269 si tu C# corre en otro lado cuando pruebes
-            return redirect('http://127.0.0.1:5269/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
+            return redirect('/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
         }
 
         // 2. Traemos la llave secreta del .env
@@ -48,7 +48,7 @@ class AuthController extends Controller
 
         } catch (Exception $e) {
             // El token expiró o alguien intentó hackearlo. Lo regresamos al C#
-            return redirect('http://127.0.0.1:5269/Auth/Login?error=TokenInvalido');
+            return redirect('/Auth/Login?error=TokenInvalido');
         }
     }
 
@@ -57,6 +57,6 @@ class AuthController extends Controller
         // Limpiamos la sesión nativa de Laravel
         $request->session()->flush();
         // Redirigimos al LOGOUT del sistema central (C#) para destruir la cookie maestra
-        return redirect('http://127.0.0.1:5269/Auth/Logout');
+        return redirect('/Auth/Logout');
     }
 }
