@@ -132,13 +132,17 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            await HttpContext.SignInAsync(
+            // ... lógica de login ...
+Console.WriteLine("🚀 Intentando firmar la cookie de autenticación ahora mismo...");
+
+await HttpContext.SignInAsync(
     CookieAuthenticationDefaults.AuthenticationScheme, 
     new ClaimsPrincipal(claimsIdentity),
     new AuthenticationProperties { 
-        IsPersistent = true, // 🚀 IMPORTANTE: Esto le dice al navegador que guarde la cookie en disco
-        ExpiresUtc = DateTime.UtcNow.AddHours(8) 
+        IsPersistent = true 
     });
+
+Console.WriteLine("✅ SignInAsync ejecutado exitosamente.");
             // 🚀 EL TRUCO DE LA REDIRECCIÓN BLINDADO
 if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
     user.Role.RoleName.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase) ||

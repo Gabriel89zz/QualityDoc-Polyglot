@@ -43,12 +43,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Auth/Login"; 
         options.AccessDeniedPath = "/Auth/AccessDenied"; 
         
-        // 🚀 ESTO ES LO QUE VA A CORREGIR EL PROBLEMA
-        options.Cookie.Name = "QualityDocAuthCookie"; 
+        options.Cookie.Name = "QualityDocAuthCookie";
         options.Cookie.Path = "/";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Lax; // Lax es obligatorio para HTTP
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Permite HTTP si no hay HTTPS
+        
+        // 🚀 CAMBIO CRÍTICO:
+        // Si no tienes HTTPS instalado, 'Secure' debe ser 'SameAsRequest'
+        // 'SameSite' debe ser 'Lax' para permitir navegación entre dominios
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
+
         options.ExpireTimeSpan = TimeSpan.FromHours(8); 
     });
 
