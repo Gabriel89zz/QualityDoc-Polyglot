@@ -40,11 +40,12 @@ builder.Services.Configure<IISServerOptions>(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        // 🚀 CORRECCIÓN: Agregar el prefijo /admin para que coincida con tu ruta base
         options.LoginPath = "/Auth/Login"; 
-        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.AccessDeniedPath = "/Auth/AccessDenied"; 
         
-        // 🚀 CORRECCIÓN: Hacer la cookie permisiva para pruebas en red local (HTTP)
+        // 🚀 ESTO ES LO QUE ESTABA FALTANDO
+        options.Cookie.Name = "QualityDocAuthCookie"; // Nombre fijo para que no se confunda
+        options.Cookie.Path = "/";                    // Forzamos que la cookie sea válida para toda la app
         options.Cookie.SameSite = SameSiteMode.Lax; 
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
         options.Cookie.HttpOnly = true;
