@@ -15,13 +15,12 @@ class AuthController extends Controller
         $token = $request->query('token');
 
         if (!$token) {
-            // Si alguien entra directo a la ruta sin token, lo pateamos de vuelta al Login de C#
-            // Ajusta el puerto 5269 si tu C# corre en otro lado cuando pruebes
-            return redirect('/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
+            // 🚀 CORRECCIÓN 1: Agregamos /admin para regresar al Login de C#
+            return redirect('/admin/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
         }
 
-        // 2. Traemos la llave secreta del .env
-        $secretKey = env('JWT_SECRET');
+        // 🚀 CORRECCIÓN 2: Leemos la variable exacta como la tienes en tu .env unificado
+        $secretKey = env('LARAVEL_JWT_SECRET');
 
         try {
             // 3. Validar y decodificar el token
@@ -39,7 +38,7 @@ class AuthController extends Controller
                 'dept_id' => $decoded->dept_id ?? 0
             ]);
 
-            // 🚀 5. EL NUEVO CADENERO: Redirección inteligente basada en roles
+            // 5. EL NUEVO CADENERO: Redirección inteligente basada en roles
             if (in_array($decoded->role, ['Administrador', 'Auditor'])) {
                 return redirect()->route('dashboard'); 
             } else {
@@ -47,8 +46,8 @@ class AuthController extends Controller
             }
 
         } catch (Exception $e) {
-            // El token expiró o alguien intentó hackearlo. Lo regresamos al C#
-            return redirect('/Auth/Login?error=TokenInvalido');
+            // 🚀 CORRECCIÓN 3: Agregamos /admin para expulsar a C#
+            return redirect('/admin/Auth/Login?error=TokenInvalido');
         }
     }
 
@@ -56,7 +55,8 @@ class AuthController extends Controller
     {
         // Limpiamos la sesión nativa de Laravel
         $request->session()->flush();
-        // Redirigimos al LOGOUT del sistema central (C#) para destruir la cookie maestra
-        return redirect('/Auth/Logout');
+        
+        // 🚀 CORRECCIÓN 4: Agregamos /admin para ir al LOGOUT del sistema central (C#)
+        return redirect('/admin/Auth/Logout');
     }
 }
