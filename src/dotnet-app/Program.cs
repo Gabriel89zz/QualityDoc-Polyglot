@@ -84,8 +84,16 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // 3. ACTIVAR LOS GAFETES EN EL PIPELINE (¡EL ORDEN ES VITAL!)
-app.UseAuthentication(); // <- NUEVO: Primero lee la Cookie para saber QUIÉN eres
-app.UseAuthorization();  // Después usa esa info para ver si tienes PERMISO (Roles)
+app.UseAuthentication(); 
+
+// 🚀 LOGGING DE AUTORIZACIÓN (Esto nos dirá qué está pasando)
+app.Use((context, next) => {
+    Console.WriteLine($"🔍 URL Visitada: {context.Request.Path}");
+    Console.WriteLine($"🔍 ¿Está autenticado?: {context.User.Identity.IsAuthenticated}");
+    return next();
+});
+
+app.UseAuthorization();
 
 app.MapStaticAssets();
 
