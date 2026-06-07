@@ -19,8 +19,8 @@ class AuthController extends Controller
             return redirect('/admin/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
         }
 
-        // 🚀 CORRECCIÓN 2: Leemos la variable exacta como la tienes en tu .env unificado
-        $secretKey = env('LARAVEL_JWT_SECRET');
+        // 🚀 EL SALVAVIDAS: Si Docker no lee el .env, usamos la llave de respaldo
+        $secretKey = env('LARAVEL_JWT_SECRET', 'QualityDocPolyglot_SuperSecretKey_2026!#_ParaAutenticacionSegura');
 
         try {
             // 3. Validar y decodificar el token
@@ -45,7 +45,8 @@ class AuthController extends Controller
                 return redirect()->route('dashboard'); 
             }
 
-        } catch (Exception $e) {
+        // 🚀 PROTECCIÓN TOTAL: Cambiamos Exception por \Throwable para atrapar el error 500 de variables nulas
+        } catch (\Throwable $e) {
             // 🚀 CORRECCIÓN 3: Agregamos /admin para expulsar a C#
             return redirect('/admin/Auth/Login?error=TokenInvalido');
         }
