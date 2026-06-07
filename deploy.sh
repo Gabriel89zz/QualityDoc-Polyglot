@@ -29,6 +29,7 @@ sudo chmod -R 777 keys
 echo "🔐 2/4 - Otorgando permisos de ejecución a los scripts..."
 chmod +x docker/php/entrypoint.sh
 chmod +x db/sql-server/entrypoint.sh
+chmod -R 755 ./db/sql-server/scripts
 
 # ---------------------------------------------------------
 # PASO 3: LEVANTAR INFRAESTRUCTURA

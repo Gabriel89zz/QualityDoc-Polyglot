@@ -20,7 +20,6 @@ services:
   # --- BASES DE DATOS (Blindadas, sin puertos expuestos al host) ---
   sql-server:
     image: mcr.microsoft.com/mssql/server:2022-CU12-ubuntu-22.04
-    user: "root"
     container_name: sql_server_prod
     restart: always
     environment:

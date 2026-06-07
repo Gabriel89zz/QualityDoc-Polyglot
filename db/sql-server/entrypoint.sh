@@ -21,9 +21,11 @@ done
 
 # Ejecutar los scripts en orden
 echo "Ejecutando scripts de inicialización..."
-# 🚀 CORRECCIÓN: Le quitamos el 18 a mssql-tools en estas dos líneas también
-/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -i /usr/config/scripts/01_schema.sql
-/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -i /usr/config/scripts/02_seed.sql
+echo "Ejecutando esquema..."
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -i /usr/config/scripts/01_schema.sql || { echo "Error en el esquema"; exit 1; }
+
+echo "Ejecutando seeds..."
+/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -i /usr/config/scripts/02_seed.sql || { echo "Error en los seeds"; exit 1; }
 
 echo "¡Inicialización completa!"
 
