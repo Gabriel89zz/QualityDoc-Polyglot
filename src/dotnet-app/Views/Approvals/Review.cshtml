@@ -39,7 +39,7 @@
         <div class="lg:col-span-2 bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] overflow-hidden flex flex-col transition-colors duration-300">
             <div class="px-5 py-4 bg-slate-50 dark:bg-[#2a2b2e] border-b border-slate-200 dark:border-[#4a4b50] flex justify-between items-center transition-colors">
                 <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-eye mr-2"></i> Vista Previa del Documento</span>
-                <a href="@Model.DocumentVersion?.FilePath" target="_blank" class="text-brand dark:text-brand-light hover:text-brand-hover text-xs font-bold flex items-center transition-colors">
+                <a href="/admin@(Model.DocumentVersion?.FilePath)" target="_blank" class="text-brand dark:text-brand-light hover:text-brand-hover text-xs font-bold flex items-center transition-colors">
                     Abrir en otra pestaña <i class="fa-solid fa-arrow-up-right-from-square ml-1.5"></i>
                 </a>
             </div>
@@ -53,7 +53,7 @@
                 }
                 else
                 {
-                    <iframe src="@Model.DocumentVersion?.FilePath" class="w-full h-full border-0"></iframe>
+                    <iframe src="/admin@(Model.DocumentVersion?.FilePath)" class="w-full h-full border-0"></iframe>
                 }
             </div>
         </div>
