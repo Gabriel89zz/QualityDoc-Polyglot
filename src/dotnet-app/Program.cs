@@ -35,8 +35,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         // 🚀 CORRECCIÓN: Agregar el prefijo /admin para que coincida con tu ruta base
-        options.LoginPath = "/admin/Auth/Login"; 
-        options.AccessDeniedPath = "/admin/Auth/AccessDenied"; 
+        options.LoginPath = "/Auth/Login"; 
+        options.AccessDeniedPath = "/Auth/AccessDenied";
         
         // 🚀 CORRECCIÓN: Hacer la cookie permisiva para pruebas en red local (HTTP)
         options.Cookie.SameSite = SameSiteMode.Lax; 
@@ -61,6 +61,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var app = builder.Build();
 
 app.UseForwardedHeaders();
+app.UsePathBase("/admin");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -71,7 +72,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-app.UsePathBase("/admin");
+
 
 app.UseStaticFiles();
 app.UseRouting();
