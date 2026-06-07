@@ -52,108 +52,95 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+public async Task<IActionResult> Login(LoginViewModel model)
+{
+    // 1. TRAMPA DEL MODELO: Si falta un campo, ahora sabremos por qué "parpadea"
+    if (!ModelState.IsValid) 
+    {
+        Console.WriteLine("❌ ERROR DE FORMULARIO: Faltan campos en el HTML para que el modelo sea válido.");
+        return View(model);
+    }
+
+    var user = await _context.Users
+        .Include(u => u.Role)
+        .Include(u => u.Company) 
+        .FirstOrDefaultAsync(u => u.Email == model.Email);
+
+    if (user == null || user.Status != "Active" || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
+    {
+        TempData["ErrorMessage"] = "Credenciales incorrectas o usuario dado de baja."; 
+        ModelState.AddModelError(string.Empty, "Credenciales incorrectas o usuario dado de baja.");
+        return View(model);
+    }
+
+    // =======================================================
+    // LÓGICA DE 2FA (Queda intacta)
+    // =======================================================
+    bool requires2FA = false;
+    if (user.Role.RoleName == "Super Administrador" || user.Role.RoleName == "Super Admin" || user.Role.RoleName == "Admin de Empresa")
+    {
+        requires2FA = true;
+        var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(user.UserId.ToString() + user.PasswordHash);
+        var expectedToken = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(plainTextBytes));
+        var trustedCookie = Request.Cookies["QualityDoc2FA_Trusted_" + user.UserId];
+
+        if (trustedCookie == expectedToken) requires2FA = false; 
+    }
+
+    if (requires2FA)
+    {
+        string code = new Random().Next(100000, 999999).ToString();
+        user.TwoFactorCode = code;
+        user.TwoFactorExpiry = DateTime.UtcNow.AddMinutes(10);
+        
+        _context.Update(user);
+        await _context.SaveChangesAsync();
+
+        try
         {
-            if (!ModelState.IsValid) return View(model);
-
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .Include(u => u.Company) 
-                .FirstOrDefaultAsync(u => u.Email == model.Email);
-
-            if (user == null || user.Status != "Active" || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
-{
-    // 🚀 AGREGA ESTA LÍNEA PARA QUE APAREZCA EL MENSAJE ROJO EN EL HTML
-    TempData["ErrorMessage"] = "Credenciales incorrectas o usuario dado de baja."; 
-    
-    ModelState.AddModelError(string.Empty, "Credenciales incorrectas o usuario dado de baja.");
-    return View(model);
-}
-
-            // =======================================================
-            // 🚀 INTERCEPCIÓN PARA 2FA DE ADMINISTRADORES
-            // =======================================================
-            bool requires2FA = false;
-            if (user.Role.RoleName == "Super Administrador" || user.Role.RoleName == "Super Admin" || user.Role.RoleName == "Admin de Empresa")
-            {
-                requires2FA = true; // Por defecto asumimos que sí lo necesita
-
-                // 🧠 LÓGICA DE DISPOSITIVO DE CONFIANZA
-                var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(user.UserId.ToString() + user.PasswordHash);
-                var expectedToken = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(plainTextBytes));
-                var trustedCookie = Request.Cookies["QualityDoc2FA_Trusted_" + user.UserId];
-
-                // Si la cookie existe en su navegador y coincide con la firma secreta, lo dejamos pasar
-                if (trustedCookie == expectedToken)
-                {
-                    requires2FA = false; 
-                }
-            }
-
-            if (requires2FA)
-            {
-                // 1. Generar código OTP de 6 dígitos
-                string code = new Random().Next(100000, 999999).ToString();
-                user.TwoFactorCode = code;
-                user.TwoFactorExpiry = DateTime.UtcNow.AddMinutes(10);
-                
-                _context.Update(user);
-                await _context.SaveChangesAsync();
-
-                // 2. Disparar correo con el OTP
-                try
-                {
-                    await _emailService.SendEmailAsync(
-                        user.Email,
-                        "🔒 Código de Seguridad 2FA - QualityDoc",
-                        "Autenticación en Dos Pasos",
-                        $"Hola <b>{user.FullName}</b>,<br><br>Se requiere verificación adicional para ingresar al panel de administración. Ingresa el siguiente código de seguridad (válido por 10 minutos):<br><br><div style='text-align:center; font-size:32px; font-weight:bold; letter-spacing:10px; background:#F1F5F9; color:#4F46E5; padding:20px; border-radius:12px; margin:20px 0;'>{code}</div>"
-                    );
-                }
-                catch (Exception) { /* Ignoramos fallo smtp */ }
-
-                // 3. Guardar en memoria temporal quién intentó entrar y mandarlo a la vista del PIN
-                TempData["Pending2FAUserId"] = user.UserId;
-                return RedirectToAction("Verify2FA");
-            }
-            // =======================================================
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.RoleName), 
-                
-                new Claim("CompanyId", user.CompanyId.HasValue ? user.CompanyId.Value.ToString() : "0"), 
-                new Claim("CompanyName", user.Company != null ? user.Company.LegalName : "Sistema (Super Admin)")
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            // ... lógica de login ...
-Console.WriteLine("🚀 Intentando firmar la cookie de autenticación ahora mismo...");
-
-await HttpContext.SignInAsync(
-    CookieAuthenticationDefaults.AuthenticationScheme, 
-    new ClaimsPrincipal(claimsIdentity),
-    new AuthenticationProperties { 
-        IsPersistent = true 
-    });
-
-Console.WriteLine("✅ SignInAsync ejecutado exitosamente.");
-            // 🚀 EL TRUCO DE LA REDIRECCIÓN BLINDADO
-if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
-    user.Role.RoleName.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase) ||
-    user.Role.RoleName.Trim().Equals("Auditor", StringComparison.OrdinalIgnoreCase))
-{
-    var jwtToken = GenerarTokenParaPhp(user);
-    return Redirect($"/auth/token?token={jwtToken}");
-}
-
-            return RedirectToAction("Index", "Home");
+            await _emailService.SendEmailAsync(user.Email, "🔒 Código de Seguridad", "Autenticación", $"Código: {code}");
         }
+        catch (Exception) { /* Ignoramos fallo smtp */ }
+
+        TempData["Pending2FAUserId"] = user.UserId;
+        return RedirectToAction("Verify2FA");
+    }
+
+    // =======================================================
+    // LÓGICA DE CREACIÓN DE COOKIE
+    // =======================================================
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+        new Claim(ClaimTypes.Name, user.FullName),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role.RoleName), 
+        new Claim("CompanyId", user.CompanyId.HasValue ? user.CompanyId.Value.ToString() : "0"), 
+        new Claim("CompanyName", user.Company != null ? user.Company.LegalName : "Sistema (Super Admin)")
+    };
+
+    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+    Console.WriteLine("🚀 Firmando cookie desde el Login Normal...");
+
+    // 2. LA CORRECCIÓN: Igualamos esto a Verify2FA (Quitamos el IsPersistent)
+    await HttpContext.SignInAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme, 
+        new ClaimsPrincipal(claimsIdentity));
+
+    Console.WriteLine("✅ Cookie firmada correctamente.");
+
+    // 🚀 REDIRECCIÓN
+    if (user.Role.RoleName.Trim().Equals("Operario", StringComparison.OrdinalIgnoreCase) || 
+        user.Role.RoleName.Trim().Equals("Lector", StringComparison.OrdinalIgnoreCase) ||
+        user.Role.RoleName.Trim().Equals("Auditor", StringComparison.OrdinalIgnoreCase))
+    {
+        var jwtToken = GenerarTokenParaPhp(user);
+        return Redirect($"/auth/token?token={jwtToken}");
+    }
+
+    return RedirectToAction("Index", "Home");
+}
 
         // =======================================================
         // 2. ZONA DE REGISTRO PÚBLICO (SaaS Autoregistro)
