@@ -63,10 +63,13 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
                 .FirstOrDefaultAsync(u => u.Email == model.Email);
 
             if (user == null || user.Status != "Active" || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
-            {
-                ModelState.AddModelError(string.Empty, "Credenciales incorrectas o usuario dado de baja.");
-                return View(model);
-            }
+{
+    // 🚀 AGREGA ESTA LÍNEA PARA QUE APAREZCA EL MENSAJE ROJO EN EL HTML
+    TempData["ErrorMessage"] = "Credenciales incorrectas o usuario dado de baja."; 
+    
+    ModelState.AddModelError(string.Empty, "Credenciales incorrectas o usuario dado de baja.");
+    return View(model);
+}
 
             // =======================================================
             // 🚀 INTERCEPCIÓN PARA 2FA DE ADMINISTRADORES

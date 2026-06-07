@@ -130,7 +130,7 @@
                 <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Principal</p>
             </div>
             <nav class="space-y-1 px-3">
-                <a class="@GetLinkClass("Home", "Index")" href="/Home/Index">
+                <a class="@GetLinkClass("Home", "Index")" href="/admin/Home/Index">
                     <i class="fa-solid fa-chart-line @GetIconClass("Home", "Index")"></i>
                     <span class="ml-3">Dashboard</span>
                 </a>
@@ -138,21 +138,21 @@
                 @if (esAdminEmpresa)
                 {
                     <div class="px-3 mt-8 mb-3"><p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Configuración ISO</p></div>
-                    <a class="@GetLinkClass("Departments")" href="/Departments/Index">
+                    <a class="@GetLinkClass("Departments")" href="/admin/Departments/Index">
                         <i class="fa-solid fa-sitemap @GetIconClass("Departments")"></i><span class="ml-3">Departamentos</span>
                     </a>
-                    <a class="@GetLinkClass("Users")" href="/Users/Index">
+                    <a class="@GetLinkClass("Users")" href="/admin/Users/Index">
                         <i class="fa-solid fa-users @GetIconClass("Users")"></i><span class="ml-3">Personal</span>
                     </a>
-                    <a class="@GetLinkClass("DocumentCategories")" href="/DocumentCategories/Index">
+                    <a class="@GetLinkClass("DocumentCategories")" href="/admin/DocumentCategories/Index">
                         <i class="fa-solid fa-folder-tree @GetIconClass("DocumentCategories")"></i><span class="ml-3">Estructura ISO</span>
                     </a>
 
                     <div class="px-3 mt-8 mb-3"><p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Gestión Documental</p></div>
-                    <a class="@GetLinkClass("Documents")" href="/Documents/Index">
+                    <a class="@GetLinkClass("Documents")" href="/admin/Documents/Index">
                         <i class="fa-solid fa-file-signature @GetIconClass("Documents")"></i><span class="ml-3">Master de Docs</span>
                     </a>
-                    <a class="@GetLinkClass("DocumentApprovals") flex justify-between" href="/DocumentApprovals/Index">
+                    <a class="@GetLinkClass("DocumentApprovals") flex justify-between" href="/admin/DocumentApprovals/Index">
                         <div class="flex items-center">
                             <i class="fa-solid fa-bars-progress @GetIconClass("DocumentApprovals")"></i><span class="ml-3">Flujos Activos</span>
                         </div>
@@ -164,7 +164,7 @@
                             </span>
                         }
                     </a>
-                    <a class="@GetLinkClass("QualityTickets")" href="/QualityTickets/Index">
+                    <a class="@GetLinkClass("QualityTickets")" href="/admin/QualityTickets/Index">
                         <i class="fa-solid fa-inbox @GetIconClass("QualityTickets")"></i><span class="ml-3">Buzón de Incidencias</span>
                     </a>
                 }
@@ -172,15 +172,15 @@
                 {
                     <div class="px-3 mt-8 mb-3"><p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Host Tenant</p></div>
     
-                        <a class="@GetLinkClass("Companies")" href="/Companies/Index">
+                        <a class="@GetLinkClass("Companies")" href="/admin/Companies/Index">
                             <i class="fa-solid fa-city @GetIconClass("Companies")"></i><span class="ml-3">Empresas</span>
                         </a>
     
-                        <a class="@GetLinkClass("Norms")" href="/Norms/Index">
+                        <a class="@GetLinkClass("Norms")" href="/admin/Norms/Index">
                             <i class="fa-solid fa-scale-balanced @GetIconClass("Norms")"></i><span class="ml-3">Normativas</span>
                         </a>
     
-                        <a class="@GetLinkClass("Users")" href="/Users/Index">
+                        <a class="@GetLinkClass("Users")" href="/admin/Users/Index">
                             <i class="fa-solid fa-users-gear @GetIconClass("Users")"></i><span class="ml-3">Usuarios Globales</span>
                         </a>
                 }
@@ -190,16 +190,16 @@
                     
                     @if (User.IsInRole("Creador de Doc"))
                     {
-                        <a class="@GetLinkClass("Documents", "Create")" href="/Documents/Create">
+                        <a class="@GetLinkClass("Documents", "Create")" href="/admin/Documents/Create">
                             <i class="fa-solid fa-file-signature @GetIconClass("Documents", "Create")"></i><span class="ml-3">Redactar Docs</span>
                         </a>
                     }
                     
-                    <a class="@GetLinkClass("Approvals")" href="/Approvals/Index">
+                    <a class="@GetLinkClass("Approvals")" href="/admin/Approvals/Index">
                         <i class="fa-solid fa-inbox @GetIconClass("Approvals")"></i><span class="ml-3">Mis Firmas</span>
                     </a>
                     
-                    <a class="@GetLinkClass("Documents", "Index")" href="/Documents/Index">
+                    <a class="@GetLinkClass("Documents", "Index")" href="/admin/Documents/Index">
                         <i class="fa-solid fa-book-open-reader @GetIconClass("Documents", "Index")"></i><span class="ml-3">Biblioteca ISO</span>
                     </a>
                 }
@@ -212,7 +212,7 @@
                     <i class="fa-solid fa-moon" id="moonIconGlobal"></i>
                     <i class="fa-solid fa-sun hidden" id="sunIconGlobal"></i>
                 </button>
-                <form method="post" action="/Auth/Logout">
+                <form method="post" action="/admin/Auth/Logout">
                     <button type="submit" class="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 dark:border-[#4a4b50] text-slate-500 dark:text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 transition-all duration-300" title="Cerrar Sesión">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
