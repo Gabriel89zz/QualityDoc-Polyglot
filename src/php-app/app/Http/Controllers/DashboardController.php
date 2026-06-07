@@ -16,7 +16,7 @@ class DashboardController extends Controller
     public function dashboard(Request $request)
     {
         if (!session('is_authenticated')) {
-            return redirect('http://127.0.0.1:5269/Auth/Login');
+            return redirect('/admin/Auth/Login');
         }
 
         $myCompany = session('company_id');
@@ -160,7 +160,7 @@ class DashboardController extends Controller
     public function directorio(Request $request)
     {
         if (!session('is_authenticated')) {
-            return redirect('http://127.0.0.1:5269/Auth/Login');
+            return redirect('/admin/Auth/Login');
         }
 
         $searchTerm = $request->query('search');
@@ -224,7 +224,7 @@ class DashboardController extends Controller
     public function logDocumentAccess(Request $request)
     {
         if (!session('is_authenticated')) {
-            return redirect('http://127.0.0.1:5269/Auth/Login');
+            return redirect('/admin/Auth/Login');
         }
 
         // Capturamos parámetros con valores por defecto para evitar errores de Postgres
@@ -255,7 +255,7 @@ class DashboardController extends Controller
 
         // Redirigimos a C# para mostrar el archivo
         $urlLimpia = str_replace('\\', '/', $urlArchivo);
-        return redirect('http://127.0.0.1:5269' . $urlLimpia);
+        return redirect('/admin' . $urlLimpia);
     }
 
     // =========================================================
@@ -264,7 +264,7 @@ class DashboardController extends Controller
     public function acuseLectura(Request $request)
     {
         if (!session('is_authenticated')) {
-            return redirect('http://127.0.0.1:5269/Auth/Login');
+            return redirect('/admin/Auth/Login');
         }
 
         $codigo = $request->input('codigo');
@@ -300,7 +300,7 @@ class DashboardController extends Controller
     public function misCumplimientos(Request $request)
     {
         if (!session('is_authenticated')) {
-            return redirect('http://127.0.0.1:5269/Auth/Login');
+            return redirect('/admin/Auth/Login');
         }
 
         $myCompany = session('company_id');

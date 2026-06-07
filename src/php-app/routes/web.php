@@ -9,7 +9,7 @@ use App\Http\Controllers\ReportController;
 // 1. ZONA PÚBLICA / AUTENTICACIÓN
 // ==========================================
 Route::get('/', function () {
-    return redirect('/Auth/Login'); // ✅ ASÍ DEBE QUEDAR
+    return redirect('/admin/Auth/Login');
 });
 
 Route::get('/auth/token', [AuthController::class, 'verifyToken'])->name('auth.token');
