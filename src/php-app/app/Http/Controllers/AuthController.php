@@ -19,8 +19,8 @@ class AuthController extends Controller
             return redirect('/admin/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
         }
 
-        // 🚀 EL SALVAVIDAS: Si Docker no lee el .env, usamos la llave de respaldo
-        $secretKey = env('LARAVEL_JWT_SECRET', 'QualityDocPolyglot_SuperSecretKey_2026!#_ParaAutenticacionSegura');
+       
+        $secretKey = env('JWT_SECRET');
 
         try {
             // 3. Validar y decodificar el token
