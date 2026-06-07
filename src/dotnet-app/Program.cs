@@ -31,17 +31,18 @@ builder.Services.Configure<IISServerOptions>(options =>
 });
 // ==============================================================
 
-// 2. CONFIGURACIÓN DEL GUARDIA DE SEGURIDAD (Cookies)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        // Si alguien intenta entrar a un lugar prohibido, lo mandamos al Login
-        options.LoginPath = "/Auth/Login"; 
+        // 🚀 CORRECCIÓN: Agregar el prefijo /admin para que coincida con tu ruta base
+        options.LoginPath = "/admin/Auth/Login"; 
+        options.AccessDeniedPath = "/admin/Auth/AccessDenied"; 
         
-        // Si alguien logueado intenta entrar a un lugar de Admin sin serlo:
-        options.AccessDeniedPath = "/Auth/AccessDenied"; 
-        
-        // La sesión dura 8 horas (una jornada laboral estándar)
+        // 🚀 CORRECCIÓN: Hacer la cookie permisiva para pruebas en red local (HTTP)
+        options.Cookie.SameSite = SameSiteMode.Lax; 
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
+        options.Cookie.HttpOnly = true;
+
         options.ExpireTimeSpan = TimeSpan.FromHours(8); 
     });
 
