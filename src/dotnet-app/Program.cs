@@ -2,11 +2,17 @@ using Microsoft.AspNetCore.Authentication.Cookies; // 1. Agregamos la librería 
 using Microsoft.EntityFrameworkCore;
 using QualityDoc.API.Data;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"/app/keys"))
+    .SetApplicationName("QualityDocApp");
 
 // Registrar el DbContext con la cadena de conexión
 builder.Services.AddDbContext<QualityDocDbContext>(options =>
