@@ -82,6 +82,7 @@ services:
       - quality-net
     volumes:
       - ./datos_produccion/uploads:/app/wwwroot/uploads
+      - ./keys:/app/keys
 
   php-app:
     build:
