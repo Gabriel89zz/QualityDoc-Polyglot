@@ -52,6 +52,7 @@ if (role != null && (role.Trim().Equals("Operario", StringComparison.OrdinalIgno
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
 public async Task<IActionResult> Login(LoginViewModel model)
 {
     // 1. TRAMPA DEL MODELO: Si falta un campo, ahora sabremos por qué "parpadea"
@@ -157,7 +158,7 @@ public async Task<IActionResult> Login(LoginViewModel model)
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -335,7 +336,7 @@ public async Task<IActionResult> Login(LoginViewModel model)
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Verify2FA(string code, bool rememberDevice = false) // 🚀 Parámetro nuevo
         {
             var userIdStr = TempData["Pending2FAUserId"]?.ToString();
@@ -439,7 +440,7 @@ public async Task<IActionResult> Login(LoginViewModel model)
 
         [HttpPost]
         [AllowAnonymous]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(string token, string newPassword)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.PasswordResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow);
