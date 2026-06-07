@@ -43,13 +43,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Auth/Login"; 
         options.AccessDeniedPath = "/Auth/AccessDenied"; 
         
-        // 🚀 ESTO ES LO QUE ESTABA FALTANDO
-        options.Cookie.Name = "QualityDocAuthCookie"; // Nombre fijo para que no se confunda
-        options.Cookie.Path = "/";                    // Forzamos que la cookie sea válida para toda la app
-        options.Cookie.SameSite = SameSiteMode.Lax; 
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
+        // 🚀 ESTO ES LO QUE VA A CORREGIR EL PROBLEMA
+        options.Cookie.Name = "QualityDocAuthCookie"; 
+        options.Cookie.Path = "/";
         options.Cookie.HttpOnly = true;
-
+        options.Cookie.SameSite = SameSiteMode.Lax; // Lax es obligatorio para HTTP
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Permite HTTP si no hay HTTPS
         options.ExpireTimeSpan = TimeSpan.FromHours(8); 
     });
 
