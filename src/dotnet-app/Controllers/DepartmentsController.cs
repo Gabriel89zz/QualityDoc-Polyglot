@@ -86,7 +86,7 @@ namespace QualityDoc.API.Controllers
 
         // 4. POST: /Departments/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("DeptName")] Department department)
         {
             if (ModelState.IsValid)
