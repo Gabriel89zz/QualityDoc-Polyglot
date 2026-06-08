@@ -110,7 +110,7 @@
             <div class="flex items-center gap-4 bg-white/80 dark:bg-[#2a2b2e]/80 backdrop-blur-md px-4 py-2 rounded-full lg:bg-transparent lg:p-0 lg:w-full lg:max-w-lg lg:mx-auto lg:justify-start">
                 <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 hidden sm:block">
                     ¿Ya tienes una cuenta?
-                    <a asp-action="Login" class="font-semibold text-slate-900 dark:text-white hover:text-brand dark:hover:text-brand transition-colors">Inicia sesión</a>
+                    <a href="/admin/Auth/Login" class="font-semibold text-slate-900 dark:text-white hover:text-brand dark:hover:text-brand transition-colors">Inicia sesión</a>
                 </p>
                 <button id="themeToggle" class="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand" aria-label="Cambiar tema">
                     <i data-lucide="moon" id="moonIcon" class="w-5 h-5 lg:w-6 lg:h-6 text-slate-600 dark:text-slate-300"></i>
@@ -128,7 +128,8 @@
 
             <div asp-validation-summary="ModelOnly" class="text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-sm mb-4 font-semibold"></div>
 
-            <form asp-controller="Auth" asp-action="Register" method="post" id="registerForm" class="space-y-5">
+            <form action="/admin/Auth/Register" method="post" id="registerForm" class="space-y-5">
+                @Html.AntiForgeryToken()
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div class="space-y-1.5">
@@ -259,7 +260,7 @@
                 </button>
 
                 <p class="text-center text-sm text-slate-500 dark:text-slate-400 sm:hidden mt-6">
-                    ¿Ya tienes una cuenta? <a asp-action="Login" class="font-semibold text-brand transition-colors">Inicia sesión</a>
+                    ¿Ya tienes una cuenta? <a href="/admin/Auth/Login" class="font-semibold text-brand transition-colors">Inicia sesión</a>
                 </p>
             </form>
 

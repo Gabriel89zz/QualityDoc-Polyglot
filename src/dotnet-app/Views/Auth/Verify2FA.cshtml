@@ -105,7 +105,8 @@
             Hemos enviado un PIN seguro a tu correo electrónico para verificar tu identidad.
         </p>
 
-        <form asp-controller="Auth" asp-action="Verify2FA" method="post" class="space-y-6">
+        <form action="/admin/Auth/Verify2FA" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
             
             <!-- Mensaje de Error (Se respeta la lógica de ASP.NET) -->
             @if (!ViewData.ModelState.IsValid)
@@ -140,7 +141,7 @@
             </div>
             
             <div class="text-center mt-6">
-                 <a asp-controller="Auth" asp-action="Login" class="text-sm font-medium text-primary dark:text-primary-dark hover:underline transition-all flex items-center justify-center gap-2">
+                 <a href="/admin/Auth/Login" class="text-sm font-medium text-primary dark:text-primary-dark hover:underline transition-all flex items-center justify-center gap-2">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Cancelar y volver
                 </a>
             </div>

@@ -135,7 +135,7 @@
             <div class="flex items-center gap-4">
                 <p class="text-base text-slate-500 dark:text-slate-400 hidden sm:block">
                     ¿Tu empresa es nueva aquí?
-                    <a asp-action="Register" class="font-semibold text-slate-900 dark:text-white hover:text-brand dark:hover:text-brand transition-colors">Regístrate</a>
+                    <a href="/admin/Auth/Register" class="font-semibold text-slate-900 dark:text-white hover:text-brand dark:hover:text-brand transition-colors">Regístrate</a>
                 </p>
                 <button id="themeToggle" class="p-3 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand" aria-label="Cambiar tema">
                     <i data-lucide="moon" id="moonIcon" class="w-6 h-6 text-slate-600 dark:text-slate-300"></i>
@@ -205,7 +205,8 @@
                 </button>
             </form>
 
-            <form asp-controller="Auth" asp-action="ForgotPassword" method="post" id="forgotForm" class="hidden space-y-6 transition-all duration-300">
+            <form action="/admin/Auth/ForgotPassword" method="post" id="forgotForm" class="hidden space-y-6 transition-all duration-300">
+                @Html.AntiForgeryToken()
                 <div>
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
