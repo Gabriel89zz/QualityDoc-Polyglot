@@ -7,9 +7,9 @@
 <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6 mt-4">
     <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
         <ol class="inline-flex items-center space-x-2">
-            <li><a asp-action="Index" class="hover:text-brand transition-colors">Documentos</a></li>
+            <li><a href="/admin/Documents/Index" class="hover:text-brand transition-colors">Documentos</a></li>
             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
-            <li><a asp-action="Details" asp-route-id="@Model.DocId" class="hover:text-brand transition-colors">Expediente</a></li>
+            <li><a href="/admin/Documents/Details/@Model.DocId" class="hover:text-brand transition-colors">Expediente</a></li>
             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
             <li class="text-slate-400 dark:text-slate-500">Nueva Versión</li>
         </ol>
@@ -28,7 +28,8 @@
         </div>
 
         <div class="p-6 lg:p-10">
-            <form asp-action="NewVersion" enctype="multipart/form-data">
+            <form action="/admin/Documents/NewVersion" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-red-500 mb-6 text-sm font-semibold bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-transparent"></div>
 
                 <input type="hidden" asp-for="DocId" />
@@ -112,7 +113,7 @@
                 </div>
 
                 <div class="mt-10 pt-6 border-t border-slate-100 dark:border-[#4a4b50] flex justify-end space-x-3 transition-colors duration-300">
-                    <a asp-action="Details" asp-route-id="@Model.DocId" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-3 px-6 rounded-xl transition duration-150">
+                    <a href="/admin/Documents/Details/@Model.DocId" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-3 px-6 rounded-xl transition duration-150">
                         Cancelar
                     </a>
                     <button type="submit" class="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-3 px-8 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-150">

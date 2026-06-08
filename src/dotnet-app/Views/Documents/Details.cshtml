@@ -67,7 +67,7 @@
         </div>
         
         <div class="mt-4 sm:mt-0 flex flex-wrap gap-3">
-            <a asp-action="Index" class="bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors text-sm flex items-center">
+            <a href="/admin/Documents/Index" class="bg-white dark:bg-[#323338] border border-slate-200 dark:border-[#4a4b50] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a2b2e] font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors text-sm flex items-center">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver
             </a>
         </div>
@@ -121,7 +121,7 @@
             
             @if (hasPowerOverDoc && canUploadNewVersion)
             {
-                <a asp-action="NewVersion" asp-route-id="@Model.DocId" class="bg-brand hover:bg-brand-hover text-white text-xs font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors flex items-center">
+                <a href="/admin/Documents/NewVersion/@Model.DocId" class="bg-brand hover:bg-brand-hover text-white text-xs font-bold py-2.5 px-5 rounded-xl shadow-sm transition-colors flex items-center">
                     <i class="fa-solid fa-cloud-arrow-up mr-2 text-base"></i> Subir Nueva Versión
                 </a>
             }
@@ -210,7 +210,7 @@
 var ultimoMovimiento = version.AuditLogs?.OrderByDescending(l => l.CreatedAt).FirstOrDefault()?.ActionType;
 bool estaBloqueadoPorRechazo = (ultimoMovimiento == "Rejected" || ultimoMovimiento == "SignatureRevoked");
 
-<a asp-action="Edit" asp-route-id="@Model.DocId" class="text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 dark:text-amber-500 dark:bg-amber-900/20 dark:border-amber-800/30 dark:hover:bg-amber-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Modificar los detalles o reemplazar el archivo PDF">
+<a href="/admin/Documents/Edit/@Model.DocId" class="text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 dark:text-amber-500 dark:bg-amber-900/20 dark:border-amber-800/30 dark:hover:bg-amber-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Modificar los detalles o reemplazar el archivo PDF">
     <i class="fa-solid fa-file-pen mr-1.5 text-base"></i> Editar Borrador
 </a>
 
@@ -222,7 +222,8 @@ bool estaBloqueadoPorRechazo = (ultimoMovimiento == "Rejected" || ultimoMovimien
 }
 else
 {
-    <form asp-action="SendToReview" method="post" class="inline" onsubmit="return confirm('¿Iniciar el flujo de revisión para esta versión?');">
+    <form action="/admin/Documents/SendToReview" method="post" class="inline" onsubmit="return confirm('¿Iniciar el flujo de revisión para esta versión?');">
+        @Html.AntiForgeryToken()
         <input type="hidden" name="versionId" value="@version.VersionId" />
         <input type="hidden" name="docId" value="@Model.DocId" />
         <button type="submit" class="text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800/30 dark:hover:bg-emerald-900/40 px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center shadow-sm" title="Solicitar Firmas (Iniciar Flujo)">
@@ -238,7 +239,8 @@ else
 
                                                 if (isPendingRevisor)
                                                 {
-                                                    <form asp-action="RecallWorkflow" method="post" class="inline" onsubmit="return confirm('¿Estás seguro de cancelar el envío? El documento regresará a Borrador de forma segura.');">
+                                                    <form action="/admin/Documents/RecallWorkflow" method="post" class="inline" onsubmit="return confirm('¿Estás seguro de cancelar el envío? El documento regresará a Borrador de forma segura.');">
+                                                        @Html.AntiForgeryToken()
                                                         <input type="hidden" name="versionId" value="@version.VersionId" />
                                                         <input type="hidden" name="docId" value="@Model.DocId" />
                                                         <button type="submit" class="inline-flex items-center px-3.5 py-1.5 text-xs font-bold rounded-lg bg-transparent border border-slate-300 dark:border-[#4a4b50] text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shadow-sm" title="Cancelar Envío (Regresar a Borrador)">
@@ -259,7 +261,10 @@ else
                                     @if (showRevokeButton)
                                     {
                                         <div class="hidden sm:block w-px h-6 bg-slate-200 dark:bg-[#4a4b50] mx-1"></div>
-                                        <form asp-controller="Approvals" asp-action="RevertSignature" method="post" class="inline-flex" onsubmit="return confirm('@(canRecallEmergencia ? "¡ALERTA CRÍTICA! Vas a ejecutar un RECALL DE EMERGENCIA. El documento desaparecerá de la vista de los operarios de inmediato. ¿Proceder?" : "¿Estás seguro de revocar tu decisión? El flujo retrocederá a este paso de forma automática.")');">
+                                        <form action="/admin/Approvals/RevertSignature" method="post" class="inline-flex" onsubmit="return confirm('@(canRecallEmergencia ?
+"¡ALERTA CRÍTICA! Vas a ejecutar un RECALL DE EMERGENCIA. El documento desaparecerá de la vista de los operarios de inmediato. ¿Proceder?"
+: "¿Estás seguro de revocar tu decisión? El flujo retrocederá a este paso de forma automática.")');">
+    @Html.AntiForgeryToken()
                                             
                                             <input type="hidden" name="versionId" value="@version.VersionId" />
                                             <input type="hidden" name="approvalId" value="@targetApprovalId" />
