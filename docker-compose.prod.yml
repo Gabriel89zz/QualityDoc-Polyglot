@@ -18,10 +18,29 @@ services:
       - quality-net
 
   # --- BASES DE DATOS (Blindadas, sin puertos expuestos al host) ---
+
+  # ──────────────────────────────────────────────────────────
+  # INIT: prepara el volumen con los permisos correctos (UID 10001)
+  # ──────────────────────────────────────────────────────────
+  sql-init:
+    image: alpine:latest
+    container_name: sql_server_init
+    volumes:
+      - sql_data:/data
+    command: >
+      sh -c "chown -R 10001:10001 /data && chmod 755 /data"
+    networks:
+      - quality-net
+    restart: "no"
+
+  
   sql-server:
     image: mcr.microsoft.com/mssql/server:2022-CU12-ubuntu-22.04
     container_name: sql_server_prod
     restart: always
+    depends_on:
+      sql-init:
+        condition: service_completed_successfully
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${SQL_SERVER_PASSWORD}
@@ -32,6 +51,7 @@ services:
     command: /bin/bash /usr/config/entrypoint.sh
     networks:
       - quality-net
+    user: "10001:10001"
 
   postgres-db:
     image: postgres:15.6-alpine
@@ -139,5 +159,6 @@ networks:
 
 volumes:
   sql_data:
+    name: sql_server_data
   postgres_data:
   mongo_data:
