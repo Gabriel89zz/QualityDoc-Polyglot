@@ -100,8 +100,8 @@ services:
     networks:
       - quality-net
     volumes:
-      - ./datos_produccion/uploads:/app/wwwroot/uploads
-      - ./keys:/app/keys
+      - doc_uploads:/app/wwwroot/uploads
+      - crypto_keys:/app/keys
 
   php-app:
     build:
@@ -162,3 +162,5 @@ volumes:
     name: sql_server_data
   postgres_data:
   mongo_data:
+  doc_uploads:        
+  crypto_keys:
