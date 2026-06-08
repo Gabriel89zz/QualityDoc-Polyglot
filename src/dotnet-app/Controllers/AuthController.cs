@@ -69,7 +69,6 @@ public async Task<IActionResult> Login(LoginViewModel model)
 
     if (user == null || user.Status != "Active" || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
     {
-        TempData["ErrorMessage"] = "Credenciales incorrectas o usuario dado de baja."; 
         ModelState.AddModelError(string.Empty, "Credenciales incorrectas o usuario dado de baja.");
         return View(model);
     }
