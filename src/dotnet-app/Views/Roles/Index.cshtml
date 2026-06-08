@@ -20,7 +20,7 @@
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestión de permisos y niveles de acceso en la plataforma</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            <a asp-action="Create" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-5 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-200">
+            <a href="/admin/Roles/Create" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-5 rounded-xl shadow-md shadow-brand/20 flex items-center transition duration-200">
                 <i class="fa-solid fa-plus mr-2"></i> Nuevo Rol
             </a>
         </div>
@@ -102,13 +102,13 @@
                                 
                                 <td class="p-4 text-center flex justify-center items-center space-x-4">
                                     
-                                    <a asp-action="Details" asp-route-id="@item.RoleId" class="text-slate-400 hover:text-brand dark:hover:text-brand transition" title="Ver Detalles">
+                                    <a href="/admin/Roles/Details/@item.RoleId" class="text-slate-400 hover:text-brand dark:hover:text-brand transition" title="Ver Detalles">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     @if (item.Status == "Active")
                                     {
-                                        <a asp-action="Edit" asp-route-id="@item.RoleId" class="text-slate-400 hover:text-amber-500 transition" title="Editar Rol">
+                                        <a href="/admin/Roles/Edit/@item.RoleId" class="text-slate-400 hover:text-amber-500 transition" title="Editar Rol">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                     }
@@ -127,7 +127,8 @@
                                     }
                                     else if (item.Status == "Active")
                                     {
-                                        <form asp-action="Delete" asp-route-id="@item.RoleId" method="post" class="inline-block m-0 p-0">
+                                        <form action="/admin/Roles/Delete/@item.RoleId" method="post" class="inline-block m-0 p-0">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition bg-transparent border-none p-0 cursor-pointer" title="Suspender Rol" onclick="return confirm('¿Estás seguro de suspender este rol?');">
                                                 <i class="fa-solid fa-power-off"></i>
                                             </button>
@@ -135,7 +136,8 @@
                                     }
                                     else
                                     {
-                                        <form asp-action="Reactivate" asp-route-id="@item.RoleId" method="post" class="inline-block m-0 p-0">
+                                        <form action="/admin/Roles/Reactivate/@item.RoleId" method="post" class="inline-block m-0 p-0">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="text-slate-400 hover:text-green-500 transition bg-transparent border-none p-0 cursor-pointer" title="Reactivar Rol" onclick="return confirm('¿Estás seguro de que deseas reactivar este rol?');">
                                                 <i class="fa-solid fa-rotate-left"></i>
                                             </button>

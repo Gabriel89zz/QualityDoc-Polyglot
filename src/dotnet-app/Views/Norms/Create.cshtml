@@ -7,7 +7,7 @@
 <div class="w-full max-w-4xl mx-auto space-y-6">
     <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
         <ol class="inline-flex items-center space-x-2">
-            <li><a asp-action="Index" class="hover:text-brand transition-colors">Catálogo ISO</a></li>
+            <li><a href="/admin/Norms/Index" class="hover:text-brand transition-colors">Catálogo ISO</a></li>
             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
             <li class="text-slate-400 dark:text-slate-500">Nueva Normativa</li>
         </ol>
@@ -27,7 +27,8 @@
             </div>
         </div>
 
-        <form asp-action="Create" class="p-6 md:p-8 space-y-6">
+        <form action="/admin/Norms/Create" method="post" class="p-6 md:p-8 space-y-6">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-sm font-bold text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-transparent mb-6"></div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -55,7 +56,7 @@
             </div>
 
             <div class="flex items-center justify-end space-x-3 pt-6 mt-6 border-t border-slate-100 dark:border-[#4a4b50] transition-colors duration-300">
-                <a asp-action="Index" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150">
+                <a href="/admin/Norms/Index" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150">
                     Cancelar
                 </a>
                 <button type="submit" class="bg-brand hover:bg-brand-hover text-white font-bold py-2.5 px-6 rounded-xl shadow-md shadow-brand/20 transition duration-200 flex items-center text-sm">

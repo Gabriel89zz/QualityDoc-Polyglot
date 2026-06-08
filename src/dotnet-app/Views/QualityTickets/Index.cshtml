@@ -118,7 +118,8 @@
                                 <td class="p-4 text-center">
                                     @if (ticket.IssueStatus == "Pending")
                                     {
-                                        <form asp-action="Resolve" asp-route-id="@ticket.IssueId" method="post" class="inline-block m-0 p-0">
+                                        <form action="/admin/QualityTickets/Resolve/@ticket.IssueId" method="post" class="inline-block m-0 p-0">
+                                            @Html.AntiForgeryToken()
                                             <button type="submit" class="bg-white dark:bg-[#323338] text-emerald-600 hover:text-white hover:bg-emerald-500 border border-emerald-200 dark:border-emerald-800/50 hover:border-transparent px-3 py-1.5 rounded-lg font-bold text-xs transition-colors shadow-sm flex items-center mx-auto" onclick="return confirm('¿Confirmas que esta incidencia ya fue corregida?');">
                                                 <i class="fa-solid fa-wrench mr-1.5"></i> Resolver
                                             </button>
