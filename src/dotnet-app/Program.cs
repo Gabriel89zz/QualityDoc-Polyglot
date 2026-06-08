@@ -61,7 +61,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // ==============================================================
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // 🚀 CAMBIO AQUÍ: Agregamos XForwardedHost para que detecte el puerto dinámico
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    
     // Limpiamos las redes conocidas para que acepte el tráfico de la red de Docker
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
