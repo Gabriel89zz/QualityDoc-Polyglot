@@ -49,10 +49,10 @@
                     </p>
 
                     <div class="flex flex-wrap items-center gap-3">
-                        <a href="/Companies/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                        <a href="/admin/Companies/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
                             <i class="fa-solid fa-plus"></i> Nueva Empresa
                         </a>
-                        <a href="/Companies/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
+                        <a href="/admin/Companies/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
                             Ver catálogo completo
                         </a>
                     </div>
@@ -151,7 +151,7 @@
                         <i class="fa-solid fa-city text-blue-500 mr-2"></i> Operaciones de Tenant
                     </h3>
                     <div class="space-y-3 flex-1">
-                        <a href="/Companies/Create" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-darkbg-base hover:bg-slate-100 dark:hover:bg-darkbg-card transition-colors border dark:border-darkbg-border group relative overflow-hidden">
+                        <a href="/admin/Companies/Create" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-darkbg-base hover:bg-slate-100 dark:hover:bg-darkbg-card transition-colors border dark:border-darkbg-border group relative overflow-hidden">
                             <div class="absolute inset-y-0 left-0 w-1 bg-brand opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div class="w-12 h-12 bg-white dark:bg-darkbg-card rounded-xl shadow-sm flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-building-circle-check text-brand dark:text-[#B8ACFF] text-lg"></i>
@@ -162,7 +162,7 @@
                             </div>
                         </a>
                         
-                        <a href="/Companies/Index" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-darkbg-base hover:bg-slate-100 dark:hover:bg-darkbg-card transition-colors border dark:border-darkbg-border group relative overflow-hidden">
+                        <a href="/admin/Companies/Index" class="flex items-center p-4 rounded-xl bg-slate-50 dark:bg-darkbg-base hover:bg-slate-100 dark:hover:bg-darkbg-card transition-colors border dark:border-darkbg-border group relative overflow-hidden">
                             <div class="absolute inset-y-0 left-0 w-1 bg-purple-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div class="w-12 h-12 bg-white dark:bg-darkbg-card rounded-xl shadow-sm flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-list-ul text-purple-600 dark:text-[#B8ACFF] text-lg"></i>
@@ -369,10 +369,10 @@ else if (esAdminEmpresa)
                     </p>
 
                     <div class="flex flex-wrap items-center gap-3">
-                        <a href="/Documents/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                        <a href="/admin/Documents/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
                             <i class="fa-solid fa-plus"></i> Nuevo Documento
                         </a>
-                        <a href="/DocumentApprovals/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
+                        <a href="/admin/DocumentApprovals/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
                             Ver flujos activos
                         </a>
                     </div>
@@ -463,7 +463,7 @@ else if (esAdminEmpresa)
                 <div class="lg:col-span-2 bg-white dark:bg-darkbg-card rounded-2xl shadow-soft border border-slate-200 dark:border-darkbg-border overflow-hidden flex flex-col h-full">
                     <div class="px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <h2 class="font-bold text-slate-800 dark:text-white text-lg tracking-tight">Progreso de Firmas Recientes</h2>
-                        <a class="flex items-center gap-1.5 text-brand hover:text-brand-hover text-sm font-semibold transition-colors group" href="/DocumentApprovals/Index">
+                        <a class="flex items-center gap-1.5 text-brand hover:text-brand-hover text-sm font-semibold transition-colors group" href="/admin/DocumentApprovals/Index">
                             Ver flujos completos <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
                         </a>
                     </div>
@@ -504,7 +504,7 @@ else if (esAdminEmpresa)
                     }
                 </div>
 
-                <a href="/Users/Index" class="lg:col-span-1 relative overflow-hidden rounded-3xl p-6 bg-brand text-white shadow-soft hover:shadow-hover-soft transition-all duration-300 group flex flex-col h-full min-h-[280px]">
+                <a href="/admin/Users/Index" class="lg:col-span-1 relative overflow-hidden rounded-3xl p-6 bg-brand text-white shadow-soft hover:shadow-hover-soft transition-all duration-300 group flex flex-col h-full min-h-[280px]">
                     <i class="fa-solid fa-users-gear absolute -bottom-6 -right-6 text-9xl opacity-10 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500"></i>
                     <div class="relative z-10 flex-1 flex flex-col">
                         <div class="mb-4">
@@ -607,7 +607,7 @@ else if (esAdminEmpresa)
                     {
                         foreach (var doc in ViewBag.ListaRechazados)
                         {
-                            <a href="/Documents/Edit/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                            <a href="/admin/Documents/Edit/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
                                 <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
                                     <i class="fa-solid fa-triangle-exclamation"></i>
                                 </div>
@@ -623,7 +623,7 @@ else if (esAdminEmpresa)
                     {
                         foreach (var firma in ViewBag.ListaFirmas)
                         {
-                            <a href="/Approvals/Review/@firma.ApprovalId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                            <a href="/admin/Approvals/Review/@firma.ApprovalId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
                                 <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
                                     <i class="fa-solid fa-pen-nib"></i>
                                 </div>
@@ -723,12 +723,12 @@ else
                     <div class="flex flex-wrap items-center gap-3">
                         @if (User.IsInRole("Creador de Doc"))
                         {
-                            <a href="/Documents/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            <a href="/admin/Documents/Create" class="inline-flex items-center gap-2 bg-white text-brand font-bold text-sm px-6 py-3 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
                                 <i class="fa-solid fa-file-signature"></i> Redactar Documento
                             </a>
                         }
                         
-                        <a href="/Approvals/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
+                        <a href="/admin/Approvals/Index" class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-white/20 transition-all">
                             <i class="fa-solid fa-inbox mr-1"></i> Ir a Bandeja de Firmas
                         </a>
                     </div>
@@ -855,7 +855,7 @@ else
             }
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-up delay-200">
-                <a href="/Approvals/Index" class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
+                <a href="/admin/Approvals/Index" class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
                     <div class="flex items-center">
                         <div class="p-4 bg-brand/10 dark:bg-brand/20 text-brand dark:text-[#B8ACFF] rounded-xl mr-5">
                             <i class="fa-solid fa-signature text-2xl"></i>
@@ -870,7 +870,7 @@ else
                     </div>
                 </a>
 
-                <a href="/Documents/Index" class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
+                <a href="/admin/Documents/Index" class="bg-white dark:bg-[#323338] p-6 rounded-2xl shadow-soft dark:shadow-none border border-slate-200 dark:border-[#4a4b50] flex items-center justify-between hover:border-brand dark:hover:border-brand transition-colors cursor-pointer group">
                     <div class="flex items-center">
                         <div class="p-4 bg-slate-100 dark:bg-[#2A2B2E] text-slate-600 dark:text-slate-300 rounded-xl mr-5">
                             <i class="fa-solid fa-book-open-reader text-2xl"></i>
@@ -971,7 +971,7 @@ else
                     {
                         foreach (var doc in ViewBag.ListaRechazados)
                         {
-                            <a href="/Documents/Edit/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                            <a href="/admin/Documents/Edit/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
                                 <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center flex-shrink-0">
                                     <i class="fa-solid fa-triangle-exclamation"></i>
                                 </div>
@@ -987,7 +987,7 @@ else
                     {
                         foreach (var firma in ViewBag.ListaFirmas)
                         {
-                            <a href="/Approvals/Review/@firma.ApprovalId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                            <a href="/admin/Approvals/Review/@firma.ApprovalId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
                                 <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
                                     <i class="fa-solid fa-pen-nib"></i>
                                 </div>
@@ -1003,7 +1003,7 @@ else
                     {
                         foreach (var doc in ViewBag.ListaBorradores)
                         {
-                            <a href="/Documents/Details/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
+                            <a href="/admin/Documents/Details/@doc.DocId" class="flex items-center gap-4 group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-slate-50 dark:hover:bg-darkbg-base transition-colors">
                                 <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
                                     <i class="fa-solid fa-file-pen"></i>
                                 </div>
