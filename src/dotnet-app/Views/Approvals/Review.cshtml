@@ -9,7 +9,7 @@
 
     <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
         <ol class="inline-flex items-center space-x-2">
-            <li><a asp-action="Index" class="hover:text-brand transition-colors">Centro de Tareas</a></li>
+            <li><a href="/admin/Approvals/Index" class="hover:text-brand transition-colors">Centro de Tareas</a></li>
             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
             <li class="text-slate-400 dark:text-slate-500">Evaluar Documento</li>
         </ol>
@@ -28,7 +28,7 @@
             </div>
         </div>
         <div class="mt-4 sm:mt-0 w-full sm:w-auto">
-            <a asp-action="Index" class="w-full sm:w-auto bg-slate-50 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold py-2.5 px-5 rounded-xl shadow-sm transition inline-flex items-center justify-center text-sm">
+            <a href="/admin/Approvals/Index" class="w-full sm:w-auto bg-slate-50 dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold py-2.5 px-5 rounded-xl shadow-sm transition inline-flex items-center justify-center text-sm">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Volver a la Bandeja
             </a>
         </div>
@@ -93,7 +93,8 @@
                     Revisa el documento detalladamente antes de emitir tu fallo. Esta acción quedará registrada permanentemente en la bitácora de auditoría.
                 </p>
 
-                <form asp-action="Sign" method="post" id="signForm" class="relative z-10">
+                <form action="/admin/Approvals/Sign" method="post" id="signForm" class="relative z-10">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="approvalId" value="@Model.ApprovalId" />
                     
                     <div class="mb-5">
