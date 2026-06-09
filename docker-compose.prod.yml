@@ -118,7 +118,7 @@ services:
       - APP_ENV=production
       - APP_DEBUG=false
       - APP_URL=http://${IP_DEL_SERVIDOR_DEL_PROFE}:${APP_PORT:-80}
-      - APP_KEY=${LARAVEL_APP_KEY}
+      
       
       # Base de Datos
       - DB_CONNECTION=pgsql
