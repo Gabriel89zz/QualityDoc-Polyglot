@@ -148,6 +148,8 @@ services:
       dockerfile: docker/python/Dockerfile
     container_name: python_fastapi_prod
     restart: always
+    ports:
+      - "8000:8000"
     environment: 
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
