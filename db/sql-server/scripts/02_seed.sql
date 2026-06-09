@@ -53,9 +53,9 @@ GO
 INSERT INTO Users (company_id, dept_id, role_id, full_name, email, password_hash, created_by) VALUES
 -- --- ADMINISTRADORES PRINCIPALES ---
 -- Tu usuario Super Admin (NULL en company y dept)
-(NULL, NULL, 1, 'Hector Torres', 'hector@qualitydoc.com', '$2a$12$.uPJW3BoFdrdTjPuMHKXUeNldtKtmDK/ysKzOwcqM7QBNSGpXIeaG', NULL),
+(NULL, NULL, 1, 'Hector Torres', 'elcomparosh97@gmail.com', '$2a$12$.uPJW3BoFdrdTjPuMHKXUeNldtKtmDK/ysKzOwcqM7QBNSGpXIeaG', NULL),
 -- Admins de cada tenant
-(1, 1, 2, 'Admin Falcons', 'elcomparosh97@gmail.com', '$2a$12$dR9OqQ6S.iJITr8wMQJ/N.9scRHa66h3P7AbpKvOGvf6yNgeIWhFq', 1),
+(1, 1, 2, 'Admin Falcons', 'yega2632@gmail.com', '$2a$12$dR9OqQ6S.iJITr8wMQJ/N.9scRHa66h3P7AbpKvOGvf6yNgeIWhFq', 1),
 (2, 3, 2, 'Admin Merco', 'torres.gabriel33zz@gmail.com', '$2a$12$dR9OqQ6S.iJITr8wMQJ/N.9scRHa66h3P7AbpKvOGvf6yNgeIWhFq', 1),
 
 -- --- FALCONS: DEPARTAMENTO 1 (Aseguramiento de Calidad) ---
