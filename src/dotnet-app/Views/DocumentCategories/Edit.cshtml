@@ -7,7 +7,7 @@
 <div class="w-full max-w-4xl mx-auto space-y-6">
     <nav class="flex mb-4 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
         <ol class="inline-flex items-center space-x-2">
-            <li><a asp-action="Index" class="hover:text-brand transition-colors">Categorías</a></li>
+            <li><a href="/admin/Categories/Index" class="hover:text-brand transition-colors">Categorías</a></li>
             <li><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
             <li class="text-slate-400 dark:text-slate-500">Modificar Registro</li>
         </ol>
@@ -32,98 +32,112 @@
             </span>
         </div>
 
-        <form asp-action="Edit" class="p-6 md:p-8 space-y-6">
+       <form action="/admin/Categories/Edit" method="post" class="p-6 md:p-8 space-y-6">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm font-bold bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-transparent mb-6"></div>
-            
-            <input type="hidden" asp-for="CategoryId" />
+    
+            <input type="hidden" name="CategoryId" id="CategoryId" value="@Model.CategoryId" />
 
             <div>
-                <label asp-for="CategoryName" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nombre de la Categoría <span class="text-red-500">*</span></label>
-                <div class="relative">
+                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="CategoryName">Nombre de la Categoría <span class="text-red-500">*</span></label>
+                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-font"></i>
                     </div>
-                    <input asp-for="CategoryName" class="pl-10 w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none" required />
-                </div>
-                <span asp-validation-for="CategoryName" class="text-xs text-red-500 font-semibold mt-1 block"></span>
-            </div>
+                    <input name="CategoryName" id="CategoryName" value="@Model.CategoryName" class="pl-10 w-full ..." required />
+               </div>
+               <span class="text-xs text-red-500 font-semibold mt-1 block" data-valmsg-for="CategoryName" data-valmsg-replace="true"></span>
+           </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <div>
-                    <label asp-for="Prefix" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Prefijo ISO <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="Prefix">Prefijo ISO <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-solid fa-tag"></i>
                         </div>
-                        <input asp-for="Prefix" class="pl-10 w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white font-mono font-bold uppercase focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none" maxlength="5" style="text-transform: uppercase;" required />
-                    </div>
+                       <input name="Prefix" id="Prefix" value="@Model.Prefix" class="pl-10 w-full ..." maxlength="5" style="text-transform: uppercase;" required />
+                   </div>
                     
                     <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-3 flex items-start shadow-sm">
                         <i class="fa-solid fa-circle-info text-amber-500 mt-0.5 mr-2 text-sm"></i>
                         <p class="text-[11px] text-amber-700 dark:text-amber-400 font-medium leading-tight">Cambiar el prefijo afectará la codificación de los <b class="font-black">nuevos</b> documentos que se suban.</p>
                     </div>
-                    <span asp-validation-for="Prefix" class="text-xs text-red-500 font-semibold mt-1 block"></span>
+                    <span class="text-xs text-red-500 font-semibold mt-1 block" data-valmsg-for="Prefix" data-valmsg-replace="true"></span>
                 </div>
 
                 <div>
-                    <label asp-for="HierarchyLevel" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nivel Jerárquico <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="HierarchyLevel">Nivel Jerárquico <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-solid fa-layer-group"></i>
                         </div>
-                        <select asp-for="HierarchyLevel" class="pl-10 w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none appearance-none font-medium" required>
-                            <option value="">-- Seleccionar --</option>
-                            <option value="1">Nivel 1 (Manuales / Políticas)</option>
-                            <option value="2">Nivel 2 (Procedimientos)</option>
-                            <option value="3">Nivel 3 (Instructivos de Trabajo)</option>
-                            <option value="4">Nivel 4 (Formatos / Registros)</option>
+                        <select name="HierarchyLevel" id="HierarchyLevel" class="pl-10 w-full ..." required>
+                             <option value="">-- Seleccionar --</option>
+                             <option value="1" selected="@(Model.HierarchyLevel == 1 ? "selected" : null)">Nivel 1 (Manuales / Políticas)</option>
+                             <option value="2" selected="@(Model.HierarchyLevel == 2 ? "selected" : null)">Nivel 2 (Procedimientos)</option>
+                             <option value="3" selected="@(Model.HierarchyLevel == 3 ? "selected" : null)">Nivel 3 (Instructivos de Trabajo)</option>
+                             <option value="4" selected="@(Model.HierarchyLevel == 4 ? "selected" : null)">Nivel 4 (Formatos / Registros)</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
                             <i class="fa-solid fa-chevron-down text-[10px]"></i>
                         </div>
-                    </div>
-                    <span asp-validation-for="HierarchyLevel" class="text-xs text-red-500 font-semibold mt-1 block"></span>
+                   </div>
+                   <span class="text-xs text-red-500 font-semibold mt-1 block" data-valmsg-for="HierarchyLevel" data-valmsg-replace="true"></span>
                 </div>
 
                 <div>
-                    <label asp-for="NormId" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Aplica para Norma</label>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="NormId">Aplica para Norma</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <i class="fa-solid fa-book"></i>
                         </div>
-                        <select asp-for="NormId" asp-items="ViewBag.Norms" class="pl-10 w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none appearance-none font-medium">
-                            <option value="">-- Genérica (Todas) --</option>
-                        </select>
+                        <select name="NormId" id="NormId" class="pl-10 w-full ...">
+                        <option value="">-- Genérica (Todas) --</option>
+                        @if (ViewBag.Norms != null)
+                        {
+                             foreach (var item in (IEnumerable<SelectListItem>)ViewBag.Norms)
+                             {
+                                 if (Model.NormId?.ToString() == item.Value || item.Selected)
+                                 {
+                                      <option value="@item.Value" selected="selected">@item.Text</option>
+                                 }
+                                 else
+                                 {
+                                     <option value="@item.Value">@item.Text</option>
+                                 }
+                             }
+                        }
+                    </select>
                         <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
                             <i class="fa-solid fa-chevron-down text-[10px]"></i>
                         </div>
                     </div>
-                    <span asp-validation-for="NormId" class="text-xs text-red-500 font-semibold mt-1 block"></span>
+<span class="text-xs text-red-500 font-semibold mt-1 block" data-valmsg-for="NormId" data-valmsg-replace="true"></span>
                 </div>
             </div>
 
             <div>
-                <label asp-for="RetentionYears" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Años de Retención Legal <span class="text-red-500">*</span></label>
-                <div class="relative">
+               <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="RetentionYears">Años de Retención Legal <span class="text-red-500">*</span></label>
+               <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-box-archive"></i>
                     </div>
-                    <input asp-for="RetentionYears" type="number" min="1" max="99" class="pl-10 w-full rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] px-4 py-2.5 text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none" required />
-                </div>
+                   <input name="RetentionYears" id="RetentionYears" type="number" min="1" max="99" value="@Model.RetentionYears" class="pl-10 w-full ..." required />
+              </div>
                 <p class="text-[11px] text-amber-700 dark:text-amber-400 mt-1 font-medium">Impacta el ciclo de vida de los documentos asignados a esta categoría.</p>
-                <span asp-validation-for="RetentionYears" class="text-xs text-red-500 font-semibold mt-1 block"></span>
-            </div>
+                <span class="text-xs text-red-500 font-semibold mt-1 block" data-valmsg-for="RetentionYears" data-valmsg-replace="true"></span>            </div>
 
             <div>
-                <label asp-for="Description" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Descripción</label>
-                <textarea asp-for="Description" rows="3" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-[#2a2b2e] border border-slate-300 dark:border-[#4a4b50] text-slate-700 dark:text-white focus:border-amber-500 dark:focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none resize-none"></textarea>
-                <span asp-validation-for="Description" class="text-xs text-red-500 font-semibold mt-1 block"></span>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="Description">Descripción</label>
+                <textarea name="Description" id="Description" rows="3" class="w-full ...">@Model.Description</textarea>
+                <span class="text-xs text-red-500 font-semibold mt-1 block" data-valmsg-for="Description" data-valmsg-replace="true"></span>
             </div>
 
             <div class="flex justify-end space-x-3 pt-6 mt-4 border-t border-slate-100 dark:border-[#4a4b50] transition-colors duration-300">
-                <a asp-action="Index" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150 flex items-center">
-                    Cancelar
+                <a href="/admin/Categories/Index" class="bg-slate-100 dark:bg-[#2a2b2e] hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold py-2.5 px-6 rounded-xl transition duration-150 flex items-center">
+                      Cancelar
                 </a>
                 <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-6 rounded-xl shadow-md shadow-amber-500/20 hover:shadow-lg transition duration-200 flex items-center text-sm">
                     <i class="fa-solid fa-rotate mr-2"></i> Guardar Cambios

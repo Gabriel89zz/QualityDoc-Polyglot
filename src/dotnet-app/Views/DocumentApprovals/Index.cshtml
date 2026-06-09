@@ -71,8 +71,8 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                        <a asp-controller="Documents" asp-action="Details" asp-route-id="@item.DocumentVersion?.DocId" class="text-slate-500 dark:text-slate-400 hover:text-brand dark:hover:text-brand-light px-4 py-2 bg-slate-100 dark:bg-[#2a2b2e] hover:bg-brand/10 dark:hover:bg-brand/20 rounded-lg transition font-bold shadow-sm">
-                                            Ver Detalles <i class="fa-solid fa-arrow-right ml-1"></i>
+                                        <a href="/admin/Documents/Details/@(item.DocumentVersion?.DocId)" class="text-slate-500 dark:text-slate-400 hover:text-brand dark:hover:text-brand-light px-4 py-2 bg-slate-100 dark:bg-[#2a2b2e] hover:bg-brand/10 dark:hover:bg-brand/20 rounded-lg transition font-bold shadow-sm">
+                                           Ver Detalles <i class="fa-solid fa-arrow-right ml-1"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -145,7 +145,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                        <a asp-controller="Documents" asp-action="Details" asp-route-id="@draft.DocId" class="text-slate-500 dark:text-slate-400 hover:text-brand dark:hover:text-brand-light px-4 py-2 bg-slate-100 dark:bg-[#2a2b2e] hover:bg-brand/10 dark:hover:bg-brand/20 rounded-lg transition font-bold shadow-sm">
+                                        <a href="/admin/Documents/Details/@(draft.DocId)" class="text-slate-500 dark:text-slate-400 hover:text-brand dark:hover:text-brand-light px-4 py-2 bg-slate-100 dark:bg-[#2a2b2e] hover:bg-brand/10 dark:hover:bg-brand/20 rounded-lg transition font-bold shadow-sm">
                                             Ver Detalles <i class="fa-solid fa-arrow-right ml-1"></i>
                                         </a>
                                     </td>
