@@ -15,12 +15,12 @@ class AuthController extends Controller
         $token = $request->query('token');
 
         if (!$token) {
-            // 🚀 CORRECCIÓN 1: Agregamos /admin para regresar al Login de C#
-            return redirect(env('APP_URL') . '/admin/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
+            // 🚀 BUENA PRÁCTICA: Usar config() en lugar de env()
+            return redirect(config('app.url') . '/admin/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
         }
 
-       
-        $secretKey = env('JWT_SECRET');
+        // 🚀 BUENA PRÁCTICA: Leer el secret desde la configuración de la app
+        $secretKey = config('app.jwt_secret', env('JWT_SECRET')); 
 
         try {
             // 3. Validar y decodificar el token
@@ -47,8 +47,7 @@ class AuthController extends Controller
 
         // 🚀 PROTECCIÓN TOTAL: Cambiamos Exception por \Throwable para atrapar el error 500 de variables nulas
         } catch (\Throwable $e) {
-            // 🚀 CORRECCIÓN 3: Agregamos /admin para expulsar a C#
-            return redirect(env('APP_URL') . '/admin/Auth/Login?error=TokenInvalido');
+            return redirect(config('app.url') . '/admin/Auth/Login?error=TokenInvalido');
         }
     }
 
@@ -57,7 +56,7 @@ class AuthController extends Controller
         // Limpiamos la sesión nativa de Laravel
         $request->session()->flush();
         
-        // 🚀 CORRECCIÓN 4: Agregamos /admin para ir al LOGOUT del sistema central (C#)
-       return redirect(env('APP_URL') . '/admin/Auth/Logout');
+        // 🚀 BUENA PRÁCTICA: Redirección de salida
+       return redirect(config('app.url') . '/admin/Auth/Logout');
     }
 }
