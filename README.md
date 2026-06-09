@@ -144,13 +144,13 @@ Una vez finalizado el despliegue, podrás acceder a los distintos servicios medi
 ## Portal Principal de Calidad y Administración
 
 ```text
-http://<IP_DEL_SERVIDOR>:<APP_PORT>
+http://<IP_DEL_SERVIDOR>:<APP_PORT>/admin/
 ```
 
 ### Ejemplo
 
 ```text
-http://192.168.1.184:8080
+http://192.168.1.184:8080/admin/
 ```
 
 ---
@@ -447,5 +447,7 @@ Beneficios:
 * Despliegue simplificado mediante Docker Compose.
 * Posibilidad de evolucionar cada componente de forma independiente.
 
+---
 
+# Para ver la documentacion detallada y resolver dudas aqui:
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Gabriel89zz/QualityDoc-Polyglot)
