@@ -260,7 +260,7 @@ public async Task<IActionResult> Login(LoginViewModel model)
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     
             // Ahora sí, te manda a la pantalla de login limpio
-            return RedirectToAction("Login");
+            return Redirect("/admin/Auth/Login");
         }
 
         [HttpGet]
