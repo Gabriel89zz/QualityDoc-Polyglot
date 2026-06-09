@@ -16,6 +16,26 @@ chmod +x db/sql-server/entrypoint.sh
 chmod -R 755 ./db/sql-server/scripts
 
 # ---------------------------------------------------------
+# PASO NUEVO: GENERAR JWT SECRET GLOBAL AUTOMÁTICO
+# ---------------------------------------------------------
+echo "🛡️ Verificando clave maestra JWT para los microservicios..."
+
+# Busca si el .env todavía tiene el texto de ejemplo
+if grep -q "LARAVEL_JWT_SECRET=tu_secreto_jwt_aqui" .env; then
+    echo "🔑 Generando un nuevo JWT Secret criptográfico..."
+    
+    # Crea una cadena aleatoria súper segura de 32 bytes en base64
+    NUEVO_JWT=$(openssl rand -base64 32)
+    
+    # Busca el texto de ejemplo en el .env y lo reemplaza por la nueva llave
+    sed -i "s|LARAVEL_JWT_SECRET=tu_secreto_jwt_aqui|LARAVEL_JWT_SECRET=$NUEVO_JWT|g" .env
+    
+    echo "✅ JWT Secret inyectado con éxito en el archivo global."
+else
+    echo "⚡ El JWT Secret ya está configurado. Se conserva para no cerrar sesiones."
+fi
+
+# ---------------------------------------------------------
 # PASO 2: LEVANTAR INFRAESTRUCTURA
 # ---------------------------------------------------------
 echo "🐳 2/3 - Levantando toda la infraestructura con Docker..."
