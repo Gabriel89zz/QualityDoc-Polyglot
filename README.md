@@ -1,6 +1,15 @@
 # 🚀 QualityDoc-Polyglot
 
-Sistema integral para la gestión documental, auditoría, búsqueda inteligente y administración de calidad mediante una arquitectura basada en microservicios y contenedores Docker.
+## Visión General
+QualityDoc-Polyglot es una plataforma de gestión documental y cumplimiento normativo basada en una arquitectura de microservicios políglota (Polyglot Microservices Architecture).
+
+La solución utiliza múltiples tecnologías especializadas para aprovechar las fortalezas de cada ecosistema:
+
+* **ASP.NET Core 10.0 MVC** para procesos administrativos y flujos de aprobación complejos.
+* **PHP Laravel 10** para la interacción rápida de operadores y usuarios finales.
+* **Python FastAPI** para indexación, búsqueda avanzada y recuperación eficiente de documentos.
+* **Nginx** como Gateway y Reverse Proxy centralizado.
+* **SQL Server**, **PostgreSQL** y **MongoDB** como estrategia de persistencia políglota.
 
 ---
 
@@ -54,7 +63,7 @@ Es importante configurar correctamente:
 PROYECTO_NOMBRE=QualityDoc-Polyglot
 
 # IP física o pública del servidor
-IP_DEL_SERVIDOR_DEL_PROFE=192.168.1.184
+IP_DEL_SERVIDOR=192.168.1.184
 
 # Puerto externo utilizado por Nginx
 APP_PORT=8080
@@ -135,7 +144,7 @@ Una vez finalizado el despliegue, podrás acceder a los distintos servicios medi
 ## Portal Principal de Calidad y Administración
 
 ```text
-http://<IP_DEL_SERVIDOR_DEL_PROFE>:<APP_PORT>
+http://<IP_DEL_SERVIDOR>:<APP_PORT>
 ```
 
 ### Ejemplo
@@ -149,7 +158,7 @@ http://192.168.1.184:8080
 ## Documentación Interactiva de la API de Búsqueda
 
 ```text
-http://<IP_DEL_SERVIDOR_DEL_PROFE>:8000/docs
+http://<IP_DEL_SERVIDOR>:8000/docs
 ```
 
 ### Ejemplo
@@ -217,7 +226,226 @@ bash deploy.sh
 
 Proyecto académico orientado a la gestión documental, auditoría y búsqueda inteligente mediante una arquitectura moderna basada en microservicios.
 
+---
 
+# 🏛️ Arquitectura del Sistema
+
+```text
+                    ┌─────────────┐
+                    │    Usuario   │
+                    └──────┬──────┘
+                           │
+                           ▼
+                  ┌─────────────────┐
+                  │  NGINX GATEWAY  │
+                  │ Reverse Proxy   │
+                  └─────┬─────┬─────┘
+                        │     │
+          ┌─────────────┘     └─────────────┐
+          ▼                                 ▼
+
+ ┌─────────────────┐             ┌─────────────────┐
+ │   ASP.NET Core  │             │ PHP Laravel 10  │
+ │  Portal Admin   │             │ Portal Operador │
+ └────────┬────────┘             └────────┬────────┘
+          │                               │
+          ▼                               ▼
+
+   ┌─────────────┐               ┌─────────────┐
+   │ SQL Server  │               │ PostgreSQL │
+   └─────────────┘               └─────────────┘
+
+                 ┌────────────────────┐
+                 │ Python FastAPI API │
+                 │ Search Engine      │
+                 └─────────┬──────────┘
+                           │
+                           ▼
+                     ┌─────────┐
+                     │ MongoDB │
+                     └─────────┘
+```
+
+---
+
+# 🌐 Gateway Centralizado
+
+Todas las solicitudes ingresan a través de Nginx, el cual actúa como punto único de entrada para la plataforma.
+
+### Rutas principales
+
+| Ruta           | Servicio                           |
+| -------------- | ---------------------------------- |
+| `/`            | Portal Operador Laravel            |
+| `/admin/`      | Portal Administrativo ASP.NET Core |
+| `/api/search/` | API de Búsqueda FastAPI            |
+
+Gracias a este enfoque, el usuario interactúa con una única dirección mientras Nginx enruta internamente cada solicitud al microservicio correspondiente.
+
+---
+
+# 🔷 Portal Administrativo (.NET)
+
+## Responsabilidad
+
+Es el núcleo del sistema y representa la fuente oficial de información (Source of Truth).
+
+### Funcionalidades
+
+* Gestión de empresas.
+* Gestión de departamentos.
+* Administración de usuarios.
+* Gestión de roles y permisos.
+* Control documental.
+* Flujo de aprobación.
+* Versionamiento de documentos.
+* Firmas electrónicas.
+* Gestión de normativas.
+* Indicadores de cumplimiento.
+
+### Tecnología
+
+* ASP.NET Core 10 MVC
+* Entity Framework Core
+* SQL Server
+
+---
+
+# 🟢 Portal Operador (Laravel)
+
+## Responsabilidad
+
+Proporcionar una experiencia ligera y rápida para los usuarios operativos.
+
+### Funcionalidades
+
+* Consulta de documentos vigentes.
+* Directorio documental.
+* Firma de enterado.
+* Confirmación de lectura.
+* Historial de cumplimiento.
+* Consulta rápida de normativas.
+
+### Tecnología
+
+* PHP 8.2
+* Laravel 10
+* PostgreSQL
+
+---
+
+# 🟡 Motor de Búsqueda (FastAPI)
+
+## Responsabilidad
+
+Permitir búsquedas rápidas y desacopladas del sistema principal.
+
+### Funcionalidades
+
+* Indexación documental.
+* Búsqueda por texto.
+* Filtrado avanzado.
+* Recuperación de documentos.
+* API REST para consultas.
+
+### Tecnología
+
+* Python 3.11
+* FastAPI
+* MongoDB
+
+---
+
+# 🗄️ Estrategia de Persistencia Políglota
+
+El sistema utiliza tres motores de bases de datos especializados.
+
+## SQL Server
+
+Almacena:
+
+* Empresas
+* Departamentos
+* Usuarios
+* Roles
+* Documentos
+* Versiones
+* Aprobaciones
+
+## PostgreSQL
+
+Almacena:
+
+* Firmas de enterado
+* Confirmaciones de lectura
+* Historial de cumplimiento
+* Actividad de operadores
+
+## MongoDB
+
+Almacena:
+
+* Índices documentales
+* Metadatos
+* Información optimizada para búsquedas
+
+---
+
+# 🔐 Seguridad
+
+## JWT Compartido
+
+La plataforma implementa un mecanismo Single Sign-On (SSO) entre .NET y Laravel mediante JWT.
+
+### Flujo
+
+1. Usuario inicia sesión en ASP.NET Core.
+2. ASP.NET genera un JWT firmado.
+3. Laravel valida el token.
+4. Se crea una sesión local automáticamente.
+5. El usuario navega entre portales sin volver a autenticarse.
+
+---
+
+## Endurecimiento de Seguridad
+
+Nginx implementa medidas adicionales de protección:
+
+* X-Frame-Options
+* X-Content-Type-Options
+* X-XSS-Protection
+* Aislamiento de red Docker
+* Bases de datos no expuestas públicamente
+
+---
+
+# 🐳 Infraestructura Docker
+
+Todos los servicios se ejecutan dentro de contenedores Docker conectados mediante una red privada:
+
+```text
+quality-net
+```
+
+Beneficios:
+
+* Aislamiento de servicios.
+* Comunicación segura interna.
+* Despliegue reproducible.
+* Escalabilidad futura.
+* Portabilidad entre entornos.
+
+---
+
+# 🚀 Beneficios de la Arquitectura
+
+* Separación clara de responsabilidades.
+* Escalabilidad independiente por servicio.
+* Mayor rendimiento en búsquedas.
+* Mejor mantenibilidad.
+* Persistencia especializada según el tipo de información.
+* Despliegue simplificado mediante Docker Compose.
+* Posibilidad de evolucionar cada componente de forma independiente.
 
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Gabriel89zz/QualityDoc-Polyglot)
