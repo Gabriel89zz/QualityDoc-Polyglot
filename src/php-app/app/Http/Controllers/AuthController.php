@@ -16,7 +16,7 @@ class AuthController extends Controller
 
         if (!$token) {
             // 🚀 CORRECCIÓN 1: Agregamos /admin para regresar al Login de C#
-            return redirect('/admin/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
+            return redirect(env('APP_URL') . '/admin/Auth/Login')->with('error', 'Acceso denegado. Se requiere iniciar sesión.');
         }
 
        
@@ -48,7 +48,7 @@ class AuthController extends Controller
         // 🚀 PROTECCIÓN TOTAL: Cambiamos Exception por \Throwable para atrapar el error 500 de variables nulas
         } catch (\Throwable $e) {
             // 🚀 CORRECCIÓN 3: Agregamos /admin para expulsar a C#
-            return redirect('/admin/Auth/Login?error=TokenInvalido');
+            return redirect(env('APP_URL') . '/admin/Auth/Login?error=TokenInvalido');
         }
     }
 
@@ -58,6 +58,6 @@ class AuthController extends Controller
         $request->session()->flush();
         
         // 🚀 CORRECCIÓN 4: Agregamos /admin para ir al LOGOUT del sistema central (C#)
-        return redirect('/admin/Auth/Logout');
+       return redirect(env('APP_URL') . '/admin/Auth/Logout');
     }
 }
