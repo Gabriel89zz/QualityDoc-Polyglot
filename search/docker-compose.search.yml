@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mongo-db:
+    image: mongo:4.4
+    container_name: mongo_prod
+    restart: always
+    env_file:
+      - ../.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+      - ./db/mongodb/scripts:/docker-entrypoint-initdb.d
+    networks:
+      - quality-net
+
+  python-app:
+    build:
+      context: ..
+      dockerfile: search/docker/python/Dockerfile
+    container_name: python_fastapi_prod
+    restart: always
+    env_file:
+      - ../.env
+    environment: 
+      # 🚀 CORRECCIÓN APLICADA PARA PRODUCCIÓN
+      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo_prod:27017/
+    networks:
+      - quality-net
+    volumes:
+      # Compartimos el volumen nombrado de producción donde C# guarda los PDFs
+      - doc_uploads_prod:/shared_uploads:ro
+
+networks:
+  quality-net:
+    external: true
+
+volumes:
+  mongo_data:
+    name: mongo_data_prod
+  # Declaramos el volumen como externo porque C# es quien lo crea
+  doc_uploads_prod:
+    external: true

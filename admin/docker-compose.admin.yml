@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # INIT: prepara el volumen con los permisos correctos (UID 10001)
+  sql-init:
+    image: alpine:latest
+    container_name: sql_server_init
+    volumes:
+      - sql_data:/data
+    command: >
+      sh -c "chown -R 10001:10001 /data && chmod 755 /data"
+    networks:
+      - quality-net
+    restart: "no"
+
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-CU12-ubuntu-22.04
+    container_name: sql_server_prod
+    restart: always
+    env_file:
+      - ../.env
+    depends_on:
+      sql-init:
+        condition: service_completed_successfully
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SQL_SERVER_PASSWORD}
+    volumes:
+      - sql_data:/var/opt/mssql/data
+      - ./db/sql-server/scripts:/usr/config/scripts:ro
+      - ./db/sql-server/entrypoint.sh:/usr/config/entrypoint.sh:ro
+    command: /bin/bash /usr/config/entrypoint.sh
+    networks:
+      - quality-net
+    user: "10001:10001"
+
+  dotnet-app:
+    build: 
+      context: ..
+      dockerfile: admin/docker/dotnet/Dockerfile
+    container_name: dotnet_mvc_prod
+    restart: always
+    env_file:
+      - ../.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=sql_server_prod;Database=QualityDocDB;User Id=sa;Password=${SQL_SERVER_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True;
+      - Microservices__PythonSearchApi=http://python_fastapi_prod:8000
+      - TZ=America/Monterrey
+      - JwtConfig__SecretKey=${LARAVEL_JWT_SECRET}
+      - EmailSettings__SenderEmail=${SMTP_EMAIL}
+      - EmailSettings__Username=${SMTP_EMAIL}
+      - EmailSettings__Password=${SMTP_PASSWORD}
+    networks:
+      - quality-net
+    volumes:
+      - doc_uploads:/app/wwwroot/uploads
+      - crypto_keys:/app/keys
+
+networks:
+  quality-net:
+    external: true
+
+volumes:
+  sql_data:
+    name: sql_server_data_prod
+  doc_uploads:
+    name: doc_uploads_prod
+  crypto_keys:
+    name: crypto_keys_prod

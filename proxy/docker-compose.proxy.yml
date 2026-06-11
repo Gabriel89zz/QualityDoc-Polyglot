@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  nginx-proxy:
+    image: nginx:1.25-alpine
+    container_name: nginx_gateway_prod
+    restart: always
+    env_file:
+      - ../.env
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - quality-net
+
+networks:
+  quality-net:
+    external: true
