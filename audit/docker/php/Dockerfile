@@ -14,7 +14,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # 🚀 NUEVO PARA PRODUCCIÓN: Copiamos todo el código de Laravel adentro de la imagen
-COPY src/php-app .
+COPY audit/src/php-app .
 
 # 🚀 NUEVO PARA PRODUCCIÓN: Instalamos dependencias optimizadas (sin paquetes de pruebas)
 RUN composer install --no-dev --optimize-autoloader
@@ -25,6 +25,6 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
 # 🚀 NUEVO: Configuramos el script de arranque para producción
-COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY audit/docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
