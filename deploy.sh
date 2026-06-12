@@ -46,11 +46,11 @@ fi
 # ---------------------------------------------------------
 echo "🐳 3/4 - Levantando módulos con Docker en orden estratégico..."
 
-echo "   -> Levantando Módulo de Búsqueda (MongoDB + FastAPI)..."
-sudo docker compose --env-file .env -f search/docker-compose.search.yml up -d --build
-
 echo "   -> Levantando Módulo de Administración (SQL Server + C#)..."
 sudo docker compose --env-file .env -f admin/docker-compose.admin.yml up -d --build
+
+echo "   -> Levantando Módulo de Búsqueda (MongoDB + FastAPI)..."
+sudo docker compose --env-file .env -f search/docker-compose.search.yml up -d --build
 
 echo "   -> Levantando Módulo de Auditoría (PostgreSQL + Laravel)..."
 sudo docker compose --env-file .env -f audit/docker-compose.audit.yml up -d --build
