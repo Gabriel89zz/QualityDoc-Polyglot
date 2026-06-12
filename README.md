@@ -104,10 +104,18 @@ SMTP_PASSWORD=tu_token_de_aplicacion_smtp
 
 ## ⚡ Paso 4: Ejecutar el Despliegue Automático
 
-Una vez guardados los cambios en el archivo `.env`, ejecuta:
+El proyecto cuenta con orquestadores inteligentes que detectan tu sistema operativo, verifican dependencias (instalando Docker si falta en Linux), crean redes virtuales y levantan los módulos en cascada.
+
+Si estás en Linux/Servidor Ubuntu (Bash):
 
 ```bash
 bash deploy.sh
+```
+
+Si estás en Windows (CMD):
+Solo dale doble clic al archivo deploy.bat desde el explorador de archivos, o ejecútalo en la terminal:
+```bash
+deploy.bat
 ```
 
 Este script realizará automáticamente:
@@ -189,8 +197,16 @@ docker logs -f <nombre_del_contenedor>
 
 Para detener todos los servicios:
 
+Si estás en Linux/Servidor Ubuntu (Bash):
+
 ```bash
-docker compose down
+bash shutdown.sh
+```
+
+Si estás en Windows (CMD):
+Solo dale doble clic al archivo shutdown.bat desde el explorador de archivos, o ejecútalo en la terminal:
+```bash
+shutdowm.bat
 ```
 
 ---
