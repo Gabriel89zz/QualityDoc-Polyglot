@@ -4,6 +4,26 @@
 @{
     ViewData["Title"] = "Evaluar Documento";
     var doc = Model.DocumentVersion?.Document;
+
+    // 🚀 LÓGICA DE PRODUCCIÓN: Construcción y corrección de la URL base
+    string ipServidor = Configuration["IP_DEL_SERVIDOR_DEL_PROFE"] ?? "127.0.0.1";
+    string puertoApp = Configuration["APP_PORT"] ?? "80";
+    
+    // Formateamos el puerto (si es el 80, lo ocultamos para producción)
+    string puertoFmt = (puertoApp == "80" || string.IsNullOrEmpty(puertoApp)) ? "" : $":{puertoApp}";
+
+    // Extraemos el FilePath crudo y nos aseguramos de que empiece con "admin/"
+    string filePath = Model.DocumentVersion?.FilePath ?? "";
+    string cleanPath = filePath.StartsWith("/") ? filePath.Substring(1) : filePath;
+    
+    // Si la base de datos no guardó el archivo con "admin/", se lo forzamos aquí de manera global
+    if (!cleanPath.StartsWith("admin/", StringComparison.OrdinalIgnoreCase))
+    {
+        cleanPath = $"admin/{cleanPath}";
+    }
+
+    // Esta es la URL pública real del archivo en el servidor (Para pestañas e iframes normales)
+    string urlArchivoPublica = $"http://{ipServidor}{puertoFmt}/{cleanPath}";
 }
 
 <div class="w-full max-w-7xl mx-auto space-y-6">
@@ -40,7 +60,8 @@
          <div class="lg:col-span-2 bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] overflow-hidden flex flex-col transition-colors duration-300">
             <div class="px-5 py-4 bg-slate-50 dark:bg-[#2a2b2e] border-b border-slate-200 dark:border-[#4a4b50] flex justify-between items-center transition-colors">
                 <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-eye mr-2"></i> Vista Previa del Documento</span>
-                <a href="@Model.DocumentVersion?.FilePath" target="_blank" class="text-brand dark:text-brand-light hover:text-brand-hover text-xs font-bold flex items-center transition-colors">
+                
+                <a href="@urlArchivoPublica" target="_blank" class="text-brand dark:text-brand-light hover:text-brand-hover text-xs font-bold flex items-center transition-colors">
                     Abrir en otra pestaña <i class="fa-solid fa-arrow-up-right-from-square ml-1.5"></i>
                 </a>
             </div>
@@ -54,44 +75,27 @@
                 }
                 else
                 {
-                    // 🚀 LÓGICA RAZOR: Detectamos el tipo de archivo
-                    var filePath = Model.DocumentVersion.FilePath;
                     var ext = System.IO.Path.GetExtension(filePath)?.ToLower() ?? "";
                     var officeExts = new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" };
                     bool isOfficeDoc = officeExts.Contains(ext);
 
                     if (isOfficeDoc)
-{
-    // 🚀 DOBLE INYECCIÓN DINÁMICA DE PRODUCCIÓN:
-    // 1. Extraemos la IP y el Puerto desde la memoria del contenedor (.env maestro)
-    string ipServidor = Configuration["IP_DEL_SERVIDOR_DEL_PROFE"] ?? "127.0.0.1";
-    string puertoApp = Configuration["APP_PORT"] ?? "80"; // Si no se define, por defecto es el 80
-    
-    // 🚀 2. FORMATEAMOS EL FILEPATH PARA QUE INCLUYA /admin/ ANTES DE MANDARLO A PYTHON
-    // Primero limpiamos cualquier "/" inicial que pueda traer el filePath para no duplicarla
-    string cleanPath = filePath.StartsWith("/") ? filePath.Substring(1) : filePath;
-    
-    // Si la base de datos no guardó el archivo con "admin/", se lo forzamos aquí
-    string fullAdminPath = $"admin/{cleanPath}";
-    
-    // 3. Armamos la URL apuntando al enrutamiento público a través del Proxy de Nginx
-    // Le pasamos la URL completa corregida con el /admin/ adentro del EscapeDataString
-    string urlArchivoParaPython = $"http://{ipServidor}:{puertoApp}/{fullAdminPath}";
-    
-    string pythonPreviewUrl = $"http://{ipServidor}:{puertoApp}/api/docs/preview?url_archivo={Uri.EscapeDataString(urlArchivoParaPython)}";
+                    {
+                        // 🚀 Mandamos la URL pública corregida con el admin/ codificado para Python
+                        string pythonPreviewUrl = $"http://{ipServidor}{puertoFmt}/api/docs/preview?url_archivo={Uri.EscapeDataString(urlArchivoPublica)}";
 
-    <div id="officeLoading" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-100/90 dark:bg-[#1a1b1e]/90 backdrop-blur-sm">
-        <i class="fa-solid fa-file-export fa-bounce text-4xl text-brand mb-4"></i>
-        <span class="text-slate-600 dark:text-slate-300 font-bold text-sm">Generando previsualización segura...</span>
-        <span class="text-slate-400 text-xs mt-1">Conectando con el microservicio de conversión.</span>
-    </div>
-    
-    <iframe src="@pythonPreviewUrl" class="w-full h-full border-0 relative z-20 opacity-0 transition-opacity duration-500" onload="document.getElementById('officeLoading').style.display='none'; this.classList.remove('opacity-0');"></iframe>
-}
-        else
-        {
-            <iframe src="@filePath" class="w-full h-full border-0 relative z-20"></iframe>
-        }
+                        <div id="officeLoading" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-100/90 dark:bg-[#1a1b1e]/90 backdrop-blur-sm">
+                            <i class="fa-solid fa-file-export fa-bounce text-4xl text-brand mb-4"></i>
+                            <span class="text-slate-600 dark:text-slate-300 font-bold text-sm">Generando previsualización segura...</span>
+                            <span class="text-slate-400 text-xs mt-1">Conectando con el microservicio de conversión.</span>
+                        </div>
+                        
+                        <iframe src="@pythonPreviewUrl" class="w-full h-full border-0 relative z-20 opacity-0 transition-opacity duration-500" onload="document.getElementById('officeLoading').style.display='none'; this.classList.remove('opacity-0');"></iframe>
+                    }
+                    else
+                    {
+                        <iframe src="@urlArchivoPublica" class="w-full h-full border-0 relative z-20"></iframe>
+                    }
                 }
             </div>
         </div>
@@ -164,10 +168,9 @@
         function validateRejection() {
             var comments = document.getElementById('commentsBox').value.trim();
             if (comments === '') {
-                // Podemos mejorar este alert nativo más adelante con SweetAlert o Toastr si lo deseas
                 alert('Por favor, ingresa un comentario explicando por qué rechazas el documento para que el autor pueda corregirlo.');
                 document.getElementById('commentsBox').focus();
-                return false; // Detiene el envío del formulario
+                return false; 
             }
             return confirm('¿Estás seguro de RECHAZAR este documento? Se regresará a estatus de Borrador y se notificará al autor.');
         }
