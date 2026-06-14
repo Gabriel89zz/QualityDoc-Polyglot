@@ -1,12 +1,18 @@
+# 1. Imagen base ligera de Python
 FROM python:3.11-slim
+
+# 2. Directorio de trabajo
 WORKDIR /app
 
-RUN pip install --no-cache-dir fastapi uvicorn motor pymongo
+# 🚀 FIX: Instalamos LibreOffice (versión sin interfaz gráfica) para convertir archivos a PDF
+RUN apt-get update && apt-get install -y libreoffice --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
-# 🚀 CORRECCIÓN PARA PRODUCCIÓN: Apuntamos a la nueva ruta modular dentro del contexto global
-COPY search/src/python-app/ .
+# 3. Copiamos y ejecutamos dependencias
+COPY src/python-app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+# 4. Exponemos puerto
 EXPOSE 8000
 
-# 🚀 NUEVO PARA PRODUCCIÓN: Sin "--reload" para exprimir el máximo rendimiento en el servidor
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 5. Comando de inicio
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
