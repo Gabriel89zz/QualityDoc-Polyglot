@@ -8,7 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y libreoffice --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 # 3. Copiamos y ejecutamos dependencias
-COPY src/python-app/requirements.txt .
+COPY search/src/python-app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 4. Exponemos puerto
