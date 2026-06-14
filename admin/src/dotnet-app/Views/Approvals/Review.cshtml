@@ -61,24 +61,33 @@
                     bool isOfficeDoc = officeExts.Contains(ext);
 
                     if (isOfficeDoc)
-        {
-            // 🚀 DOBLE INYECCIÓN DINÁMICA DE PRODUCCIÓN:
-            // 1. Extraemos la IP y el Puerto desde la memoria del contenedor (.env maestro)
-            string ipServidor = Configuration["IP_DEL_SERVIDOR_DEL_PROFE"] ?? "127.0.0.1";
-            string puertoApp = Configuration["APP_PORT"] ?? "80"; // Si no se define, por defecto es el 80
-            
-            // 2. Armamos la URL apuntando al enrutamiento público a través del Proxy de Nginx
-            // En producción, el tráfico entra por el puerto del proxy y Nginx redirige internamente a FastAPI.
-            string pythonPreviewUrl = $"http://{ipServidor}:{puertoApp}/api/docs/preview?url_archivo={Uri.EscapeDataString(filePath)}";
+{
+    // 🚀 DOBLE INYECCIÓN DINÁMICA DE PRODUCCIÓN:
+    // 1. Extraemos la IP y el Puerto desde la memoria del contenedor (.env maestro)
+    string ipServidor = Configuration["IP_DEL_SERVIDOR_DEL_PROFE"] ?? "127.0.0.1";
+    string puertoApp = Configuration["APP_PORT"] ?? "80"; // Si no se define, por defecto es el 80
+    
+    // 🚀 2. FORMATEAMOS EL FILEPATH PARA QUE INCLUYA /admin/ ANTES DE MANDARLO A PYTHON
+    // Primero limpiamos cualquier "/" inicial que pueda traer el filePath para no duplicarla
+    string cleanPath = filePath.StartsWith("/") ? filePath.Substring(1) : filePath;
+    
+    // Si la base de datos no guardó el archivo con "admin/", se lo forzamos aquí
+    string fullAdminPath = $"admin/{cleanPath}";
+    
+    // 3. Armamos la URL apuntando al enrutamiento público a través del Proxy de Nginx
+    // Le pasamos la URL completa corregida con el /admin/ adentro del EscapeDataString
+    string urlArchivoParaPython = $"http://{ipServidor}:{puertoApp}/{fullAdminPath}";
+    
+    string pythonPreviewUrl = $"http://{ipServidor}:{puertoApp}/api/docs/preview?url_archivo={Uri.EscapeDataString(urlArchivoParaPython)}";
 
-            <div id="officeLoading" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-100/90 dark:bg-[#1a1b1e]/90 backdrop-blur-sm">
-                <i class="fa-solid fa-file-export fa-bounce text-4xl text-brand mb-4"></i>
-                <span class="text-slate-600 dark:text-slate-300 font-bold text-sm">Generando previsualización segura...</span>
-                <span class="text-slate-400 text-xs mt-1">Conectando con el microservicio de conversión.</span>
-            </div>
-            
-            <iframe src="@pythonPreviewUrl" class="w-full h-full border-0 relative z-20 opacity-0 transition-opacity duration-500" onload="document.getElementById('officeLoading').style.display='none'; this.classList.remove('opacity-0');"></iframe>
-        }
+    <div id="officeLoading" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-100/90 dark:bg-[#1a1b1e]/90 backdrop-blur-sm">
+        <i class="fa-solid fa-file-export fa-bounce text-4xl text-brand mb-4"></i>
+        <span class="text-slate-600 dark:text-slate-300 font-bold text-sm">Generando previsualización segura...</span>
+        <span class="text-slate-400 text-xs mt-1">Conectando con el microservicio de conversión.</span>
+    </div>
+    
+    <iframe src="@pythonPreviewUrl" class="w-full h-full border-0 relative z-20 opacity-0 transition-opacity duration-500" onload="document.getElementById('officeLoading').style.display='none'; this.classList.remove('opacity-0');"></iframe>
+}
         else
         {
             <iframe src="@filePath" class="w-full h-full border-0 relative z-20"></iframe>
