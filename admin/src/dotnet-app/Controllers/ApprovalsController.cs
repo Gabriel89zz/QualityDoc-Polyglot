@@ -191,6 +191,27 @@ namespace QualityDoc.API.Controllers
                         string origenDocumento = updatedVersion.Document.IsExternal ? "Externo" : "Interno";
 
                         // Armamos el JSON con la taxonomía optimizada para MongoDB
+                        // 🚀 Extraemos solo el nombre del archivo (ej. "ISO-9001.pdf") para evitar conflictos de rutas en Linux/Docker
+                        // 🚀 FIX: Extraemos la ruta relativa exacta respetando subcarpetas para Python
+                        string nombreArchivoFisico = "";
+                        if (!string.IsNullOrEmpty(updatedVersion.FilePath))
+                        {
+                            // 1. Normalizamos las diagonales de Windows (\) a Linux (/)
+                            nombreArchivoFisico = updatedVersion.FilePath.Replace("\\", "/");
+                            
+                            // 2. Cortamos todo lo que esté antes de "uploads/" para que empate con el volumen de Docker
+                            int uploadsIndex = nombreArchivoFisico.IndexOf("uploads/", StringComparison.OrdinalIgnoreCase);
+                            if (uploadsIndex >= 0)
+                            {
+                                // Tomamos lo que sigue después de "uploads/" (que son 8 caracteres)
+                                nombreArchivoFisico = nombreArchivoFisico.Substring(uploadsIndex + 8); 
+                            }
+                            else
+                            {
+                                nombreArchivoFisico = Path.GetFileName(updatedVersion.FilePath);
+                            }
+                        }
+
                         var payload = new
                         {
                             documento_id = updatedVersion.DocId,
@@ -199,14 +220,18 @@ namespace QualityDoc.API.Controllers
                             version = updatedVersion.VersionNum ?? "1.0",
                             
                             etiquetas = new[] { 
-                                normativaDinamica,                                             // "ISO" o "IATF" dinámico
-                                updatedVersion.Document.Category?.CategoryName ?? "General",   // "Manual de Calidad", "Procedimientos", etc.
-                                updatedVersion.Document.Department?.DeptName ?? "General",     // "Calidad", "Producción", etc.
-                                origenDocumento,                                               // "Interno" o "Externo"
-                                "Vigente"                                                      // Estatus del ciclo de vida ISO
+                                normativaDinamica,        
+                                updatedVersion.Document.Category?.CategoryName ?? "General",   
+                                updatedVersion.Document.Department?.DeptName ?? "General",     
+                                origenDocumento,                                               
+                                "Vigente"                                                      
                             },
                             
                             url_archivo = updatedVersion.FilePath ?? "",
+                            
+                            // 🚀 NUEVO: Le mandamos el nombre físico a Python
+                            archivo_fisico = nombreArchivoFisico,
+                            
                             aprobado_por = currentUser.FullName ?? "Sistema",
                             empresa_id = updatedVersion.Document.Department?.CompanyId ?? 0, 
                             departamento_id = updatedVersion.Document.Department?.DeptId ?? 0 
@@ -216,24 +241,29 @@ namespace QualityDoc.API.Controllers
                         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
                         try
-                        {
-                            var pythonApiUrl = _config["Microservices:PythonSearchApi"];
-                            var response = await httpClient.PostAsync($"{pythonApiUrl}/api/docs/index", content);
-                            
-                            if (response.IsSuccessStatusCode)
-                            {
-                                TempData["SuccessMessage"] = $"¡Firma aplicada! El documento (v{updatedVersion.VersionNum}) fue aprobado y ya está disponible en el portal operativo.";
-                                return RedirectToAction(nameof(Index));
-                            }
-                            else
-                            {
-                                TempData["ErrorMessage"] = "Firma aplicada, pero ocurrió un error al indexar en MongoDB.";
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            TempData["ErrorMessage"] = "Firma aplicada, pero el motor de búsqueda (FastAPI/Python) está fuera de línea.";
-                        }
+{
+    var pythonApiUrl = _config["Microservices:PythonSearchApi"];
+    var response = await httpClient.PostAsync($"{pythonApiUrl}/api/docs/index", content);
+    
+    if (response.IsSuccessStatusCode)
+    {
+        TempData["SuccessMessage"] = $"¡Firma aplicada! El documento (v{updatedVersion.VersionNum}) fue aprobado y ya está disponible en el portal operativo.";
+        return RedirectToAction(nameof(Index));
+    }
+    else
+    {
+        // Si Python responde pero con un error (ej. 500 o 400), capturamos qué nos dijo
+        string respuestaPython = await response.Content.ReadAsStringAsync();
+        TempData["ErrorMessage"] = $"Firma aplicada, pero Python rechazó los datos (Código: {response.StatusCode}). Detalle: {respuestaPython}";
+    }
+}
+catch (Exception ex)
+{
+    // Captura el error de red exacto (DNS, Connection Refused, etc.)
+    string errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+    var pythonApiUrl = _config["Microservices:PythonSearchApi"];
+    TempData["ErrorMessage"] = $"Firma aplicada, pero falló la conexión con FastAPI. Error: {errorReal} | URL intentada: {pythonApiUrl}/api/docs/index";
+}
                     }
                     else
                     {
@@ -338,5 +368,39 @@ public async Task<IActionResult> RevertSignature(int versionId, int approvalId, 
 
     return RedirectToAction("Details", "Documents", new { id = docId });
 }
+
+
+        // ==========================================
+        // 🚀 5. ENDPOINT: OBTENER HISTORIAL DE VERSIONES (Para la Línea de Tiempo)
+        // ==========================================
+        [HttpGet("api/documents/{docCode}/history")]
+        [AllowAnonymous] // Permite que Laravel lo consulte fácilmente sin chocar con las cookies de sesión de C#
+        public async Task<IActionResult> GetDocumentHistory(string docCode)
+        {
+            try
+            {
+                // Buscamos todas las versiones que coincidan con el código del documento
+                var history = await _context.DocumentVersions
+                    .Include(v => v.Document)
+                    .Where(v => v.Document.DocCode == docCode)
+                    .OrderByDescending(v => v.CreatedAt) // Ordenamos de la más reciente a la más antigua
+                    .Select(v => new {
+                        version = v.VersionNum,
+                        descripcion = v.ChangeDescription ?? "Sin descripción de cambios",
+                        fecha_aprobacion = v.ApprovedAt,
+                        fecha_obsoleto = v.ObsoletedAt,
+                        ruta_archivo = v.FilePath,
+                        estado_id = v.StatusId // 3 = Vigente, 4 = Obsoleto
+                    })
+                    .ToListAsync();
+
+                // Ok() automáticamente convierte el objeto anónimo a un JSON perfecto
+                return Ok(history); 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener historial", error = ex.Message });
+            }
+        }
     }
 }

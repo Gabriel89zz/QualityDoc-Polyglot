@@ -32,6 +32,7 @@ Route::prefix('operario')->group(function () {
 
     // 🚀 NUEVA RUTA: Puente AJAX para enviar el reporte de error a C#
     Route::post('/reportar-error', [DashboardController::class, 'reportarError'])->name('reportar.error');
+    Route::get('/directorio/historial/{codigo}', [DashboardController::class, 'historialDocumento'])->name('documento.historial');
 });
 
 

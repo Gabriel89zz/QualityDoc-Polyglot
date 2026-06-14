@@ -1,4 +1,5 @@
 @model QualityDoc.API.Models.NewDocumentVersionViewModel
+@inject IConfiguration Configuration
 
 @{
     ViewData["Title"] = "Subir Nueva Versión";
@@ -129,6 +130,9 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
+        // 🚀 Inyectamos el entorno de Docker de forma segura a JavaScript
+        window.IP_SERVIDOR_PROFE = '@Configuration["IP_DEL_SERVIDOR_DEL_PROFE"]' || '127.0.0.1';
+        window.APP_PORT = '@Configuration["APP_PORT"]' || '80';
         document.addEventListener('DOMContentLoaded', function () {
             
             // ==========================================
@@ -174,6 +178,51 @@
                             currentObjectUrl = URL.createObjectURL(file);
                             filePreview.innerHTML = `<img src="${currentObjectUrl}" class="absolute inset-0 w-full h-full object-contain bg-slate-100 dark:bg-[#2a2b2e] p-2" alt="Vista previa" />`;
                         } 
+                        // 🚀 NUEVA LÓGICA: INTERCEPTAMOS OFFICE PARA MANDARLO A PYTHON
+else if (file.type.toLowerCase().match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/)) {
+    
+    // Mostramos el spinner de carga
+    filePreview.innerHTML = `
+        <div class="absolute inset-0 w-full h-full bg-white dark:bg-[#323338] text-center p-6 flex flex-col items-center justify-center">
+            <i class="fa-solid fa-file-export fa-bounce text-5xl text-brand mb-4"></i>
+            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">Generando vista previa de Office...</p>
+            <p class="text-xs text-slate-500 mt-2">Conectando con el motor de renderizado de producción.</p>
+        </div>
+    `;
+
+    // Empaquetamos el archivo local para enviarlo por red
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // 🚀 PRODUCCIÓN: Construimos la URL dinámica apuntando a la IP y Puerto del Proxy
+    const apiUrl = `http://${window.IP_SERVIDOR_PROFE}:${window.APP_PORT}/api/docs/preview-upload`;
+
+    // Petición al endpoint POST en FastAPI a través de Nginx
+    fetch(apiUrl, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Fallo en la conversión de Python");
+        return response.blob(); // Recibimos el PDF como datos binarios crudos
+    })
+    .then(blob => {
+        // Convertimos el binario del PDF en una URL local para el iframe
+        currentObjectUrl = URL.createObjectURL(blob);
+        filePreview.innerHTML = `<iframe src="${currentObjectUrl}#toolbar=0&navpanes=0" class="absolute inset-0 w-full h-full border-0"></iframe>`;
+    })
+    .catch(error => {
+        console.error(error);
+        // Si falla Python, le mostramos un icono genérico de Office
+        filePreview.innerHTML = `
+            <div class="absolute inset-0 w-full h-full bg-white dark:bg-[#323338] text-center flex flex-col items-center justify-center">
+                <i class="fa-solid fa-file-word text-5xl text-blue-500 mb-3"></i>
+                <p class="text-sm font-bold">Archivo Listo</p>
+                <span class="text-xs text-slate-400 mt-1">Vista previa no disponible momentáneamente</span>
+            </div>
+        `;
+    });
+}
                         else {
                             // 🚀 2. LÓGICA DE ÍCONOS PARA LOS NUEVOS ARCHIVOS
                             let iconClass = 'fa-file-lines text-slate-400';

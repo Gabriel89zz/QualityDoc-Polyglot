@@ -10,13 +10,13 @@
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Manuales, procedimientos y formatos aprobados para planta.</p>
         </div>
         
-        <form method="GET" action="{{ route('directorio') }}" class="w-full md:w-96 flex gap-2 relative" id="searchContainer" onsubmit="return false;">
+        <form method="GET" action="{{ route('directorio') }}" class="w-full md:w-96 flex gap-2 relative" id="searchContainer">
             <div class="relative flex-1">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400 z-20">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </span>
                 
-                <input type="text" id="searchInput" value="{{ $searchTerm ?? '' }}" autocomplete="off" placeholder="Buscar por código, título o etiqueta..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-darkbg-card border border-slate-200 dark:border-darkbg-border rounded-xl text-sm focus:outline-none focus:border-brand dark:focus:border-brand shadow-soft transition-all text-slate-700 dark:text-slate-200 relative z-10" />
+                <input type="text" name="search" id="searchInput" value="{{ $searchTerm ?? '' }}" autocomplete="off" placeholder="Buscar contenido y presionar Enter..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#2a2b2e] border border-slate-200 dark:border-[#4a4b50] rounded-xl text-sm focus:outline-none focus:border-brand dark:focus:border-brand shadow-sm transition-all text-slate-700 dark:text-slate-200 relative z-10" />
             </div>
             
             @if(!empty($searchTerm))
@@ -82,7 +82,7 @@
                     <tr>
                         <th class="p-5">Código</th>
                         <th class="p-5">Título del Documento</th>
-                        <th class="p-5">Metadatos (Etiquetas)</th>
+                        <th class="p-5">Etiquetas</th>
                         <th class="p-5 text-center">Acciones Operativas</th>
                     </tr>
                 </thead>
@@ -139,13 +139,19 @@
                                     <div class="w-10 h-10 rounded-xl {{ $bgClass }} flex items-center justify-center shrink-0 shadow-sm border border-slate-200/50 dark:border-[#4a4b50]">
                                         <i class="fa-solid {{ $iconClass }} text-xl"></i>
                                     </div>
-                                    <div class="flex flex-col justify-center">
+                                    <div class="flex flex-col justify-center w-full max-w-xs md:max-w-md">
                                         <div class="text-sm text-slate-800 dark:text-white font-bold">{{ $doc['titulo'] }}</div>
                                         <div class="text-[11px] text-slate-500 mt-0.5 uppercase font-bold tracking-wide">
                                             {{ $ext ? $ext : 'DOC' }} <span class="mx-1.5 text-slate-300 dark:text-slate-600">|</span> 
-                                            <i class="fa-solid fa-check-double text-green-500 mr-1"></i> {{ $doc['aprobado_por'] }} <span class="mx-1.5 text-slate-300 dark:text-slate-600">|</span> 
+                                            <i class="fa-solid fa-check-double text-green-500 mr-1"></i> {{ $doc['aprobado_por'] ?? 'Sistema' }} <span class="mx-1.5 text-slate-300 dark:text-slate-600">|</span>
                                             v{{ $doc['version'] }}
                                         </div>
+                                        
+                                        @if(!empty($doc['snippet']) && $doc['snippet'] !== 'Coincidencia en metadatos.')
+                                            <div class="mt-2.5 text-xs text-slate-600 dark:text-slate-400 bg-amber-50/80 dark:bg-amber-900/10 p-3 rounded-lg border-l-4 border-amber-400 italic shadow-inner whitespace-normal leading-relaxed break-words">
+                                                {!! $doc['snippet'] !!}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -162,18 +168,37 @@
                             
                             <td class="p-5 align-middle text-right">
                                 <div class="flex justify-end space-x-2 items-center">
-                                    
+                                    <button type="button" 
+                                       onclick="toggleHistorial(this, '{{ $doc['codigo'] }}', '{{ addslashes($doc['titulo']) }}')" 
+                                       class="inline-flex items-center text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-[#323338] dark:text-slate-400 dark:hover:text-white dark:hover:bg-[#4a4b50] border border-transparent px-3 py-1.5 rounded-lg font-bold transition-all text-xs shadow-sm group shrink-0" title="Ver historial">
+                                        <i class="fa-solid fa-chevron-down mr-1.5 transition-transform duration-300 group-hover:translate-y-0.5"></i> Historial
+                                    </button>   
+
                                     <button type="button" onclick="abrirModalReporte('{{ $doc['codigo'] }}', '{{ addslashes($doc['titulo']) }}')"
                                             class="inline-flex items-center text-red-600 hover:text-white bg-red-50 hover:bg-red-600 dark:bg-red-500/10 dark:hover:bg-red-600 border border-transparent px-3 py-1.5 rounded-lg font-bold transition-all text-xs shadow-sm group shrink-0" title="Reportar un problema">
                                         <i class="fa-solid fa-triangle-exclamation mr-1.5 text-red-500 group-hover:text-white transition-colors"></i> Reportar Error
                                     </button>
 
-                                    <a href="{{ route('log.document', ['codigo' => $doc['codigo'], 'titulo' => $doc['titulo'], 'version' => $doc['version'], 'url' => $doc['url_archivo'] ?? '']) }}" 
-                                       target="_blank" 
-                                       onclick="desbloquearFirma('{{ $doc['codigo'] }}')"
-                                        class="inline-flex items-center text-brand hover:text-white bg-brand/10 hover:bg-brand border border-transparent px-3 py-1.5 rounded-lg font-bold transition-all text-xs shadow-sm group shrink-0">
+                                    <button type="button" onclick="abrirModalMetadatos({{ json_encode($doc) }})"
+                                        class="inline-flex items-center text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 dark:bg-indigo-500/10 dark:hover:bg-indigo-600 border border-transparent px-3 py-1.5 rounded-lg font-bold transition-all text-xs shadow-sm group shrink-0" title="Inspeccionar JSON de MongoDB">
+                                        <i class="fa-solid fa-code mr-1.5 text-indigo-500 group-hover:text-white transition-colors"></i> JSON
+                                    </button>
+
+                                    @php
+                                        // 1. La URL de Laravel que guarda el log en Postgres (y sirve para el botón de descargar)
+                                        $urlLog = route('log.document', [
+                                            'codigo' => $doc['codigo'], 
+                                            'titulo' => $doc['titulo'], 
+                                            'version' => $doc['version'], 
+                                            'url' => $doc['url_archivo'] ?? ''
+                                        ]);
+                                    @endphp
+                                    
+                                    <button type="button" 
+                                       onclick="abrirModalVisor('{{ $urlLog }}', '{{ $doc['url_archivo'] ?? '' }}', '{{ $ext }}', '{{ $doc['codigo'] }}', '{{ addslashes($doc['titulo']) }}')" 
+                                       class="inline-flex items-center text-brand hover:text-white bg-brand/10 hover:bg-brand border border-transparent px-3 py-1.5 rounded-lg font-bold transition-all text-xs shadow-sm group shrink-0">
                                         <i class="fa-solid fa-eye mr-1.5 text-brand group-hover:text-white transition-colors"></i> Ver Documento
-                                    </a>
+                                    </button>
                                     
                                     <form action="{{ route('document.acuse') }}" method="POST" onsubmit="return confirm('¿Declaras formalmente haber leído y comprendido este documento?');">
                                         @csrf
@@ -270,11 +295,89 @@
         </form>
     </div>
 </div>
+<div id="modalMetadatos" class="fixed inset-0 z-[110] hidden items-center justify-center bg-slate-900/80 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-[#2a2b2e] w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden transform transition-all border border-slate-200 dark:border-darkbg-border flex flex-col max-h-[85vh]">
+            
+            <div class="bg-slate-50 dark:bg-[#323338] border-b border-slate-200 dark:border-[#4a4b50] px-6 py-4 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm">
+                        <i class="fa-solid fa-code text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">Metadatos del Documento</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Documento indexado en MongoDB</p>
+                    </div>
+                </div>
+                <button type="button" onclick="cerrarModalMetadatos()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-100 hover:bg-slate-200 dark:bg-[#2a2b2e] dark:hover:bg-[#4a4b50] w-8 h-8 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto bg-slate-900 w-full relative">
+                <button onclick="copiarJson()" class="absolute top-4 right-4 text-xs font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors flex items-center">
+                    <i class="fa-regular fa-copy mr-2"></i> Copiar
+                </button>
+                <pre class="text-green-400 font-mono text-sm whitespace-pre-wrap word-break"><code id="jsonMetadataContent"></code></pre>
+            </div>
+        </div>
+    </div>
+    <div id="modalVisorDoc" class="fixed inset-0 z-[120] hidden items-center justify-center bg-slate-900/90 backdrop-blur-sm transition-opacity p-4 md:p-6">
+        <div class="bg-white dark:bg-[#2a2b2e] w-full max-w-6xl h-full md:h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-darkbg-border">
+            
+            <div class="bg-slate-50 dark:bg-[#323338] border-b border-slate-200 dark:border-[#4a4b50] px-4 md:px-6 py-3 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div id="visorIconContainer" class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 bg-slate-200 dark:bg-slate-800">
+                        <i id="visorIcon" class="fa-solid fa-file text-lg text-slate-500"></i>
+                    </div>
+                    <div class="truncate flex flex-col justify-center">
+                        <h3 id="visorTitle" class="text-base md:text-lg font-bold text-slate-800 dark:text-white truncate leading-tight">Cargando documento...</h3>
+                        <p id="visorCode" class="text-[11px] text-slate-500 dark:text-slate-400 font-mono font-bold mt-0.5"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="btnDescargarDoc" href="#" target="_blank" download rel="noopener noreferrer" class="hidden md:flex text-slate-600 hover:text-brand bg-white hover:bg-slate-50 dark:bg-[#2a2b2e] dark:hover:bg-[#4a4b50] border border-slate-200 dark:border-darkbg-border px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm items-center">
+                        <i class="fa-solid fa-download mr-2"></i> Descargar
+                    </a>
+                    <button type="button" onclick="cerrarModalVisor()" class="text-slate-400 hover:text-red-500 dark:hover:text-red-400 bg-slate-100 hover:bg-red-50 dark:bg-[#2a2b2e] dark:hover:bg-red-900/20 border border-transparent hover:border-red-100 dark:hover:border-red-900/30 w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-slate-200/50 dark:bg-[#1a1b1e] w-full h-full relative" id="visorContainer">
+                
+                <div id="visorLoading" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-100/80 dark:bg-[#1a1b1e]/80 backdrop-blur-sm">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand mb-3"></i>
+                    <span class="text-slate-600 dark:text-slate-300 font-bold animate-pulse text-sm">Cargando visualización...</span>
+                </div>
+                
+                <iframe id="iframeVisor" class="w-full h-full border-0 bg-white" allowfullscreen></iframe>
+                
+                <div id="localhostWarning" class="hidden absolute inset-0 flex-col items-center justify-center z-20 bg-slate-900/95 text-center p-8">
+                    <div class="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mb-6 border border-amber-500/20">
+                        <i class="fa-brands fa-microsoft text-4xl text-amber-500"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Formato de Office Detectado</h2>
+                    <p class="text-slate-400 max-w-md mb-8 text-sm leading-relaxed">
+                        Los navegadores no pueden abrir Word o Excel nativamente. El motor de Microsoft requiere que este sistema esté alojado en una IP pública de internet, pero actualmente estás en <span class="text-amber-400 font-mono">localhost</span>.
+                    </p>
+                    <a id="btnDescargarAlternativo" href="#" target="_blank" download rel="noopener noreferrer" class="bg-brand hover:bg-brand-dark text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-brand/30 transition-transform hover:-translate-y-0.5 flex items-center w-max mx-auto">
+                        <i class="fa-solid fa-download mr-2"></i> Descargar archivo original
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 @endsection
 
 @section('scripts')
 <script>
+    // 🚀 Inyectamos el entorno global de Docker desde Laravel hacia JavaScript
+    window.IP_SERVIDOR_PROFE = '{{ env("IP_DEL_SERVIDOR_DEL_PROFE", "127.0.0.1") }}';
+    window.APP_PORT = '{{ env("APP_PORT", "80") }}';
+
     function desbloquearFirma(codigo) {
         const btnFirma = document.getElementById('btn-firma-' + codigo);
         const iconoFirma = document.getElementById('icono-firma-' + codigo);
@@ -289,6 +392,197 @@
             }
         }
     }
+
+    // ==========================================
+    // CONTROLADOR DE HISTORIAL (FILA DESPLEGABLE / ACORDEÓN)
+    // ==========================================
+    window.toggleHistorial = async function(btn, codigo, titulo) {
+        const tr = btn.closest('tr'); // Detectamos en qué fila se hizo click
+        let historyTr = tr.nextElementSibling; // Buscamos si ya existe la fila de abajo
+
+        // 1. Si el recuadro ya está abierto, lo ocultamos (Toggle)
+        if (historyTr && historyTr.classList.contains('historial-row')) {
+            historyTr.classList.toggle('hidden');
+            // Rotar la flechita del botón
+            btn.querySelector('i').classList.toggle('rotate-180');
+            return;
+        }
+
+        btn.querySelector('i').classList.add('rotate-180');
+
+        // 2. Si no existe, creamos el "recuadro" inyectando una nueva fila (<tr>)
+        historyTr = document.createElement('tr');
+        historyTr.className = 'historial-row bg-slate-50/80 dark:bg-[#1a1b1e] border-y border-slate-200 dark:border-darkbg-border transition-all';
+        historyTr.innerHTML = `
+            <td colspan="4" class="p-0">
+                <div class="px-8 py-6 border-l-4 border-indigo-500 shadow-inner">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-white">Control de Cambios: ${codigo}</h4>
+                    </div>
+                    <div class="timeline-content flex flex-col items-center justify-center py-4">
+                        <i class="fa-solid fa-circle-notch fa-spin text-2xl text-brand mb-2"></i>
+                        <p class="text-xs text-slate-500">Consultando versiones...</p>
+                    </div>
+                </div>
+            </td>
+        `;
+        
+        // Insertamos la fila en la tabla
+        tr.parentNode.insertBefore(historyTr, tr.nextSibling);
+
+        // 3. Ejecutamos la petición a Laravel
+        try {
+            const urlBase = "{{ route('documento.historial', ['codigo' => 'CODIGO_PLACEHOLDER']) }}";
+            const response = await fetch(urlBase.replace('CODIGO_PLACEHOLDER', codigo));
+            const result = await response.json();
+
+            const container = historyTr.querySelector('.timeline-content');
+
+            if (result.success && result.data.length > 0) {
+                let html = '<div class="w-full relative border-l-2 border-slate-200 dark:border-slate-700 ml-2 space-y-4 pb-2">';
+                
+                result.data.forEach((ver, index) => {
+                    const isLatest = index === 0;
+                    const colorPunto = isLatest ? 'bg-green-500 ring-green-100' : 'bg-slate-400 ring-slate-100 dark:bg-slate-500 dark:ring-slate-800';
+                    
+                    // 🚀 FIX 1: Etiqueta dinámica (Vigente en verde, Obsoleto en gris/ámbar)
+                    const badge = isLatest 
+                        ? `<span class="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded ml-2 text-[10px] font-bold border border-green-200 dark:border-green-800">Vigente</span>` 
+                        : `<span class="bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-2 py-0.5 rounded ml-2 text-[10px] font-bold border border-slate-300 dark:border-slate-600">Obsoleto</span>`;
+                    
+                    const fecha = ver.fecha_aprobacion ? new Date(ver.fecha_aprobacion).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/D';
+                    
+                    const rawUrl = ver.ruta_archivo;
+                    const ext = rawUrl ? rawUrl.split('.').pop().toLowerCase() : 'pdf';
+                    const docTituloFinal = encodeURIComponent(titulo + ' (v' + ver.version + ')');
+                    const logUrl = `{{ url('operario/log-access') }}?codigo=${codigo}&titulo=${docTituloFinal}&version=${ver.version}&url=${encodeURIComponent(rawUrl)}`;
+
+                    // 🚀 FIX 2: Título dinámico para el Modal del Visor
+                    const tituloModal = isLatest ? `Versión ${ver.version} Vigente` : `Versión ${ver.version} Obsoleta`;
+
+                    html += `
+                        <div class="relative pl-6 text-left group">
+                            <div class="absolute w-3 h-3 rounded-full ${colorPunto} ring-4 -left-[7px] top-1.5 transition-transform group-hover:scale-125"></div>
+                            <div class="bg-white dark:bg-[#2a2b2e] p-4 rounded-xl shadow-sm border border-slate-200 dark:border-darkbg-border hover:border-brand/30 transition-colors">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="font-bold text-sm text-slate-800 dark:text-white flex items-center">v${ver.version} ${badge}</div>
+                                    <div class="text-[11px] font-bold text-slate-500"><i class="fa-regular fa-calendar mr-1"></i> ${fecha}</div>
+                                </div>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 italic mb-3 bg-slate-50 dark:bg-[#1a1b1e] p-2 rounded-lg border-l-2 border-brand/50">"${ver.descripcion}"</p>
+                                
+                                <button type="button" onclick="abrirModalVisor('${logUrl}', '${rawUrl}', '${ext}', '${codigo}', '${tituloModal}')" class="text-[11px] font-bold text-brand hover:text-white bg-brand/10 hover:bg-brand px-3 py-1.5 rounded-lg border border-transparent transition-all inline-flex items-center">
+                                    <i class="fa-solid fa-eye mr-1.5"></i> Ver Archivo
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+                container.classList.remove('items-center', 'justify-center', 'flex-col');
+                container.classList.add('w-full', 'block');
+            } else {
+                container.innerHTML = `<p class="text-xs text-slate-500 bg-white p-3 rounded-xl border">No hay versiones anteriores de este documento.</p>`;
+            }
+        } catch (error) {
+            historyTr.querySelector('.timeline-content').innerHTML = `<p class="text-xs font-bold text-red-500 bg-red-50 p-3 rounded border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Error al cargar historial.</p>`;
+        }
+    };
+
+    // ==========================================
+    // CONTROLADOR DEL MODAL VISOR DE DOCUMENTOS
+    // ==========================================
+    window.abrirModalVisor = function(logUrl, rawUrl, ext, codigo, titulo) {
+        
+        // 1. Ejecutamos la lógica que ya tenías para desbloquear el botón de firmar
+        desbloquearFirma(codigo);
+
+        // 2. Setear los textos y botones del modal
+        document.getElementById('visorTitle').innerText = titulo;
+        document.getElementById('visorCode').innerText = 'Versión vigente | ' + codigo;
+        
+        // 🚀 MAGIA: Armamos el nombre bonito quitando espacios para que la descarga se vea profesional
+        const nombreLimpio = titulo.replace(/[^a-zA-Z0-9-]/g, "_") + "." + ext;
+        
+        const btnHeader = document.getElementById('btnDescargarDoc');
+        const btnWarning = document.getElementById('btnDescargarAlternativo');
+        
+        // Asignamos la URL y forzamos el nombre de descarga
+        btnHeader.href = logUrl;
+        btnHeader.setAttribute("download", nombreLimpio);
+        
+        btnWarning.href = logUrl;
+        btnWarning.setAttribute("download", nombreLimpio);
+        
+        const iframe = document.getElementById('iframeVisor');
+        const warning = document.getElementById('localhostWarning');
+        const loading = document.getElementById('visorLoading');
+        const iconDiv = document.getElementById('visorIconContainer');
+        const iconI = document.getElementById('visorIcon');
+        
+        // Reset de vistas
+        warning.classList.add('hidden');
+        loading.classList.remove('hidden');
+        iframe.classList.add('opacity-0'); // Ocultar iframe mientras carga
+        
+        // 3. Estilizar el icono de la cabecera dinámicamente
+        const officeExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        const imageExts = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        
+        if(ext === 'pdf') {
+            iconDiv.className = "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 bg-red-50 dark:bg-red-500/10";
+            iconI.className = "fa-solid fa-file-pdf text-lg text-red-500";
+        } else if (officeExts.includes(ext)) {
+            iconDiv.className = "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 bg-blue-50 dark:bg-blue-500/10";
+            iconI.className = "fa-solid fa-file-word text-lg text-blue-500";
+        } else if (imageExts.includes(ext)) {
+            iconDiv.className = "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 bg-purple-50 dark:bg-purple-500/10";
+            iconI.className = "fa-solid fa-image text-lg text-purple-500";
+        }
+
+       // 4. LÓGICA DE RENDERIZADO POR EXTENSIÓN
+        if (ext === 'pdf' || imageExts.includes(ext)) {
+            // PDFs e imágenes se renderizan nativamente pasando por el Log de Laravel
+            iframe.src = logUrl; 
+        } else if (officeExts.includes(ext)) {
+            // 🚀 MODO ENTERPRISE: Petición dinámica a través de Nginx
+            const pythonPreviewUrl = `http://${window.IP_SERVIDOR_PROFE}:${window.APP_PORT}/api/docs/preview?url_archivo=` + encodeURIComponent(rawUrl);
+            iframe.src = pythonPreviewUrl;
+            
+            // Ocultamos la advertencia amarilla (ya no la necesitamos)
+            warning.classList.add('hidden');
+            
+            // Hacemos el ping silencioso a Laravel para guardar el Log de lectura en Postgres
+            fetch(logUrl, { mode: 'no-cors' }).catch(() => {});
+        } else {
+            // Archivos raros (zip, rar)
+            iframe.src = logUrl;
+        }
+
+        // 5. Animación de carga lista
+        iframe.onload = function() {
+            loading.classList.add('hidden');
+            iframe.classList.remove('opacity-0');
+            iframe.classList.add('transition-opacity', 'duration-500');
+        };
+
+        // Mostrar el modal
+        const modal = document.getElementById('modalVisorDoc');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    };
+
+    window.cerrarModalVisor = function() {
+        const modal = document.getElementById('modalVisorDoc');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        
+        // Limpiar el src mata la reproducción de videos/audios o descargas en loop
+        setTimeout(() => {
+            document.getElementById('iframeVisor').src = 'about:blank';
+        }, 300);
+    };
 
     // ==========================================
     // CONTROLADOR DEL MODAL DE REPORTES
@@ -359,6 +653,35 @@
         }
     });
 
+    // ==========================================
+    // CONTROLADOR DEL MODAL DE METADATOS JSON
+    // ==========================================
+    window.abrirModalMetadatos = function(docData) {
+        // 1. Tomamos los datos y los formateamos con sangría de 4 espacios
+        const jsonString = JSON.stringify(docData, null, 4);
+        
+        // 2. Lo inyectamos en la etiqueta <code>
+        document.getElementById('jsonMetadataContent').textContent = jsonString;
+        
+        // 3. Mostramos el modal
+        const modal = document.getElementById('modalMetadatos');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    };
+
+    window.cerrarModalMetadatos = function() {
+        const modal = document.getElementById('modalMetadatos');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    };
+
+    window.copiarJson = function() {
+        const contenido = document.getElementById('jsonMetadataContent').textContent;
+        navigator.clipboard.writeText(contenido).then(() => {
+            alert("¡JSON copiado al portapapeles!");
+        });
+    };
+
 
     // ==========================================
     // MOTOR DE BÚSQUEDA Y PAGINACIÓN EN TIEMPO REAL
@@ -380,7 +703,7 @@
         const itemsPerPage = 7; 
         let filteredRows = [];
 
-        if (searchInput) searchInput.addEventListener('input', ejecutarFiltroVivo);
+        //if (searchInput) searchInput.addEventListener('input', ejecutarFiltroVivo);
 
         // ==========================================
         // NUEVO MOTOR DE FILTROS Y ETIQUETAS (Popover)
@@ -475,33 +798,27 @@
         // ==========================================
 
         // 1. Fase de Filtrado (Calcula quiénes sobreviven al filtro)
+        // 1. Fase de Filtrado (Calcula quiénes sobreviven al filtro de ETIQUETAS)
         function ejecutarFiltroVivo() {
-            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-            filteredRows = []; // Vaciamos la lista de resultados
+            document.querySelectorAll('.historial-row').forEach(row => row.remove());
+            filteredRows = []; 
 
             rows.forEach(row => {
-                const title = row.dataset.title;
-                const code = row.dataset.code;
                 const tagsRaw = row.dataset.tags;
                 const rowTags = tagsRaw ? tagsRaw.split(',') : [];
 
-                const matchesSearch = searchTerm === '' ? true : (
-                    title.includes(searchTerm) || 
-                    code.includes(searchTerm) || 
-                    (tagsRaw && tagsRaw.includes(searchTerm))
-                );
-                
-                // 🚀 LÓGICA 'AND' (.every)
+                // 🚀 FIX: Python ya hizo el trabajo pesado del texto. 
+                // Aquí SOLO filtramos si el usuario seleccionó etiquetas en el Popover.
                 let matchesTags = true;
                 if (selectedTags.size > 0) {
                     matchesTags = Array.from(selectedTags).every(selectedTag => rowTags.includes(selectedTag));
                 }
 
-                if (matchesSearch && matchesTags) {
+                if (matchesTags) {
                     filteredRows.push(row);
                 }
                 
-                // Ocultamos todas por defecto
+                // Ocultamos todas por defecto antes de paginar
                 row.style.display = 'none';
             });
 

@@ -1,4 +1,5 @@
 @model QualityDoc.API.Models.DocumentApproval
+@inject IConfiguration Configuration
 
 @{
     ViewData["Title"] = "Evaluar Documento";
@@ -36,24 +37,52 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <div class="lg:col-span-2 bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] overflow-hidden flex flex-col transition-colors duration-300">
+         <div class="lg:col-span-2 bg-white dark:bg-[#323338] shadow-sm rounded-2xl border border-slate-200 dark:border-[#4a4b50] overflow-hidden flex flex-col transition-colors duration-300">
             <div class="px-5 py-4 bg-slate-50 dark:bg-[#2a2b2e] border-b border-slate-200 dark:border-[#4a4b50] flex justify-between items-center transition-colors">
                 <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-eye mr-2"></i> Vista Previa del Documento</span>
-                <a href="/admin@(Model.DocumentVersion?.FilePath)" target="_blank" class="text-brand dark:text-brand-light hover:text-brand-hover text-xs font-bold flex items-center transition-colors">
+                <a href="@Model.DocumentVersion?.FilePath" target="_blank" class="text-brand dark:text-brand-light hover:text-brand-hover text-xs font-bold flex items-center transition-colors">
                     Abrir en otra pestaña <i class="fa-solid fa-arrow-up-right-from-square ml-1.5"></i>
                 </a>
             </div>
-            <div class="w-full h-[600px] md:h-[700px] bg-slate-100 dark:bg-[#1a1b1e] relative">
+            <div class="w-full h-[600px] md:h-[700px] bg-slate-100 dark:bg-[#1a1b1e] relative overflow-hidden">
                 @if (string.IsNullOrEmpty(Model.DocumentVersion?.FilePath))
                 {
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
                         <i class="fa-solid fa-file-circle-xmark text-4xl mb-3"></i>
-                        <p class="font-bold">No se encontró el archivo PDF.</p>
+                        <p class="font-bold">No se encontró el archivo anexo.</p>
                     </div>
                 }
                 else
                 {
-                    <iframe src="/admin@(Model.DocumentVersion?.FilePath)" class="w-full h-full border-0"></iframe>
+                    // 🚀 LÓGICA RAZOR: Detectamos el tipo de archivo
+                    var filePath = Model.DocumentVersion.FilePath;
+                    var ext = System.IO.Path.GetExtension(filePath)?.ToLower() ?? "";
+                    var officeExts = new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" };
+                    bool isOfficeDoc = officeExts.Contains(ext);
+
+                    if (isOfficeDoc)
+        {
+            // 🚀 DOBLE INYECCIÓN DINÁMICA DE PRODUCCIÓN:
+            // 1. Extraemos la IP y el Puerto desde la memoria del contenedor (.env maestro)
+            string ipServidor = Configuration["IP_DEL_SERVIDOR_DEL_PROFE"] ?? "127.0.0.1";
+            string puertoApp = Configuration["APP_PORT"] ?? "80"; // Si no se define, por defecto es el 80
+            
+            // 2. Armamos la URL apuntando al enrutamiento público a través del Proxy de Nginx
+            // En producción, el tráfico entra por el puerto del proxy y Nginx redirige internamente a FastAPI.
+            string pythonPreviewUrl = $"http://{ipServidor}:{puertoApp}/api/docs/preview?url_archivo={Uri.EscapeDataString(filePath)}";
+
+            <div id="officeLoading" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-100/90 dark:bg-[#1a1b1e]/90 backdrop-blur-sm">
+                <i class="fa-solid fa-file-export fa-bounce text-4xl text-brand mb-4"></i>
+                <span class="text-slate-600 dark:text-slate-300 font-bold text-sm">Generando previsualización segura...</span>
+                <span class="text-slate-400 text-xs mt-1">Conectando con el microservicio de conversión.</span>
+            </div>
+            
+            <iframe src="@pythonPreviewUrl" class="w-full h-full border-0 relative z-20 opacity-0 transition-opacity duration-500" onload="document.getElementById('officeLoading').style.display='none'; this.classList.remove('opacity-0');"></iframe>
+        }
+        else
+        {
+            <iframe src="@filePath" class="w-full h-full border-0 relative z-20"></iframe>
+        }
                 }
             </div>
         </div>

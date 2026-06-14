@@ -390,4 +390,28 @@ class DashboardController extends Controller
             return response()->json(['success' => false, 'message' => 'Error crítico de red: ' . $e->getMessage()]);
         }
     }
+
+    // =========================================================
+    // 🚀 7. OBTENER HISTORIAL DE VERSIONES (Puente a C#)
+    // =========================================================
+    public function historialDocumento($codigo)
+    {
+        try {
+            // Reemplaza 'dotnet-app' por el nombre de tu contenedor de C#
+            $csharpApiUrl = env('CSHARP_API_URL', 'http://dotnet-app:8080'); 
+            
+            $response = Http::timeout(5)->get("{$csharpApiUrl}/api/documents/{$codigo}/history");
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true, 
+                    'data' => $response->json()
+                ]);
+            }
+            
+            return response()->json(['success' => false, 'message' => 'C# rechazó la petición.']);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error de conexión con C#']);
+        }
+    }
 }
