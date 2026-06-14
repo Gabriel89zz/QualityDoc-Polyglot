@@ -29,10 +29,8 @@ client = AsyncIOMotorClient(MONGO_URL)
 db = client.qualitydoc_metadata
 coleccion_docs = db.documentos_aprobados
 
-# 🚀 NUEVO: Evento de arranque para crear el Índice de Texto Completo
 @app.on_event("startup")
 async def startup_db_client():
-    # Esto le dice a Mongo que prepare estos campos para búsquedas súper rápidas
     await coleccion_docs.create_index([
         ("contenido_texto", pymongo.TEXT),
         ("titulo", pymongo.TEXT),
@@ -41,7 +39,7 @@ async def startup_db_client():
     print("Índice de Full-Text Search creado exitosamente.")
 
 # ==========================================
-# 2. DEFINICIÓN DEL MOLDE (Pydantic)
+# 2. DEFINICIÓN DEL MOLDE
 # ==========================================
 class DocumentoAprobado(BaseModel):
     documento_id: int 
@@ -53,18 +51,42 @@ class DocumentoAprobado(BaseModel):
     aprobado_por: str
     empresa_id: int
     departamento_id: int
-    archivo_fisico: str = "" # 🚀 NUEVO: Recibe el nombre del archivo desde C#
+    archivo_fisico: str = "" 
 
 # ==========================================
 # 🚀 3. FUNCIONES HELPER
 # ==========================================
+def limpiar_ruta_archivo(ruta_cruda: str) -> str:
+    """
+    Toma cualquier cosa que envíe C# (URL, path absoluto, etc.) y extrae 
+    exactamente lo que sigue después de 'uploads/' para buscar en Docker.
+    """
+    if not ruta_cruda: return ""
+    
+    # Buscamos la palabra clave "uploads" para cortar el string
+    if "uploads/" in ruta_cruda:
+        ruta_relativa = ruta_cruda.split("uploads/")[-1]
+    elif "uploads\\" in ruta_cruda:
+        ruta_relativa = ruta_cruda.split("uploads\\")[-1]
+    else:
+        # Plan B de contingencia: agarramos solo el nombre del archivo
+        ruta_relativa = os.path.basename(ruta_cruda.replace("\\", "/"))
+        
+    # Quitamos slash inicial si quedó
+    if ruta_relativa.startswith("/"):
+        ruta_relativa = ruta_relativa[1:]
+        
+    # Armamos la ruta perfecta para el volumen de Docker
+    return os.path.join("/shared_uploads", ruta_relativa)
+
+
 def extraer_texto(nombre_archivo: str) -> str:
     """Lee el archivo físico compartido por Docker y extrae el texto puro."""
     if not nombre_archivo:
         return ""
         
-    # /shared_uploads es el volumen que configuramos en docker-compose
-    ruta_completa = os.path.join("/shared_uploads", nombre_archivo)
+    # 🚀 FIX: Limpiamos la ruta antes de buscar
+    ruta_completa = limpiar_ruta_archivo(nombre_archivo)
     
     if not os.path.exists(ruta_completa):
         print(f"Advertencia: No se encontró el archivo físico en {ruta_completa}")
@@ -72,32 +94,28 @@ def extraer_texto(nombre_archivo: str) -> str:
 
     texto = ""
     try:
-        if nombre_archivo.lower().endswith('.pdf'):
+        if ruta_completa.lower().endswith('.pdf'):
             doc = fitz.open(ruta_completa)
             for pagina in doc:
                 texto += pagina.get_text() + " "
-        elif nombre_archivo.lower().endswith('.docx'):
+        elif ruta_completa.lower().endswith(('.docx', '.doc')):
             doc_word = docx.Document(ruta_completa)
             texto = " ".join([parrafo.text for parrafo in doc_word.paragraphs])
     except Exception as e:
         print(f"Error extrayendo texto de {nombre_archivo}: {str(e)}")
         
-    # Limpiamos saltos de línea excesivos para no ensuciar Mongo
     return re.sub(r'\s+', ' ', texto).strip()
 
 def generar_snippet(texto_completo: str, query: str) -> str:
-    """Busca la palabra en el texto gigante y devuelve solo un pedacito formateado para UI."""
     if not texto_completo or not query:
         return "Coincidencia en metadatos."
         
-    # Buscamos la palabra ignorando mayúsculas/minúsculas
     match = re.search(re.escape(query), texto_completo, re.IGNORECASE)
     if match:
-        inicio = max(0, match.start() - 60) # 60 letras antes
-        fin = min(len(texto_completo), match.end() + 60) # 60 letras después
+        inicio = max(0, match.start() - 60)
+        fin = min(len(texto_completo), match.end() + 60)
         
         fragmento = texto_completo[inicio:fin]
-        # Envolvemos la coincidencia exacta en HTML (Tailwind) para PHP
         resaltado = re.sub(
             re.escape(query), 
             f"<mark class='bg-amber-200 text-amber-900 font-bold px-1 rounded'>{match.group(0)}</mark>", 
@@ -121,11 +139,10 @@ async def indexar_documento(doc: DocumentoAprobado):
         doc_dict = doc.model_dump()
         doc_dict["fecha_indexacion"] = datetime.utcnow()
         
-        # 🚀 1. Ejecutamos la extracción de texto pesada
+        # 🚀 La extracción pesada ahora usa rutas limpias
         texto_extraido = extraer_texto(doc.archivo_fisico)
         doc_dict["contenido_texto"] = texto_extraido
         
-        # 2. Guardamos en MongoDB
         resultado = await coleccion_docs.replace_one(
             {"documento_id": doc.documento_id}, 
             doc_dict,                           
@@ -134,11 +151,11 @@ async def indexar_documento(doc: DocumentoAprobado):
         
         return {
             "success": True,
-            "message": "Documento y texto interno indexados con éxito en MongoDB"
+            "message": "Documento y texto interno indexados con éxito en MongoDB",
+            "bytes_extraidos": len(texto_extraido) # Para debug visual
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al guardar en Mongo: {str(e)}")
-    
 
 @app.get("/api/docs/approved")
 async def obtener_documentos_aprobados(empresa_id: int = None, departamento_id: int = None, q: str = None):
@@ -151,18 +168,14 @@ async def obtener_documentos_aprobados(empresa_id: int = None, departamento_id: 
             filtro["departamento_id"] = departamento_id
 
         if q:
-            # 🚀 Usamos el índice de Full-Text Search de Mongo (Es rapidísimo)
             filtro["$text"] = {"$search": q}
 
-        # Traemos los documentos (EXCLUYENDO el contenido gigante para no trabar la red hacia PHP)
-        # Traemos los documentos (EXCLUYENDO el contenido gigante para no trabar la red hacia PHP)
         cursor = coleccion_docs.find(filtro, {"_id": 0, "contenido_texto": 1, "titulo": 1, "codigo": 1, "version": 1, "etiquetas": 1, "aprobado_por": 1, "url_archivo": 1})
         documentos = await cursor.to_list(length=2000)
         
-        # 🚀 Procesamos los resultados para agregarles el "Snippet" elegante a cada uno
         resultados_finales = []
         for d in documentos:
-            texto_interno = d.pop("contenido_texto", "") # Lo sacamos del dict para no enviarlo completo
+            texto_interno = d.pop("contenido_texto", "") 
             
             if q:
                 d["snippet"] = generar_snippet(texto_interno, q)
@@ -178,7 +191,7 @@ async def obtener_documentos_aprobados(empresa_id: int = None, departamento_id: 
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al buscar en Mongo: {str(e)}")
-    
+
 @app.delete("/api/docs/index/{doc_id}")
 async def eliminar_documento(doc_id: int):
     try:
@@ -189,83 +202,63 @@ async def eliminar_documento(doc_id: int):
             return {"success": True, "message": f"El documento {doc_id} no estaba indexado."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al eliminar en Mongo: {str(e)}")
-    
 
-# 🚀 7. NUEVA RUTA GET: CONVERSIÓN DE OFFICE A PDF ON-THE-FLY
+# 🚀 7. RUTA CORREGIDA: CONVERSIÓN DE OFFICE A PDF ON-THE-FLY
 @app.get("/api/docs/preview")
 async def previsualizar_documento(url_archivo: str):
     try:
-        # 1. Limpiamos la ruta igual que en C# para que empate con el volumen de Docker
-        ruta_limpia = url_archivo.replace("/uploads/", "").replace("\\uploads\\", "")
-        if ruta_limpia.startswith("/"):
-            ruta_limpia = ruta_limpia[1:]
-            
-        ruta_completa = os.path.join("/shared_uploads", ruta_limpia)
+        # 🚀 FIX: Usamos la función maestra para destruir el HTTP y encontrar el archivo
+        ruta_completa = limpiar_ruta_archivo(url_archivo)
         
         if not os.path.exists(ruta_completa):
-            raise HTTPException(status_code=404, detail="Archivo físico no encontrado en el servidor")
+            raise HTTPException(status_code=404, detail=f"Archivo físico no encontrado en volumen: {ruta_completa}")
 
         ext = ruta_completa.split('.')[-1].lower()
         office_exts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']
 
         if ext in office_exts:
-            # 2. Magia Negra: Usamos LibreOffice de Linux para convertir a PDF y guardarlo en la carpeta temporal /tmp
             comando = [
                 "libreoffice", "--headless", "--convert-to", "pdf",
                 ruta_completa, "--outdir", "/tmp"
             ]
             subprocess.run(comando, check=True)
             
-            # 3. Calculamos el nombre del nuevo PDF generado
             nombre_base = os.path.basename(ruta_completa)
             nombre_pdf = os.path.splitext(nombre_base)[0] + ".pdf"
             ruta_pdf = os.path.join("/tmp", nombre_pdf)
             
-            # 4. Devolvemos el PDF directo al navegador para que lo pinte el iframe
             return FileResponse(ruta_pdf, media_type="application/pdf")
         
-        # Si mandan otra cosa por error, devolvemos el archivo original
         return FileResponse(ruta_completa)
         
+    except subprocess.CalledProcessError as sub_e:
+         raise HTTPException(status_code=500, detail="Fallo interno de LibreOffice al convertir documento.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al convertir documento: {str(e)}")
-    
+        raise HTTPException(status_code=500, detail=f"Error al procesar documento: {str(e)}")
 
-# 🚀 8. NUEVA RUTA POST: CONVERSIÓN DE OFFICE AL VUELO DESDE EL CLIENTE (UPLOAD)
 @app.post("/api/docs/preview-upload")
 async def previsualizar_upload(file: UploadFile = File(...)):
     try:
         ext = file.filename.split('.')[-1].lower()
         office_exts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']
         
-        # 1. Generamos un nombre temporal único para no chocar con otros archivos
         temp_id = str(uuid.uuid4())
         ruta_temp = f"/tmp/{temp_id}_{file.filename}"
         
-        # 2. Guardamos el archivo físico temporalmente en el contenedor de Linux
         with open(ruta_temp, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
-        # 3. Si es de Office, lo convertimos a PDF
         if ext in office_exts:
             comando = ["libreoffice", "--headless", "--convert-to", "pdf", ruta_temp, "--outdir", "/tmp"]
-            import subprocess
             subprocess.run(comando, check=True)
             
-            # Armamos la ruta del nuevo PDF
-            import os
             nombre_base = os.path.basename(ruta_temp)
             nombre_pdf = os.path.splitext(nombre_base)[0] + ".pdf"
             ruta_pdf = os.path.join("/tmp", nombre_pdf)
             
-            # Devolvemos el PDF al navegador
-            from fastapi.responses import FileResponse
             return FileResponse(ruta_pdf, media_type="application/pdf")
             
-        # Si no es de office, devolvemos el archivo tal cual
-        from fastapi.responses import FileResponse
         return FileResponse(ruta_temp)
         
     except Exception as e:
-        from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"Error al convertir upload temporal: {str(e)}")
