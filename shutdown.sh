@@ -25,16 +25,16 @@ echo -e "${YELLOW} 🛑 DETENIENDO ORQUESTACIÓN DE MICROSERVICIOS ${NC}"
 echo -e "${BLUE}=========================================================${NC}\n"
 
 echo -e "${CYAN}   -> Deteniendo Módulo Enrutador (Nginx Proxy)...${NC}"
-sudo docker compose -f proxy/docker-compose.prod.yml down
+sudo docker compose -f proxy/docker-compose.proxy.yml down
 
 echo -e "${CYAN}   -> Deteniendo Módulo de Auditoría (PostgreSQL + Laravel)...${NC}"
-sudo docker compose -f audit/docker-compose.prod.yml down
+sudo docker compose -f audit/docker-compose.audit.yml down
 
 echo -e "${CYAN}   -> Deteniendo Módulo de Búsqueda (MongoDB + FastAPI)...${NC}"
-sudo docker compose -f search/docker-compose.prod.yml down
+sudo docker compose -f search/docker-compose.search.yml down
 
 echo -e "${CYAN}   -> Deteniendo Módulo de Administración (SQL Server + C#)...${NC}"
-sudo docker compose -f admin/docker-compose.prod.yml down
+sudo docker compose -f admin/docker-compose.admin.yml down
 
 echo -e "\n${BLUE}=========================================================${NC}"
 echo -e "${GREEN} ✅ ¡SISTEMA APAGADO DE FORMA SEGURA! ${NC}"
