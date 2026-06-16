@@ -1,55 +1,69 @@
 # 🚀 QualityDoc-Polyglot
 ---
 
-## 📑 Índice
+# 📑 Índice
 
-1. [Visión General](#-visión-general)
-2. [Guía de Instalación y Despliegue](#-guía-de-instalación-y-despliegue)
-   - [Paso 1: Clonar el Repositorio](#-paso-1-clonar-el-repositorio)
-   - [Paso 2: Crear el Archivo de Entorno Global](#-paso-2-crear-el-archivo-de-entorno-global)
-   - [Paso 3: Configurar las Variables de Entorno](#️-paso-3-configurar-las-variables-de-entorno)
-   - [Paso 4: Ejecutar el Despliegue Automático](#-paso-4-ejecutar-el-despliegue-automático)
-3. [Arquitectura Desplegada](#-arquitectura-desplegada)
-4. [Accesos al Sistema](#-accesos-al-sistema)
-5. [Verificación del Estado de los Contenedores](#-verificación-del-estado-de-los-contenedores)
-6. [Detener el Sistema](#-detener-el-sistema)
-7. [Actualizar el Proyecto](#-actualizar-el-proyecto)
-8. [Tecnologías Utilizadas](#-tecnologías-utilizadas)
-9. [Equipo de Desarrollo](#-equipo-de-desarrollo)
-10. [Arquitectura del Sistema](#-arquitectura-del-sistema)
-11. [Gateway Centralizado](#-gateway-centralizado)
-12. [Portal Administrativo (.NET)](#-portal-administrativo-net)
-13. [Portal Operador (Laravel)](#-portal-operador-laravel)
-14. [Motor de Búsqueda (FastAPI)](#-motor-de-búsqueda-fastapi)
-15. [Estrategia de Persistencia Políglota](#-estrategia-de-persistencia-políglota)
-16. [Seguridad](#-seguridad)
-17. [Infraestructura Docker](#-infraestructura-docker)
-18. [Beneficios de la Arquitectura](#-beneficios-de-la-arquitectura)
-19. [Historias de Usuario](#-historias-de-usuario)
-    - [Super Admin](#-super-admin)
-    - [Administrador de Empresa](#-administrador-de-empresa)
-    - [Creador de Documentos](#-creador-de-documentos)
-    - [Revisor y Aprobador](#-revisor-y-aprobador)
-    - [Operario](#-operario)
-    - [Auditor](#-auditor)
-    - [Historias Transversales](#-historias-de-usuario-transversales)
-20. [Especificación de Requerimientos](#-especificación-de-requerimientos)
-    - [Requerimientos Funcionales (RF-01 a RF-10)](#-requerimientos-funcionales)
-    - [Requerimientos No Funcionales (RNF-01 a RNF-07)](#-requerimientos-no-funcionales)
-21. [Modelado de Datos y Diagramas](#-modelado-de-datos-y-diagramas)
-    - [Diagrama Entidad-Relación (SQL Server)](#-diagrama-entidad-relacion-sql-server)
-    - [Modelo Relacional (PostgreSQL)](#-modelo-relacional-postgresql)
-    - [Esquema de Colecciones (MongoDB)](#-esquema-de-colecciones-mongodb)
-    - [Diccionario de Datos](#-diccionario-de-datos)
-    - [Diagrama de Casos de Uso](#-diagrama-de-casos-de-uso)
-    - [Diagrama de Clases (.NET)](#-diagrama-de-clases-net)
-    - [Diagrama de Secuencia (Flujo de Aprobación)](#-diagrama-de-secuencia-flujo-de-carga-y-aprobación-de-un-documento)
-    - [Diagrama de Despliegue (Contenedores)](#-diagrama-de-despliegue-arquitectura-de-contenedores)
-22. [Documentación Adicional](#-documentación-adicional)
+- [📖 Descripción General del Proyecto](#-descripción-general-del-proyecto)
+- [🏛️ Arquitectura General](#️-arquitectura-del-sistema)
+  - [🔧 Gateway Centralizado](#-gateway-centralizado)
+  - [🔷 Portal Administrativo (.NET)](#-portal-administrativo-net)
+  - [🟢 Portal Operador (Laravel)](#-portal-operador-laravel)
+  - [🟡 Motor de Búsqueda (FastAPI)](#-motor-de-búsqueda-fastapi)
+  - [🗄️ Estrategia de Persistencia Políglota](#️-estrategia-de-persistencia-políglota)
+
+- [🚀 Instalación y Despliegue](#-guía-de-instalación-y-despliegue)
+  - [📥 Clonar el Repositorio](#-paso-1-clonar-el-repositorio)
+  - [📄 Configuración del Archivo .env](#-paso-2-crear-el-archivo-de-entorno-global)
+  - [⚙️ Configuración de Variables de Entorno](#️-paso-3-configurar-las-variables-de-entorno)
+  - [🚀 Ejecución del Sistema](#-paso-4-ejecutar-el-despliegue-automático)
+  - [🌐 Accesos al Sistema](#-accesos-al-sistema)
+  - [🔍 Verificación del Estado de los Contenedores](#-verificación-del-estado-de-los-contenedores)
+  - [🛑 Detener el Sistema](#-detener-el-sistema)
+  - [🔄 Actualizar el Proyecto](#-actualizar-el-proyecto)
+
+- [👥 Roles del Sistema](#-resumen-de-roles)
+
+- [📋 Historias de Usuario](#-historias-de-usuario)
+  - [🛡️ Super Admin](#-super-admin)
+  - [🏢 Admin de Empresa](#-administrador-de-empresa)
+  - [📝 Creador de Documentos](#-creador-de-documentos)
+  - [✅ Revisor y Aprobador](#-revisor-y-aprobador)
+  - [👷 Operario](#-operario)
+  - [🔍 Auditor](#-auditor)
+  - [🌐 Historias Transversales](#-historias-de-usuario-transversales)
+
+- [📌 Requerimientos Funcionales](#-requerimientos-funcionales)
+- [⚙️ Requerimientos No Funcionales](#-requerimientos-no-funcionales)
+
+- [🗄️ Diseño de Base de Datos](#️-especificación-de-requerimientos)
+  - [📊 Modelo Entidad-Relación (SQL Server)](#diagrama-entidad-relacion-sql-server)
+  - [🐘 Modelo Relacional (PostgreSQL)](#-modelo-relacional-postgresql)
+  - [🍃 Esquema de Colecciones (MongoDB)](#-esquema-de-colecciones-mongodb)
+  - [📖 Diccionario de Datos](#-diccionario-de-datos)
+  - [📈 Resumen de Índices (SQL Server)](#resumen-de-índices-sql-server)
+
+- [📐 Diagramas UML y de Flujo](#diagrama-de-casos-de-uso--qualitydoc-polyglot)
+  - [👥 Diagrama de Casos de Uso](#diagrama-de-casos-de-uso--qualitydoc-polyglot)
+  - [🏗️ Diagrama de Clases (.NET)](#️-diagrama-de-clases-net)
+  - [🔄 Diagrama de Secuencia](#-diagrama-de-secuencia)
+  - [🐳 Diagrama de Despliegue](#-diagrama-de-despliegue--arquitectura-de-contenedores)
+
+- [🔐 Seguridad](#-seguridad)
+  - [🔑 Autenticación y JWT Compartido](#jwt-compartido)
+  - [🛡️ Control de Acceso Basado en Roles (RBAC)](#-control-de-acceso-basado-en-roles-rbac)
+  - [🔒 Endurecimiento de Seguridad](#endurecimiento-de-seguridad)
+
+- [🐳 Infraestructura Docker](#-infraestructura-docker)
+  - [📦 Inventario de Contenedores](#inventario-de-contenedores)
+  - [🗺️ Rutas de Nginx](#rutas-de-nginx-enrutamiento-del-gateway)
+  - [💾 Volúmenes Compartidos](#volúmenes-compartidos)
+
+- [🧪 Tecnologías Utilizadas](#-tecnologías-utilizadas)
+- [👨‍💻 Autor](#-equipo-de-desarrollo)
 
 ---
 
-## Visión General
+### 📖 Descripción General del Proyecto
 QualityDoc-Polyglot es una plataforma de gestión documental y cumplimiento normativo basada en una arquitectura de microservicios políglota (Polyglot Microservices Architecture).
 
 La solución utiliza múltiples tecnologías especializadas para aprovechar las fortalezas de cada ecosistema:
@@ -62,7 +76,7 @@ La solución utiliza múltiples tecnologías especializadas para aprovechar las 
 
 ---
 
-# 📋 Guía de Instalación y Despliegue
+### 📋 Guía de Instalación y Despliegue
 
 Sigue los pasos descritos a continuación para clonar, configurar y desplegar toda la infraestructura de **QualityDoc-Polyglot** de forma automatizada.
 
@@ -283,13 +297,6 @@ bash deploy.sh
 * Nginx
 * JWT Authentication
 
----
-
-# 👨‍💻 Equipo de Desarrollo
-
-**QualityDoc-Polyglot**
-
-Proyecto académico orientado a la gestión documental, auditoría y búsqueda inteligente mediante una arquitectura moderna basada en microservicios.
 
 ---
 
@@ -2433,7 +2440,13 @@ graph TB
 | **SSO entre portales** | PHP Laravel llama directamente a `dotnet_mvc_prod:8080` para validar el JWT y establecer la sesión del operario.   |
 
 
+---
 
+# 👨‍💻 Equipo de Desarrollo
+
+**QualityDoc-Polyglot**
+
+Hector Gabriel Torres Arzola y Jesus Alberto Sandoval Peña
 
 ---
 
