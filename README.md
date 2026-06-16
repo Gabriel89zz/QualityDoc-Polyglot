@@ -1192,7 +1192,7 @@ Cada documento almacenado en la colección posee una estructura similar a la sig
   "empresa_id": 3,
   "departamento_id": 7,
   "fecha_indexacion": "2026-06-16T10:30:00Z",
-  "🚀 contenido_texto": "Este es todo el contenido gigante extraído del archivo físico por el microservicio de Python. Aquí vendrá toda la información del documento, incluyendo las cláusulas de calidad, objetivos, políticas y normativas ISO aplicadas. Al estar almacenado en esta clave, el índice de texto completo de MongoDB ($text) podrá escanear estas palabras de forma masiva y súper rápida cuando el operador haga búsquedas desde el portal de Laravel."
+  "contenido_texto": "Este es todo el contenido gigante extraído del archivo físico por el microservicio de Python. Aquí vendrá toda la información del documento, incluyendo las cláusulas de calidad, objetivos, políticas y normativas ISO aplicadas. Al estar almacenado en esta clave, el índice de texto completo de MongoDB ($text) podrá escanear estas palabras de forma masiva y súper rápida cuando el operador haga búsquedas desde el portal de Laravel."
 }
 ```
 
