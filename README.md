@@ -464,6 +464,1363 @@ Beneficios:
 * Posibilidad de evolucionar cada componente de forma independiente.
 
 ---
+# 👥 Historias de Usuario
+
+Las siguientes historias de usuario describen los requerimientos funcionales del sistema **QualityDoc-Polyglot**, organizados por rol dentro de la plataforma.
+
+---
+
+# 🔴 Super Admin
+
+El Super Administrador tiene visibilidad global sobre toda la plataforma SaaS y es responsable de la administración multiempresa.
+
+| ID    | Historia de Usuario                                                                                                                                                                 |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SA-01 | Como **Super Admin**, quiero registrar nuevas empresas (tenants) en el sistema para gestionar múltiples clientes de forma aislada.                                                  |
+| SA-02 | Como **Super Admin**, quiero visualizar métricas globales del sistema (empresas registradas, usuarios activos y normativas configuradas) para monitorear la salud de la plataforma. |
+| SA-03 | Como **Super Admin**, quiero administrar las normas de cumplimiento (ISO 9001, IATF 16949, ISO 14001, etc.) para configurar los estándares disponibles para cada empresa.           |
+
+---
+
+# 🟠 Administrador de Empresa
+
+El Administrador de Empresa gestiona la estructura organizacional y documental de su organización.
+
+| ID    | Historia de Usuario                                                                                                                                                                   |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AE-01 | Como **Administrador de Empresa**, quiero crear y administrar departamentos para representar la estructura organizacional de la empresa.                                              |
+| AE-02 | Como **Administrador de Empresa**, quiero registrar y gestionar usuarios asignando roles y departamentos para controlar el acceso al sistema.                                         |
+| AE-03 | Como **Administrador de Empresa**, quiero configurar categorías documentales basadas en la estructura ISO de la organización para mantener el orden documental.                       |
+| AE-04 | Como **Administrador de Empresa**, quiero visualizar indicadores clave (documentos aprobados, flujos activos, borradores y documentos vencidos) para monitorear el estado documental. |
+
+---
+
+# 🔵 Creador de Documentos
+
+Responsable de la elaboración y actualización de documentación controlada.
+
+| ID    | Historia de Usuario                                                                                                                               |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CD-01 | Como **Creador de Documentos**, quiero redactar nuevos documentos y cargar versiones actualizadas para iniciar el flujo de revisión y aprobación. |
+| CD-02 | Como **Creador de Documentos**, quiero visualizar mis borradores pendientes y documentos rechazados para realizar correcciones y reenviarlos.     |
+| CD-03 | Como **Creador de Documentos**, quiero consultar la biblioteca documental vigente para reutilizar formatos y referencias existentes.              |
+
+---
+
+# 🟣 Revisor y Aprobador
+
+Responsable de validar técnica y normativamente los documentos antes de su publicación.
+
+| ID    | Historia de Usuario                                                                                                                                                               |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RA-01 | Como **Revisor/Aprobador**, quiero visualizar una bandeja centralizada de documentos pendientes de firma para gestionar mis revisiones de forma eficiente.                        |
+| RA-02 | Como **Revisor/Aprobador**, quiero revisar el contenido PDF, conocer el contexto del documento (departamento, categoría y motivo de cambio) y aprobar o rechazar con comentarios. |
+| RA-03 | Como **Revisor/Aprobador**, quiero consultar mi historial de aprobaciones y rechazos para mantener trazabilidad sobre mis decisiones.                                             |
+
+---
+
+# 🟢 Operario
+
+Usuario final encargado de consultar documentación vigente y evidenciar cumplimiento.
+
+| ID    | Historia de Usuario                                                                                                                        |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| OP-01 | Como **Operario**, quiero consultar el directorio de documentos vigentes para acceder a procedimientos, instructivos y formatos aprobados. |
+| OP-02 | Como **Operario**, quiero firmar acuses de lectura para demostrar que he leído y comprendido la documentación aplicable a mis funciones.   |
+| OP-03 | Como **Operario**, quiero consultar mi historial de firmas y enterados para monitorear mi cumplimiento documental.                         |
+
+---
+
+# 🟡 Auditor
+
+Responsable de verificar el cumplimiento normativo y la trazabilidad de las acciones realizadas en el sistema.
+
+| ID    | Historia de Usuario                                                                                                                                            |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AU-01 | Como **Auditor**, quiero revisar los registros de acceso, aprobaciones y firmas de enterado para verificar el cumplimiento de los procedimientos establecidos. |
+| AU-02 | Como **Auditor**, quiero consultar evidencias históricas de cambios documentales para realizar auditorías internas y externas.                                 |
+
+---
+
+# 🌐 Historias de Usuario Transversales
+
+Estas funcionalidades están disponibles para múltiples roles dentro del sistema.
+
+## 🔎 Gestión y Consulta Documental
+
+| ID    | Historia de Usuario                                                                                                                                  |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TR-01 | Como **usuario del sistema**, quiero buscar documentos por texto, código, categoría o etiquetas para encontrar rápidamente la información requerida. |
+| TR-02 | Como **usuario del sistema**, quiero visualizar documentos vigentes desde cualquier dispositivo para facilitar el acceso a la información.           |
+
+---
+
+## 🔐 Seguridad y Acceso
+
+| ID    | Historia de Usuario                                                                                                            |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------ |
+| TR-03 | Como **usuario**, quiero iniciar sesión mediante correo electrónico y contraseña para acceder de forma segura a la plataforma. |
+| TR-04 | Como **usuario**, quiero habilitar autenticación de dos factores (2FA) para aumentar la seguridad de mi cuenta.                |
+| TR-05 | Como **usuario**, quiero cerrar sesión de forma segura para proteger mi información.                                           |
+
+---
+
+## 📧 Recuperación de Cuenta
+
+| ID    | Historia de Usuario                                                                                                                           |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| TR-06 | Como **usuario**, quiero restablecer mi contraseña mediante correo electrónico en caso de olvidarla para recuperar el acceso a la plataforma. |
+
+---
+
+## 🏢 Registro de Empresas
+
+| ID    | Historia de Usuario                                                                                                                                                                   |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TR-07 | Como **representante de una empresa**, quiero registrar una nueva organización proporcionando datos fiscales y datos del administrador principal para comenzar a utilizar el sistema. |
+
+---
+
+# 📊 Resumen de Roles
+
+| Rol                      | Responsabilidad Principal                   |
+| ------------------------ | ------------------------------------------- |
+| 🔴 Super Admin           | Administración global de la plataforma SaaS |
+| 🟠 Admin de Empresa      | Gestión organizacional y documental         |
+| 🔵 Creador de Documentos | Elaboración y actualización documental      |
+| 🟣 Revisor/Aprobador     | Validación y aprobación documental          |
+| 🟢 Operario              | Consulta documental y cumplimiento          |
+| 🟡 Auditor               | Verificación y trazabilidad del sistema     |
+
+---
+
+# 📋 Especificación de Requerimientos
+
+Esta sección describe los requerimientos funcionales y no funcionales que definen el comportamiento esperado de la plataforma **QualityDoc-Polyglot**.
+
+---
+
+# ⚙️ Requerimientos Funcionales
+
+Los requerimientos funcionales describen las capacidades y servicios que el sistema debe proporcionar a sus usuarios.
+
+---
+
+## RF-01: Gestión de Empresas (Multi-Tenancy)
+
+### Descripción
+
+El sistema debe permitir la administración completa de empresas (tenants) dentro de la plataforma SaaS.
+
+### Funcionalidades
+
+* Registrar nuevas empresas.
+* Editar información de empresas existentes.
+* Deshabilitar empresas temporalmente.
+* Reactivar empresas deshabilitadas.
+* Preservar la integridad de todos los datos asociados.
+
+### Reglas de Negocio
+
+* Funcionalidad exclusiva para el rol **Super Admin**.
+* El aislamiento de información se realiza mediante el identificador `company_id`.
+* La desactivación se realiza mediante procedimientos almacenados especializados.
+
+### Beneficio
+
+Permite operar múltiples organizaciones dentro de una única instancia del sistema manteniendo aislamiento lógico de datos.
+
+---
+
+## RF-02: Gestión de Departamentos
+
+### Descripción
+
+Permite administrar la estructura organizacional de cada empresa.
+
+### Funcionalidades
+
+* Crear departamentos.
+* Consultar departamentos.
+* Editar departamentos.
+* Desactivar departamentos.
+
+### Reglas de Negocio
+
+* Cada departamento pertenece a una única empresa.
+* Los nombres deben ser únicos dentro de la misma organización.
+
+### Beneficio
+
+Facilita la clasificación y distribución de responsabilidades documentales.
+
+---
+
+## RF-03: Gestión de Usuarios
+
+### Descripción
+
+Permite administrar el personal registrado dentro de cada organización.
+
+### Funcionalidades
+
+* Crear usuarios.
+* Editar usuarios.
+* Desactivar usuarios (Soft Delete).
+* Asignar roles.
+* Asignar departamentos.
+
+### Automatizaciones
+
+Al registrar un usuario:
+
+1. Se genera un token de configuración.
+2. Se envía un correo electrónico de bienvenida.
+3. Se habilita un enlace de activación válido por 72 horas.
+
+### Beneficio
+
+Garantiza una incorporación controlada y segura de nuevos usuarios.
+
+---
+
+## RF-04: Autenticación y Single Sign-On (SSO)
+
+### Descripción
+
+Gestiona la autenticación centralizada y la integración entre portales.
+
+### Funcionalidades
+
+* Inicio de sesión con correo y contraseña.
+* Validación mediante BCrypt.
+* Recuperación de contraseña.
+* Autenticación de dos factores (2FA).
+* Single Sign-On entre ASP.NET Core y Laravel.
+
+### Reglas de Seguridad
+
+* Código 2FA de 6 dígitos.
+* Vigencia de 10 minutos.
+* Obligatorio para roles administrativos.
+* Soporte para dispositivos de confianza.
+
+### Beneficio
+
+Aumenta significativamente la seguridad del acceso al sistema.
+
+---
+
+## RF-05: Gestión de Normativas y Estructura ISO
+
+### Descripción
+
+Permite configurar las normas de cumplimiento aplicables a cada organización.
+
+### Normativas Soportadas
+
+* ISO 9001
+* IATF 16949
+* ISO 14001
+* ISO 27001
+* ISO 45001
+
+### Funcionalidades
+
+* Administración de normativas.
+* Configuración de categorías documentales.
+* Organización jerárquica por empresa.
+
+### Beneficio
+
+Facilita la adaptación del sistema a diferentes marcos normativos.
+
+---
+
+## RF-06: Control Documental
+
+### Descripción
+
+Gestiona el ciclo de vida completo de los documentos.
+
+### Funcionalidades
+
+* Creación de documentos.
+* Asignación de código único.
+* Carga de archivos.
+* Versionamiento.
+* Control de cambios.
+* Eliminación lógica.
+
+### Automatizaciones
+
+* Obsolescencia automática de versiones anteriores.
+* Conservación histórica de todas las revisiones.
+
+### Beneficio
+
+Garantiza trazabilidad documental completa.
+
+---
+
+## RF-07: Flujo de Aprobación de Documentos
+
+### Descripción
+
+Implementa el proceso formal de validación documental.
+
+### Flujo
+
+```text
+Creador
+   ↓
+Revisor
+   ↓
+Aprobador
+   ↓
+Documento Vigente
+```
+
+### Funcionalidades
+
+* Aprobar documentos.
+* Rechazar documentos.
+* Agregar comentarios.
+* Cancelar documentos aprobados.
+* Mantener bitácora permanente.
+
+### Reglas de Negocio
+
+* Los comentarios son obligatorios en rechazos.
+* Un rechazo devuelve el documento a estado borrador.
+
+### Beneficio
+
+Asegura el cumplimiento de procesos documentales controlados.
+
+---
+
+## RF-08: Portal Operador
+
+### Descripción
+
+Permite a los usuarios operativos acceder a la documentación vigente.
+
+### Funcionalidades
+
+* Consulta documental.
+* Firma de enterado.
+* Historial de cumplimiento.
+* Acceso a documentos aprobados.
+
+### Beneficio
+
+Facilita la evidencia de cumplimiento normativo.
+
+---
+
+## RF-09: Motor de Búsqueda Inteligente
+
+### Descripción
+
+Proporciona capacidades avanzadas de búsqueda documental.
+
+### Funcionalidades
+
+* Indexación automática.
+* Desindexación automática.
+* Búsqueda por texto libre.
+* Filtrado avanzado.
+* Recuperación rápida de resultados.
+
+### Arquitectura
+
+```text
+ASP.NET Core
+      │
+      ▼
+FastAPI
+      │
+      ▼
+MongoDB
+```
+
+### Beneficio
+
+Reduce significativamente los tiempos de localización de información.
+
+---
+
+## RF-10: Auditoría de Accesos
+
+### Descripción
+
+Permite registrar y monitorear las actividades realizadas dentro del sistema.
+
+### Información Registrada
+
+* Usuario.
+* Rol.
+* Dirección IP.
+* Documento consultado.
+* Fecha y hora.
+
+### Reglas
+
+* Zona horaria oficial: America/Monterrey.
+
+### Beneficio
+
+Proporciona evidencia para auditorías internas y externas.
+
+---
+
+# 🔒 Requerimientos No Funcionales
+
+Los requerimientos no funcionales definen los atributos de calidad del sistema.
+
+---
+
+## RNF-01: Seguridad
+
+### El sistema debe:
+
+* Almacenar contraseñas utilizando BCrypt.
+* Utilizar JWT firmado con HS256.
+* Aplicar expiración de tokens.
+* Implementar protección mediante headers HTTP.
+* Mantener bases de datos inaccesibles desde Internet.
+
+### Objetivo
+
+Garantizar confidencialidad, integridad y autenticación segura.
+
+---
+
+## RNF-02: Arquitectura de Microservicios
+
+### Características
+
+* Arquitectura políglota.
+* Servicios desacoplados.
+* Persistencia especializada.
+* Comunicación mediante red Docker privada.
+
+### Componentes
+
+| Servicio              | Tecnología   |
+| --------------------- | ------------ |
+| Portal Administrativo | ASP.NET Core |
+| Portal Operativo      | Laravel      |
+| Motor de Búsqueda     | FastAPI      |
+| Gateway               | Nginx        |
+
+---
+
+## RNF-03: Rendimiento
+
+### Restricciones
+
+* Tamaño máximo de carga: **35 MB**
+* Timeout de proxy: **75 segundos**
+* Búsquedas desacopladas del portal principal.
+
+### Objetivo
+
+Mantener tiempos de respuesta óptimos incluso con grandes volúmenes documentales.
+
+---
+
+## RNF-04: Disponibilidad y Despliegue
+
+### Requisitos
+
+* Reinicio automático de contenedores.
+* Despliegue automatizado.
+* Configuración centralizada mediante `.env`.
+
+### Objetivo
+
+Minimizar tiempos de inactividad y simplificar la operación.
+
+---
+
+## RNF-05: Portabilidad
+
+### Características
+
+* Contenerización completa mediante Docker.
+* Compatibilidad con Linux y Windows.
+* Despliegue reproducible.
+
+### Objetivo
+
+Facilitar la instalación en diferentes entornos.
+
+---
+
+## RNF-06: Mantenibilidad y Trazabilidad
+
+### Características
+
+* Soft Delete en entidades críticas.
+* Uso de procedimientos almacenados para lógica sensible.
+* Separación clara de responsabilidades.
+
+### Objetivo
+
+Reducir riesgos durante mantenimiento y evolución del sistema.
+
+---
+
+## RNF-07: Control de Acceso Basado en Roles (RBAC)
+
+### Roles Definidos
+
+| Rol                   |
+| --------------------- |
+| Super Admin           |
+| Admin de Empresa      |
+| Creador de Documentos |
+| Revisor               |
+| Aprobador             |
+| Operario              |
+| Auditor               |
+
+### Reglas
+
+* Aislamiento automático mediante `company_id`.
+* Aplicación global de filtros de seguridad.
+* Restricción de acceso basada en permisos.
+
+### Objetivo
+
+Garantizar que cada usuario únicamente pueda acceder a la información correspondiente a su función.
+
+---
+
+### Diagrama Entidad Relacion( SQL SERVER)
+
+![Arquitectura del Sistema](docs/images/DiagramaER.png)
+
+---
+
+### 🐘 Modelo Relacional (PostgreSQL)
+
+A diferencia de la base de datos principal en **SQL Server**, el modelo relacional implementado en **PostgreSQL** tiene una estructura ligera y especializada, enfocada exclusivamente en el almacenamiento de evidencias de acceso y trazabilidad documental.
+
+Su propósito es registrar las acciones realizadas por los usuarios dentro del **Portal Operador (Laravel)**, permitiendo generar auditorías y evidencias de cumplimiento normativo.
+
+---
+
+#### 📄 Migraciones que Definen el Esquema
+
+El esquema de PostgreSQL se construye mediante dos migraciones de Laravel:
+
+##### 1️⃣ Creación de la tabla principal
+
+```text
+2026_05_12_014117_create_access_logs_table.php
+```
+
+Responsable de crear la tabla `access_logs` y sus columnas base.
+
+##### 2️⃣ Incorporación de soporte Multi-Tenant
+
+```text
+2026_05_15_010630_add_company_id_to_access_logs_table.php
+```
+
+Agrega la columna `company_id` para permitir el aislamiento de registros por empresa.
+
+---
+
+#### 📊 Diagrama Relacional
+
+<p align="center">
+  <img src="docs/images/ModeloRelacional.png" alt="PostgreSQL Relational Model" width="900">
+</p>
+
+<p align="center">
+  <em>Figura X. Modelo Relacional de PostgreSQL para auditoría y trazabilidad documental.</em>
+</p>
+
+---
+
+#### 🗂️ Estructura de la Tabla `access_logs`
+
+| Columna            | Tipo de Dato | Restricciones      | Descripción                                                  |
+| ------------------ | ------------ | ------------------ | ------------------------------------------------------------ |
+| **id**             | BIGINT       | PK, AUTO_INCREMENT | Identificador único del registro.                            |
+| **document_code**  | VARCHAR      | INDEX              | Código del documento consultado (ej. PR-001).                |
+| **document_title** | VARCHAR      | NOT NULL           | Nombre o título del documento.                               |
+| **version_num**    | VARCHAR      | NOT NULL           | Versión del documento consultado.                            |
+| **user_id**        | INTEGER      | NOT NULL           | Referencia lógica al usuario registrado en SQL Server.       |
+| **user_name**      | VARCHAR      | NOT NULL           | Nombre completo del usuario que realizó la acción.           |
+| **user_role**      | VARCHAR      | NOT NULL           | Rol del usuario al momento del acceso.                       |
+| **ip_address**     | VARCHAR      | NULLABLE           | Dirección IP desde la cual se realizó la operación.          |
+| **company_id**     | INTEGER      | DEFAULT 0          | Identificador lógico de la empresa propietaria del registro. |
+| **created_at**     | TIMESTAMP    | NOT NULL           | Fecha y hora de creación del evento.                         |
+| **updated_at**     | TIMESTAMP    | NOT NULL           | Fecha y hora de la última modificación del registro.         |
+
+---
+
+#### 🔗 Integración con la Arquitectura Políglota
+
+Aunque PostgreSQL no mantiene claves foráneas físicas hacia SQL Server, la tabla `access_logs` conserva referencias lógicas mediante:
+
+* `user_id` → Usuario registrado en SQL Server.
+* `company_id` → Empresa propietaria del documento.
+* `document_code` → Documento administrado por el módulo .NET.
+
+Esta estrategia permite desacoplar los microservicios y mantener la independencia tecnológica de cada base de datos.
+
+---
+
+### 🍃 Esquema de Colecciones (MongoDB)
+
+Dentro de la arquitectura políglota de **QualityDoc-Polyglot**, MongoDB actúa como el motor especializado para la indexación y recuperación rápida de documentos.
+
+A diferencia de SQL Server y PostgreSQL, MongoDB no almacena la información transaccional completa del sistema. Su propósito es mantener un índice optimizado de documentos vigentes que permita realizar búsquedas eficientes sin afectar el rendimiento de los módulos administrativos.
+
+---
+
+#### 🗄️ Base de Datos y Colección
+
+| Elemento                      | Valor                  |
+| ----------------------------- | ---------------------- |
+| **Base de Datos**             | `qualitydoc_metadata`  |
+| **Colección**                 | `documentos_aprobados` |
+| **Tecnología**                | MongoDB                |
+| **Microservicio Responsable** | FastAPI (Python)       |
+
+---
+
+#### 🏗️ Definición del Esquema
+
+El esquema documental se encuentra definido mediante un modelo **Pydantic** dentro del microservicio de búsqueda desarrollado con FastAPI.
+
+```text
+search/src/python-app/main.py
+```
+
+Este modelo valida la estructura de los documentos antes de ser almacenados en MongoDB.
+
+---
+
+#### 📊 Diagrama de la Colección
+
+<p align="center">
+  <img src="docs/images/MongoDBSchema.png" alt="MongoDB Collection Schema" width="900">
+</p>
+
+<p align="center">
+  <em>Figura X. Esquema de la colección documentos_aprobados.</em>
+</p>
+
+---
+
+#### 📄 Estructura del Documento
+
+Cada documento almacenado en la colección posee una estructura similar a la siguiente:
+
+```json
+{
+  "_id": "ObjectId(...)",
+  "documento_id": 42,
+  "codigo": "PR-001",
+  "titulo": "Procedimiento de Control de Documentos",
+  "version": "2.0",
+  "etiquetas": [
+    "ISO",
+    "Procedimientos",
+    "Calidad",
+    "Interno",
+    "Vigente"
+  ],
+  "url_archivo": "/uploads/companies/1/PR-001_v2.pdf",
+  "aprobado_por": "Juan Pérez",
+  "empresa_id": 3,
+  "departamento_id": 7,
+  "fecha_indexacion": "2026-06-16T10:30:00Z"
+}
+```
+
+---
+
+#### 🗂️ Descripción de Campos
+
+| Campo                | Tipo          | Descripción                                                |
+| -------------------- | ------------- | ---------------------------------------------------------- |
+| **_id**              | ObjectId      | Identificador único generado automáticamente por MongoDB.  |
+| **documento_id**     | Integer       | Referencia lógica al documento almacenado en SQL Server.   |
+| **codigo**           | String        | Código único del documento.                                |
+| **titulo**           | String        | Nombre o título del documento.                             |
+| **version**          | String        | Versión actualmente aprobada del documento.                |
+| **etiquetas**        | Array[String] | Conjunto de etiquetas utilizadas para búsquedas y filtros. |
+| **url_archivo**      | String        | Ruta del archivo físico almacenado en el sistema.          |
+| **aprobado_por**     | String        | Nombre del aprobador final del documento.                  |
+| **empresa_id**       | Integer       | Identificador de la empresa propietaria del documento.     |
+| **departamento_id**  | Integer       | Departamento responsable del documento.                    |
+| **fecha_indexacion** | DateTime      | Fecha y hora UTC en que el documento fue indexado.         |
+
+---
+
+#### 🔌 Operaciones Disponibles en la API
+
+El microservicio FastAPI expone endpoints REST para administrar el índice documental.
+
+| Endpoint                   | Método | Descripción                                                   |
+| -------------------------- | ------ | ------------------------------------------------------------- |
+| `/api/docs/index`          | POST   | Inserta o actualiza documentos dentro del índice.             |
+| `/api/docs/approved`       | GET    | Recupera documentos aplicando filtros y búsquedas.            |
+| `/api/docs/index/{doc_id}` | DELETE | Elimina documentos del índice cuando dejan de estar vigentes. |
+
+---
+
+#### ⚙️ Flujo de Indexación
+
+```text
+Documento Aprobado (.NET)
+            │
+            ▼
+      HTTP POST
+            │
+            ▼
+      FastAPI (Python)
+            │
+            ▼
+ MongoDB (documentos_aprobados)
+            │
+            ▼
+    Búsquedas de Usuarios
+```
+
+Cuando un documento alcanza el estado **Vigente**, el módulo administrativo desarrollado en ASP.NET Core envía sus metadatos al microservicio FastAPI para ser indexados.
+
+---
+
+#### 🔍 Características del Motor de Búsqueda
+
+##### Upsert Automático
+
+Si un documento ya existe en la colección y se aprueba una nueva versión, MongoDB reemplaza completamente el registro anterior mediante una operación **upsert**.
+
+**Beneficio:** Siempre existe una única representación vigente del documento.
+
+---
+
+##### Búsqueda por Texto Libre
+
+Las búsquedas utilizan expresiones regulares (`$regex`) sobre múltiples campos:
+
+* Código del documento.
+* Título.
+* Etiquetas.
+
+Esto permite localizar información utilizando palabras clave parciales.
+
+---
+
+##### Aislamiento Multi-Tenant
+
+Todas las consultas son filtradas por:
+
+```text
+empresa_id
+```
+
+De esta manera, los usuarios únicamente pueden consultar documentos pertenecientes a su organización.
+
+---
+
+##### Referencias Lógicas
+
+MongoDB no utiliza claves foráneas físicas.
+
+Los siguientes campos actúan como referencias lógicas hacia SQL Server:
+
+| Campo MongoDB   | Referencia           |
+| --------------- | -------------------- |
+| documento_id    | Documents.doc_id     |
+| empresa_id      | Companies.company_id |
+| departamento_id | Departments.dept_id  |
+
+Esta estrategia permite mantener la independencia entre microservicios y tecnologías de persistencia.
+
+---
+
+##### Índice Exclusivo de Documentos Vigentes
+
+La colección `documentos_aprobados` almacena únicamente documentos con estado:
+
+```text
+Vigente
+```
+
+Cuando un documento es:
+
+* Revocado
+* Eliminado
+* Sustituido por una nueva versión
+
+el sistema ejecuta automáticamente una operación de desindexación para retirarlo del motor de búsqueda.
+
+---
+
+##### Etiquetado Dinámico
+
+Las etiquetas son generadas automáticamente desde el módulo .NET utilizando información contextual del documento:
+
+* Norma asociada.
+* Categoría documental.
+* Departamento.
+* Estado.
+* Origen.
+
+Esto permite mejorar significativamente la precisión de las búsquedas.
+
+---
+
+### 📖 Diccionario de Datos
+---
+
+> **Nota sobre campos de auditoría:** Todas las tablas de SQL Server comparten los siguientes 6 campos de auditoría. Se omiten de cada tabla individual para evitar repetición, pero están presentes en todas.
+
+| Campo | Tipo | Default | Descripción |
+|---|---|---|---|
+| `status` | `NVARCHAR(20)` | `'Active'` | Estado lógico del registro: `Active`, `Inactive`, `Deleted` |
+| `created_at` | `DATETIME2` | `GETUTCDATE()` | Fecha/hora UTC de creación |
+| `created_by` | `INT` → FK `Users` | `NULL` | Usuario que creó el registro |
+| `updated_at` | `DATETIME2` | `NULL` | Fecha/hora UTC de última modificación |
+| `updated_by` | `INT` → FK `Users` | `NULL` | Usuario que modificó el registro |
+| `deleted_at` | `DATETIME2` | `NULL` | Fecha/hora UTC de soft-delete |
+| `deleted_by` | `INT` → FK `Users` | `NULL` | Usuario que eliminó el registro | [1](#5-0) 
+
+---
+
+## Base de Datos: SQL Server — `QualityDocDB`
+
+### Tabla: `Roles`
+
+Catálogo de roles del sistema. Define los permisos y accesos de cada tipo de usuario. [2](#5-1) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `role_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del rol |
+| `role_name` | `NVARCHAR(50)` | — | NO | `UNIQUE` | Nombre del rol. Valores: `Super Admin`, `Admin de Empresa`, `Creador de Doc`, `Revisor`, `Aprobador`, `Operario`, `Auditor` |
+
+---
+
+### Tabla: `Norms`
+
+Catálogo de normas de calidad soportadas por el sistema. [3](#5-2) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `norm_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único de la norma |
+| `norm_name` | `NVARCHAR(50)` | — | NO | `UNIQUE` | Nombre de la norma. Ej: `ISO 9001:2015`, `IATF 16949:2016` |
+| `release_year` | `NVARCHAR(4)` | — | SÍ | — | Año de publicación de la norma. Ej: `'2015'` |
+
+---
+
+### Tabla: `DocumentStatus`
+
+Catálogo de estados del ciclo de vida de una versión documental. [4](#5-3) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `status_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del estado |
+| `status_name` | `NVARCHAR(30)` | — | NO | `UNIQUE` | Nombre del estado. Valores semilla: `1=Borrador`, `2=En Revisión`, `3=Aprobado`, `4=Obsoleto` |
+
+---
+
+### Tabla: `Companies`
+
+Empresas cliente registradas en el sistema (tenants). Cada empresa tiene sus propios datos aislados. [5](#5-4) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `company_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único de la empresa |
+| `legal_name` | `NVARCHAR(200)` | — | NO | — | Razón social o nombre legal de la empresa |
+| `tax_id` | `NVARCHAR(20)` | — | NO | `UNIQUE` | RFC o identificador fiscal único de la empresa |
+
+---
+
+### Tabla: `Departments`
+
+Departamentos organizacionales dentro de cada empresa. [6](#5-5) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `dept_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del departamento |
+| `company_id` | `INT` | FK → `Companies` | NO | `UQ_Company_DeptName` | Empresa a la que pertenece el departamento |
+| `dept_name` | `NVARCHAR(100)` | — | NO | `UNIQUE` por empresa | Nombre del departamento. Único dentro de la misma empresa |
+
+---
+
+### Tabla: `Users`
+
+Usuarios del sistema con sus credenciales, rol y departamento asignado. [7](#5-6) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `user_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del usuario |
+| `company_id` | `INT` | FK → `Companies` | SÍ | — | Empresa a la que pertenece. `NULL` para Super Admin |
+| `dept_id` | `INT` | FK → `Departments` | SÍ | — | Departamento asignado al usuario |
+| `role_id` | `INT` | FK → `Roles` | NO | — | Rol del usuario en el sistema |
+| `full_name` | `NVARCHAR(200)` | — | NO | — | Nombre completo del usuario |
+| `email` | `NVARCHAR(150)` | — | NO | `UNIQUE` | Correo electrónico. Usado como identificador de login |
+| `password_hash` | `NVARCHAR(MAX)` | — | NO | — | Hash BCrypt de la contraseña. Nunca se almacena en texto plano |
+| `password_reset_token` | `NVARCHAR(255)` | — | SÍ | — | Token UUID para recuperación/configuración de contraseña |
+| `reset_token_expiry` | `DATETIME2` | — | SÍ | — | Fecha de expiración del token de reset. Válido 1h (reset) o 3 días (activación) |
+| `two_factor_code` | `NVARCHAR(10)` | — | SÍ | — | Código numérico de 6 dígitos para 2FA por correo |
+| `two_factor_expiry` | `DATETIME2` | — | SÍ | — | Fecha de expiración del código 2FA. Válido 10 minutos |
+
+---
+
+### Tabla: `DocumentCategories`
+
+Estructura jerárquica de categorías documentales ISO configurada por cada empresa. [8](#5-7) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `category_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único de la categoría |
+| `company_id` | `INT` | FK → `Companies` | NO | `UQ_Company_Norm_CategoryName` | Empresa dueña de la categoría |
+| `norm_id` | `INT` | FK → `Norms` | SÍ | `UQ_Company_Norm_CategoryName` | Norma ISO a la que pertenece la categoría |
+| `category_name` | `NVARCHAR(100)` | — | NO | `UNIQUE` por empresa+norma | Nombre de la categoría. Ej: `Manual de Calidad`, `Procedimientos` |
+| `prefix` | `VARCHAR(15)` | — | NO | — | Prefijo para el código de documentos. Ej: `ISO-MAN`, `PR` |
+| `description` | `VARCHAR(255)` | — | SÍ | — | Descripción del propósito de la categoría |
+| `hierarchy_level` | `INT` | — | NO | `CHECK (1-10)` | Nivel jerárquico dentro de la estructura ISO (1=más alto) |
+| `retention_years` | `INT` | `3` | NO | `CHECK (1-99)` | Años de retención obligatoria de documentos según norma ISO |
+
+---
+
+### Tabla: `Documents`
+
+Documentos maestros del sistema. Cada documento puede tener múltiples versiones. [9](#5-8) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `doc_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del documento |
+| `company_id` | `INT` | FK → `Companies` | NO | `UQ_DocCode_Per_Company` | Empresa dueña del documento |
+| `category_id` | `INT` | FK → `DocumentCategories` | NO | — | Categoría ISO a la que pertenece el documento |
+| `dept_id` | `INT` | FK → `Departments` | NO | — | Departamento responsable (dueño) del documento |
+| `doc_code` | `NVARCHAR(50)` | — | NO | `UNIQUE` por empresa | Código único del documento dentro de la empresa. Ej: `PR-001` |
+| `doc_name` | `NVARCHAR(255)` | — | NO | — | Nombre o título del documento |
+| `description` | `NVARCHAR(MAX)` | — | SÍ | — | Descripción del contenido o propósito del documento |
+| `is_external` | `BIT` | `0` | NO | — | `0` = Documento interno, `1` = Documento externo (de proveedor o cliente) |
+
+---
+
+### Tabla: `DocumentVersions`
+
+Versiones de cada documento. Cada versión tiene su propio archivo y ciclo de aprobación. [10](#5-9) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `version_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único de la versión |
+| `doc_id` | `INT` | FK → `Documents` | NO | — | Documento al que pertenece esta versión |
+| `status_id` | `INT` | FK → `DocumentStatus` | NO | — | Estado actual: `1=Borrador`, `2=En Revisión`, `3=Aprobado`, `4=Obsoleto` |
+| `version_num` | `NVARCHAR(10)` | — | NO | — | Número de versión. Ej: `0.1`, `1.0`, `2.3` |
+| `file_path` | `NVARCHAR(MAX)` | — | NO | — | Ruta relativa al archivo en el volumen compartido Docker |
+| `extension` | `NVARCHAR(10)` | — | NO | — | Extensión del archivo. Ej: `pdf`, `docx` |
+| `change_description` | `NVARCHAR(MAX)` | — | SÍ | — | Motivo del cambio o descripción de las modificaciones respecto a la versión anterior |
+| `approved_at` | `DATETIME2` | `NULL` | SÍ | — | Fecha/hora UTC en que la versión fue aprobada (Paso 2 completado) |
+| `obsoleted_at` | `DATETIME2` | `NULL` | SÍ | — | Fecha/hora UTC en que la versión fue marcada como obsoleta por el trigger `trg_HandleDocumentObsolescence` |
+
+---
+
+### Tabla: `DocumentApprovals`
+
+Registro de cada firma dentro del flujo de aprobación. Una versión tiene máximo 2 registros (Revisor + Aprobador). [11](#5-10) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `approval_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del registro de firma |
+| `version_id` | `INT` | FK → `DocumentVersions` | NO | — | Versión del documento que se está aprobando |
+| `approver_id` | `INT` | FK → `Users` | NO | — | Usuario responsable de firmar este paso |
+| `step_order` | `INT` | — | NO | — | Orden del paso en el flujo: `1=Revisor`, `2=Aprobador` |
+| `step_type` | `NVARCHAR(30)` | — | NO | `CHECK ('Elaboró','Revisó','Aprobó')` | Tipo de firma según la nomenclatura ISO |
+| `approval_status` | `NVARCHAR(20)` | `'Pending'` | NO | `CHECK ('Pending','Approved','Rejected')` | Estado de la decisión del firmante |
+| `comments` | `NVARCHAR(MAX)` | — | SÍ | — | Observaciones del firmante. Obligatorio si `approval_status = 'Rejected'` |
+| `signature_token` | `NVARCHAR(MAX)` | — | SÍ | — | Token UUID generado al momento de firmar. Evidencia legal de la firma electrónica |
+| `signed_at` | `DATETIME2` | `NULL` | SÍ | — | Fecha/hora UTC exacta en que se emitió la firma |
+
+---
+
+### Tabla: `DocumentAuditLogs`
+
+Bitácora permanente e inmutable de todas las acciones sobre documentos. No se elimina físicamente. [12](#5-11) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `log_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del registro de bitácora |
+| `company_id` | `INT` | FK → `Companies` | NO | — | Empresa a la que pertenece el evento (clave multi-tenant) |
+| `doc_id` | `INT` | FK → `Documents` | NO | — | Documento sobre el que se realizó la acción |
+| `version_id` | `INT` | FK → `DocumentVersions` | NO | — | Versión específica involucrada en la acción |
+| `version_num` | `NVARCHAR(10)` | — | NO | — | Foto del número de versión al momento del evento (desnormalizado para inmutabilidad) |
+| `action_type` | `NVARCHAR(50)` | — | NO | — | Tipo de acción. Valores: `DraftCreated`, `DraftEdited`, `SentToReview`, `Approved`, `Rejected`, `Recalled`, `NewVersionCreated` |
+| `action_details` | `NVARCHAR(MAX)` | — | SÍ | — | Texto descriptivo del evento para lectura humana en la bitácora |
+
+---
+
+### Tabla: `DocumentIssues`
+
+Tickets de incidencias o no conformidades reportadas sobre documentos. [13](#5-12) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `issue_id` | `INT IDENTITY(1,1)` | PK | NO | — | Identificador único del ticket |
+| `company_id` | `INT` | FK → `Companies` | NO | — | Empresa que reporta la incidencia |
+| `doc_code` | `NVARCHAR(50)` | — | NO | — | Código del documento afectado (referencia lógica, no FK) |
+| `issue_type` | `NVARCHAR(100)` | — | NO | — | Tipo de incidencia. Ej: `Error de contenido`, `Versión incorrecta` |
+| `details` | `NVARCHAR(MAX)` | — | NO | — | Descripción detallada del problema reportado |
+| `reported_by` | `INT` | FK → `Users` | NO | — | Usuario que reportó la incidencia |
+| `issue_status` | `NVARCHAR(30)` | `'Pending'` | NO | `CHECK ('Pending','In Review','Resolved')` | Estado de atención del ticket |
+
+---
+
+## Base de Datos: PostgreSQL — `audit_db`
+
+### Tabla: `access_logs`
+
+Registro de todos los accesos y firmas de enterado de los operarios. Base de datos exclusiva del portal Laravel. [14](#5-13) [15](#5-14) 
+
+| Campo | Tipo | PK/FK | Nulo | Restricción | Descripción |
+|---|---|---|---|---|---|
+| `id` | `BIGINT` | PK | NO | `AUTOINCREMENT` | Identificador único del registro de acceso |
+| `document_code` | `VARCHAR` | — | NO | `INDEX` | Código del documento consultado. Ej: `PR-001`. Indexado para consultas de reportes |
+| `document_title` | `VARCHAR` | — | NO | — | Título del documento o descripción de la acción. Prefijo `[FIRMA DE ENTERADO]` para acuses |
+| `version_num` | `VARCHAR` | — | NO | — | Número de versión del documento al momento del acceso |
+| `user_id` | `INTEGER` | Ref. lógica → `Users.user_id` (SQL Server) | NO | — | ID del usuario que realizó la acción |
+| `user_name` | `VARCHAR` | — | NO | — | Nombre del usuario (desnormalizado para inmutabilidad del log) |
+| `user_role` | `VARCHAR` | — | NO | — | Rol del usuario al momento del acceso (desnormalizado) |
+| `ip_address` | `VARCHAR` | — | SÍ | — | Dirección IP desde donde se realizó el acceso |
+| `company_id` | `INTEGER` | Ref. lógica → `Companies.company_id` (SQL Server) | NO | `DEFAULT 0` | ID de la empresa del usuario. Clave de aislamiento multi-tenant |
+| `created_at` | `TIMESTAMP` | — | NO | — | Fecha/hora del evento (zona horaria `America/Monterrey`) |
+| `updated_at` | `TIMESTAMP` | — | NO | — | Última actualización del registro |
+
+---
+
+## Base de Datos: MongoDB — `qualitydoc_metadata`
+
+### Colección: `documentos_aprobados`
+
+Índice de búsqueda de documentos vigentes. Se sincroniza automáticamente desde SQL Server al aprobar o revocar documentos. [16](#5-15) 
+
+| Campo | Tipo BSON | Nulo | Descripción |
+|---|---|---|---|
+| `_id` | `ObjectId` | NO | Llave primaria generada automáticamente por MongoDB |
+| `documento_id` | `Int32` | NO | Referencia lógica a `Documents.doc_id` en SQL Server. Clave de upsert |
+| `codigo` | `String` | NO | Código único del documento. Ej: `PR-001` |
+| `titulo` | `String` | NO | Nombre del documento |
+| `version` | `String` | NO | Número de versión aprobada. Ej: `"2.0"` |
+| `etiquetas` | `Array<String>` | NO | Array de 5 tags para búsqueda: `[normativa, categoría, departamento, origen, estado]`. Ej: `["ISO", "Procedimientos", "Calidad", "Interno", "Vigente"]` |
+| `url_archivo` | `String` | NO | Ruta relativa al archivo PDF en el volumen compartido Docker |
+| `aprobado_por` | `String` | NO | Nombre del aprobador final (desnormalizado) |
+| `empresa_id` | `Int32` | NO | Referencia lógica a `Companies.company_id`. Filtro de multi-tenancy en todas las consultas |
+| `departamento_id` | `Int32` | NO | Referencia lógica a `Departments.dept_id`. Permite filtrar por departamento |
+| `fecha_indexacion` | `Date` | NO | Timestamp UTC de cuando el documento fue indexado o re-indexado en MongoDB | [17](#5-16) 
+
+---
+
+## Resumen de Índices (SQL Server) [18](#5-17) 
+
+| Índice | Tabla | Columnas | Tipo | Propósito |
+|---|---|---|---|---|
+| `IX_Users_Login` | `Users` | `email, status` | Normal | Acelerar el login |
+| `IX_Docs_Company_Status` | `Documents` | `company_id, status` | Normal | Filtrar documentos por empresa |
+| `IX_Versions_Doc_Status` | `DocumentVersions` | `doc_id, status_id, status` | Normal | Consultas de versiones por estado |
+| `UIX_Docs_Code_Company` | `Documents` | `company_id, doc_code` | `UNIQUE` filtrado | Unicidad de código por empresa, excluyendo eliminados |
+| `IX_Approvals_Pending` | `DocumentApprovals` | `approver_id, approval_status` | Normal | Bandeja de firmas pendientes |
+| `IX_AuditLogs_Version` | `DocumentAuditLogs` | `company_id, doc_id, version_id, created_at` | Normal | Consultas de bitácora por versión |
+
+
+---
+
+Basado en toda la información recopilada del sistema, aquí está el Diagrama de Casos de Uso completo:
+
+---
+
+## Diagrama de Casos de Uso — QualityDoc-Polyglot
+
+### Subsistema 1: Autenticación (Todos los actores)
+
+```mermaid
+graph LR
+    subgraph "Actores"
+        SA["Super Admin"]
+        AE["Admin de Empresa"]
+        CD["Creador de Doc"]
+        RE["Revisor"]
+        AP["Aprobador"]
+        OP["Operario"]
+        AU["Auditor"]
+    end
+
+    subgraph "Sistema: Autenticación"
+        UC1["Iniciar Sesión"]
+        UC2["Verificar Código 2FA"]
+        UC3["Recuperar Contraseña"]
+        UC4["Configurar Contraseña Inicial"]
+        UC5["Cerrar Sesión"]
+    end
+
+    SA --> UC1
+    AE --> UC1
+    CD --> UC1
+    RE --> UC1
+    AP --> UC1
+    OP --> UC1
+    AU --> UC1
+
+    UC1 -.->|"include (roles admin)"| UC2
+    UC1 -.->|"extend"| UC3
+    UC3 -.->|"include"| UC4
+    SA --> UC5
+    AE --> UC5
+    CD --> UC5
+    RE --> UC5
+    AP --> UC5
+    OP --> UC5
+    AU --> UC5
+``` [1](#6-0) 
+
+---
+
+### Subsistema 2: Gestión Global (Super Admin)
+
+```mermaid
+graph LR
+    SA["Super Admin"]
+
+    subgraph "Sistema: Gestión Global"
+        UC10["Registrar Nueva Empresa"]
+        UC11["Editar Empresa"]
+        UC12["Deshabilitar Empresa"]
+        UC13["Reactivar Empresa"]
+        UC14["Ver Métricas Globales"]
+        UC15["Gestionar Catálogo de Normas"]
+    end
+
+    SA --> UC10
+    SA --> UC11
+    SA --> UC12
+    SA --> UC13
+    SA --> UC14
+    SA --> UC15
+``` [2](#6-1) 
+
+---
+
+### Subsistema 3: Administración de Empresa (Admin de Empresa)
+
+```mermaid
+graph LR
+    AE["Admin de Empresa"]
+
+    subgraph "Sistema: Administración de Empresa"
+        UC20["Crear Departamento"]
+        UC21["Editar Departamento"]
+        UC22["Deshabilitar Departamento"]
+        UC23["Crear Usuario"]
+        UC24["Editar Usuario"]
+        UC25["Deshabilitar Usuario"]
+        UC26["Configurar Estructura ISO"]
+        UC27["Ver Dashboard de Empresa"]
+    end
+
+    AE --> UC20
+    AE --> UC21
+    AE --> UC22
+    AE --> UC23
+    AE --> UC24
+    AE --> UC25
+    AE --> UC26
+    AE --> UC27
+
+    UC23 -.->|"include"| UC28["Enviar Correo de Bienvenida"]
+``` [3](#6-2) 
+
+---
+
+### Subsistema 4: Control Documental (Creador de Doc)
+
+```mermaid
+graph LR
+    CD["Creador de Doc"]
+
+    subgraph "Sistema: Control Documental"
+        UC30["Crear Documento"]
+        UC31["Subir Nueva Versión"]
+        UC32["Editar Borrador"]
+        UC33["Iniciar Flujo de Aprobación"]
+        UC34["Cancelar Flujo (Recall)"]
+        UC35["Ver Mis Borradores"]
+        UC36["Consultar Biblioteca ISO"]
+        UC37["Reportar Incidencia en Documento"]
+    end
+
+    CD --> UC30
+    CD --> UC31
+    CD --> UC32
+    CD --> UC33
+    CD --> UC34
+    CD --> UC35
+    CD --> UC36
+    CD --> UC37
+
+    UC33 -.->|"include"| UC38["Asignar Revisor y Aprobador"]
+``` [4](#6-3) 
+
+---
+
+### Subsistema 5: Flujo de Aprobación (Revisor y Aprobador)
+
+```mermaid
+graph LR
+    RE["Revisor"]
+    AP["Aprobador"]
+
+    subgraph "Sistema: Flujo de Aprobación"
+        UC40["Ver Bandeja de Firmas Pendientes"]
+        UC41["Revisar Documento PDF"]
+        UC42["Aprobar Documento"]
+        UC43["Rechazar y Devolver Documento"]
+        UC44["Ver Historial de Firmas Realizadas"]
+        UC45["Ver Documentos Rechazados por Mí"]
+    end
+
+    RE --> UC40
+    RE --> UC41
+    RE --> UC42
+    RE --> UC43
+    RE --> UC44
+    RE --> UC45
+
+    AP --> UC40
+    AP --> UC41
+    AP --> UC42
+    AP --> UC43
+    AP --> UC44
+    AP --> UC45
+
+    UC42 -.->|"include"| UC46["Registrar Firma Electrónica (Token)"]
+    UC42 -.->|"include"| UC47["Indexar en MongoDB (FastAPI)"]
+    UC43 -.->|"include"| UC48["Notificar al Creador"]
+``` [5](#6-4) 
+
+---
+
+### Subsistema 6: Portal Operario
+
+```mermaid
+graph LR
+    OP["Operario"]
+
+    subgraph "Sistema: Portal Operario (Laravel)"
+        UC50["Consultar Directorio Vigente"]
+        UC51["Buscar Documentos"]
+        UC52["Ver Documento PDF"]
+        UC53["Firmar Enterado (Acuse de Lectura)"]
+        UC54["Ver Mis Cumplimientos"]
+        UC55["Ver Dashboard Personal"]
+    end
+
+    OP --> UC50
+    OP --> UC51
+    OP --> UC52
+    OP --> UC53
+    OP --> UC54
+    OP --> UC55
+
+    UC52 -.->|"include"| UC56["Registrar Log de Acceso (PostgreSQL)"]
+    UC53 -.->|"include"| UC56
+``` [6](#6-5) 
+
+---
+
+### Subsistema 7: Auditoría
+
+```mermaid
+graph LR
+    AU["Auditor"]
+    AE["Admin de Empresa"]
+
+    subgraph "Sistema: Auditoría"
+        UC60["Ver Logs de Acceso por Empresa"]
+        UC61["Ver Bitácora de Aprobaciones"]
+        UC62["Ver Reportes de Cumplimiento"]
+        UC63["Ver Top Documentos Consultados"]
+        UC64["Ver Usuarios Auditados"]
+    end
+
+    AU --> UC60
+    AU --> UC61
+    AU --> UC62
+    AU --> UC63
+    AU --> UC64
+
+    AE --> UC60
+    AE --> UC61
+    AE --> UC62
+``` [7](#6-6) 
+
+---
+
+### Subsistema 8: Motor de Búsqueda (FastAPI — interno)
+
+```mermaid
+graph LR
+    CD["Creador de Doc"]
+    OP["Operario"]
+    AU["Auditor"]
+
+    subgraph "Sistema: Motor de Búsqueda (FastAPI)"
+        UC70["Buscar Documentos por Texto"]
+        UC71["Filtrar por Empresa"]
+        UC72["Filtrar por Departamento"]
+        UC73["Indexar Documento Aprobado"]
+        UC74["Des-indexar Documento Revocado"]
+    end
+
+    CD --> UC70
+    OP --> UC70
+    AU --> UC70
+
+    UC70 -.->|"include"| UC71
+    UC70 -.->|"include"| UC72
+
+    subgraph "Actor Sistema"
+        SYS["Sistema C# (ApprovalsController)"]
+    end
+
+    SYS --> UC73
+    SYS --> UC74
+``` [8](#6-7) 
+
+---
+
+## Resumen de Actores y Casos de Uso
+
+| Actor | Cantidad de CU | Subsistemas |
+|---|---|---|
+| **Super Admin** | 6 | Autenticación, Gestión Global |
+| **Admin de Empresa** | 9 | Autenticación, Administración, Auditoría |
+| **Creador de Doc** | 8 | Autenticación, Control Documental, Búsqueda |
+| **Revisor** | 6 | Autenticación, Flujo de Aprobación |
+| **Aprobador** | 6 | Autenticación, Flujo de Aprobación |
+| **Operario** | 6 | Autenticación, Portal Operario, Búsqueda |
+| **Auditor** | 6 | Autenticación, Auditoría, Búsqueda |
+| **Sistema C#** | 2 | Motor de Búsqueda (actor secundario) |
+
+Los roles definidos en la base de datos son la fuente de verdad para los actores del sistema. [9](#6-8)
+
+
+
+
+---
 
 # Para ver la documentacion detallada y resolver dudas aqui:
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Gabriel89zz/QualityDoc-Polyglot)
