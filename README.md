@@ -1,4 +1,53 @@
 # 🚀 QualityDoc-Polyglot
+---
+
+## 📑 Índice
+
+1. [Visión General](#-visión-general)
+2. [Guía de Instalación y Despliegue](#-guía-de-instalación-y-despliegue)
+   - [Paso 1: Clonar el Repositorio](#-paso-1-clonar-el-repositorio)
+   - [Paso 2: Crear el Archivo de Entorno Global](#-paso-2-crear-el-archivo-de-entorno-global)
+   - [Paso 3: Configurar las Variables de Entorno](#️-paso-3-configurar-las-variables-de-entorno)
+   - [Paso 4: Ejecutar el Despliegue Automático](#-paso-4-ejecutar-el-despliegue-automático)
+3. [Arquitectura Desplegada](#-arquitectura-desplegada)
+4. [Accesos al Sistema](#-accesos-al-sistema)
+5. [Verificación del Estado de los Contenedores](#-verificación-del-estado-de-los-contenedores)
+6. [Detener el Sistema](#-detener-el-sistema)
+7. [Actualizar el Proyecto](#-actualizar-el-proyecto)
+8. [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+9. [Equipo de Desarrollo](#-equipo-de-desarrollo)
+10. [Arquitectura del Sistema](#-arquitectura-del-sistema)
+11. [Gateway Centralizado](#-gateway-centralizado)
+12. [Portal Administrativo (.NET)](#-portal-administrativo-net)
+13. [Portal Operador (Laravel)](#-portal-operador-laravel)
+14. [Motor de Búsqueda (FastAPI)](#-motor-de-búsqueda-fastapi)
+15. [Estrategia de Persistencia Políglota](#-estrategia-de-persistencia-políglota)
+16. [Seguridad](#-seguridad)
+17. [Infraestructura Docker](#-infraestructura-docker)
+18. [Beneficios de la Arquitectura](#-beneficios-de-la-arquitectura)
+19. [Historias de Usuario](#-historias-de-usuario)
+    - [Super Admin](#-super-admin)
+    - [Administrador de Empresa](#-administrador-de-empresa)
+    - [Creador de Documentos](#-creador-de-documentos)
+    - [Revisor y Aprobador](#-revisor-y-aprobador)
+    - [Operario](#-operario)
+    - [Auditor](#-auditor)
+    - [Historias Transversales](#-historias-de-usuario-transversales)
+20. [Especificación de Requerimientos](#-especificación-de-requerimientos)
+    - [Requerimientos Funcionales (RF-01 a RF-10)](#-requerimientos-funcionales)
+    - [Requerimientos No Funcionales (RNF-01 a RNF-07)](#-requerimientos-no-funcionales)
+21. [Modelado de Datos y Diagramas](#-modelado-de-datos-y-diagramas)
+    - [Diagrama Entidad-Relación (SQL Server)](#-diagrama-entidad-relacion-sql-server)
+    - [Modelo Relacional (PostgreSQL)](#-modelo-relacional-postgresql)
+    - [Esquema de Colecciones (MongoDB)](#-esquema-de-colecciones-mongodb)
+    - [Diccionario de Datos](#-diccionario-de-datos)
+    - [Diagrama de Casos de Uso](#-diagrama-de-casos-de-uso)
+    - [Diagrama de Clases (.NET)](#-diagrama-de-clases-net)
+    - [Diagrama de Secuencia (Flujo de Aprobación)](#-diagrama-de-secuencia-flujo-de-carga-y-aprobación-de-un-documento)
+    - [Diagrama de Despliegue (Contenedores)](#-diagrama-de-despliegue-arquitectura-de-contenedores)
+22. [Documentación Adicional](#-documentación-adicional)
+
+---
 
 ## Visión General
 QualityDoc-Polyglot es una plataforma de gestión documental y cumplimiento normativo basada en una arquitectura de microservicios políglota (Polyglot Microservices Architecture).
@@ -1110,13 +1159,6 @@ Este modelo valida la estructura de los documentos antes de ser almacenados en M
 
 #### 📊 Diagrama de la Colección
 
-<p align="center">
-  <img src="docs/images/MongoDBSchema.png" alt="MongoDB Collection Schema" width="900">
-</p>
-
-<p align="center">
-  <em>Figura X. Esquema de la colección documentos_aprobados.</em>
-</p>
 
 ---
 
@@ -1585,7 +1627,7 @@ graph LR
     AP --> UC5
     OP --> UC5
     AU --> UC5
-``` [1](#6-0) 
+``` 
 
 ---
 
@@ -1610,7 +1652,7 @@ graph LR
     SA --> UC13
     SA --> UC14
     SA --> UC15
-``` [2](#6-1) 
+```
 
 ---
 
@@ -1641,7 +1683,7 @@ graph LR
     AE --> UC27
 
     UC23 -.->|"include"| UC28["Enviar Correo de Bienvenida"]
-``` [3](#6-2) 
+``` 
 
 ---
 
@@ -1672,7 +1714,7 @@ graph LR
     CD --> UC37
 
     UC33 -.->|"include"| UC38["Asignar Revisor y Aprobador"]
-``` [4](#6-3) 
+``` 
 
 ---
 
@@ -1709,7 +1751,7 @@ graph LR
     UC42 -.->|"include"| UC46["Registrar Firma Electrónica (Token)"]
     UC42 -.->|"include"| UC47["Indexar en MongoDB (FastAPI)"]
     UC43 -.->|"include"| UC48["Notificar al Creador"]
-``` [5](#6-4) 
+``` 
 
 ---
 
@@ -1737,7 +1779,7 @@ graph LR
 
     UC52 -.->|"include"| UC56["Registrar Log de Acceso (PostgreSQL)"]
     UC53 -.->|"include"| UC56
-``` [6](#6-5) 
+``` 
 
 ---
 
@@ -1765,7 +1807,7 @@ graph LR
     AE --> UC60
     AE --> UC61
     AE --> UC62
-``` [7](#6-6) 
+``` 
 
 ---
 
@@ -1798,7 +1840,7 @@ graph LR
 
     SYS --> UC73
     SYS --> UC74
-``` [8](#6-7) 
+``` 
 
 ---
 
@@ -1815,7 +1857,580 @@ graph LR
 | **Auditor** | 6 | Autenticación, Auditoría, Búsqueda |
 | **Sistema C#** | 2 | Motor de Búsqueda (actor secundario) |
 
-Los roles definidos en la base de datos son la fuente de verdad para los actores del sistema. [9](#6-8)
+Los roles definidos en la base de datos son la fuente de verdad para los actores del sistema. 
+
+---
+
+### ⚙️ Diagrama de Clases (.NET)
+
+---
+
+## Parte 1: Capa de Modelos (Domain Layer)
+
+```mermaid
+classDiagram
+    class BaseEntity {
+        <<abstract>>
+        +string Status
+        +DateTime CreatedAt
+        +int? CreatedBy
+        +DateTime? UpdatedAt
+        +int? UpdatedBy
+        +DateTime? DeletedAt
+        +int? DeletedBy
+        +User CreatedByNavigation
+        +User UpdatedByNavigation
+        +User DeletedByNavigation
+    }
+
+    class Role {
+        +int RoleId
+        +string RoleName
+        +ICollection~User~ Users
+    }
+
+    class Norm {
+        +int NormId
+        +string NormName
+        +string? ReleaseYear
+        +ICollection~DocumentCategory~ Categories
+    }
+
+    class DocumentStatus {
+        +int StatusId
+        +string StatusName
+        +ICollection~DocumentVersion~ DocumentVersions
+    }
+
+    class Company {
+        +int CompanyId
+        +string LegalName
+        +string TaxId
+        +ICollection~Department~ Departments
+        +ICollection~User~ Users
+        +ICollection~DocumentCategory~ Categories
+        +ICollection~Document~ Documents
+    }
+
+    class Department {
+        +int DeptId
+        +int CompanyId
+        +string DeptName
+        +Company Company
+        +ICollection~User~ Users
+    }
+
+    class User {
+        +int UserId
+        +int? CompanyId
+        +int? DeptId
+        +int RoleId
+        +string FullName
+        +string Email
+        +string PasswordHash
+        +string? PasswordResetToken
+        +DateTime? ResetTokenExpiry
+        +string? TwoFactorCode
+        +DateTime? TwoFactorExpiry
+        +Company? Company
+        +Department? Department
+        +Role Role
+        +ICollection~DocumentApproval~ Approvals
+    }
+
+    class DocumentCategory {
+        +int CategoryId
+        +int CompanyId
+        +int? NormId
+        +string CategoryName
+        +string Prefix
+        +string? Description
+        +int HierarchyLevel
+        +int RetentionYears
+        +Company? Company
+        +Norm? Norm
+        +ICollection~Document~? Documents
+    }
+
+    class Document {
+        +int DocId
+        +int CompanyId
+        +int CategoryId
+        +int DeptId
+        +string DocCode
+        +string DocName
+        +string? Description
+        +bool IsExternal
+        +Company? Company
+        +DocumentCategory? Category
+        +Department? Department
+        +ICollection~DocumentVersion~ Versions
+    }
+
+    class DocumentVersion {
+        +int VersionId
+        +int DocId
+        +int StatusId
+        +string VersionNum
+        +string FilePath
+        +string Extension
+        +string? ChangeDescription
+        +DateTime? ApprovedAt
+        +DateTime? ObsoletedAt
+        +IFormFile? UploadedFile
+        +Document? Document
+        +DocumentStatus? DocumentStatus
+        +ICollection~DocumentApproval~ Approvals
+        +ICollection~DocumentAuditLog~ AuditLogs
+    }
+
+    class DocumentApproval {
+        +int ApprovalId
+        +int VersionId
+        +int StepOrder
+        +string StepType
+        +int ApproverId
+        +string ApprovalStatus
+        +string? Comments
+        +string? SignatureToken
+        +DateTime? SignedAt
+        +DocumentVersion? DocumentVersion
+        +User? Approver
+    }
+
+    class DocumentAuditLog {
+        +int LogId
+        +int CompanyId
+        +int DocId
+        +int VersionId
+        +string VersionNum
+        +string ActionType
+        +string ActionDetails
+        +string Status
+        +DateTime CreatedAt
+        +int CreatedBy
+        +DocumentVersion DocumentVersion
+        +User User
+    }
+
+    class DocumentIssue {
+        +int IssueId
+        +int CompanyId
+        +string DocCode
+        +string IssueType
+        +string Details
+        +int ReportedBy
+        +string IssueStatus
+        +Company Company
+        +User Reporter
+    }
+
+    BaseEntity <|-- Role
+    BaseEntity <|-- Norm
+    BaseEntity <|-- DocumentStatus
+    BaseEntity <|-- Company
+    BaseEntity <|-- Department
+    BaseEntity <|-- User
+    BaseEntity <|-- DocumentCategory
+    BaseEntity <|-- Document
+    BaseEntity <|-- DocumentVersion
+    BaseEntity <|-- DocumentApproval
+    BaseEntity <|-- DocumentIssue
+
+    Company "1" --> "*" Department : "tiene"
+    Company "1" --> "*" User : "pertenece a"
+    Company "1" --> "*" DocumentCategory : "configura"
+    Company "1" --> "*" Document : "posee"
+    Company "1" --> "*" DocumentIssue : "reporta"
+    Role "1" --> "*" User : "asignado a"
+    Department "1" --> "*" User : "agrupa"
+    Norm "1" --> "*" DocumentCategory : "clasifica"
+    DocumentCategory "1" --> "*" Document : "categoriza"
+    Department "1" --> "*" Document : "es dueno de"
+    Document "1" --> "*" DocumentVersion : "versiona"
+    DocumentStatus "1" --> "*" DocumentVersion : "define estado"
+    DocumentVersion "1" --> "*" DocumentApproval : "requiere firma"
+    DocumentVersion "1" --> "*" DocumentAuditLog : "auditada en"
+    User "1" --> "*" DocumentApproval : "firma"
+    User "1" --> "*" DocumentIssue : "reporta"
+``` 
+
+> `DocumentAuditLog` es la única entidad que **no hereda** de `BaseEntity` — tiene sus propios campos de auditoría mínimos para garantizar inmutabilidad del log.
+
+---
+
+## Parte 2: Capa de Servicios, Datos y Controladores
+
+```mermaid
+classDiagram
+    class IEmailService {
+        <<interface>>
+        +SendEmailAsync(toEmail, subject, title, messageBody, actionUrl, actionText) Task
+    }
+
+    class EmailService {
+        -IConfiguration _config
+        +EmailService(IConfiguration config)
+        +SendEmailAsync(toEmail, subject, title, messageBody, actionUrl, actionText) Task
+    }
+
+    class QualityDocDbContext {
+        +DbSet~Role~ Roles
+        +DbSet~Norm~ Norms
+        +DbSet~DocumentStatus~ DocumentStatuses
+        +DbSet~Company~ Companies
+        +DbSet~Department~ Departments
+        +DbSet~User~ Users
+        +DbSet~DocumentCategory~ DocumentCategories
+        +DbSet~Document~ Documents
+        +DbSet~DocumentVersion~ DocumentVersions
+        +DbSet~DocumentAuditLog~ DocumentAuditLogs
+        +DbSet~DocumentApproval~ DocumentApprovals
+        +DbSet~DocumentIssue~ DocumentIssues
+        +OnModelCreating(ModelBuilder) void
+    }
+
+    class LoginViewModel {
+        +string Email
+        +string Password
+    }
+
+    class RegisterViewModel {
+        +string LegalName
+        +string TaxId
+        +string AdminFullName
+        +string Email
+        +string Password
+        +string ConfirmPassword
+    }
+
+    class NewDocumentVersionViewModel {
+        +int DocId
+        +string DocCode
+        +string DocName
+        +string ChangeDescription
+        +IFormFile NewFile
+    }
+
+    class AuthController {
+        -QualityDocDbContext _context
+        -IConfiguration _config
+        -IEmailService _emailService
+        +Login() IActionResult
+        +Login(LoginViewModel) Task~IActionResult~
+        +Verify2FA() IActionResult
+        +Verify2FA(string) Task~IActionResult~
+        +ResetPassword(string) IActionResult
+        +Register() IActionResult
+        +Register(RegisterViewModel) Task~IActionResult~
+        +Logout() Task~IActionResult~
+        +GoToPhpPortal() IActionResult
+    }
+
+    class ApprovalsController {
+        -QualityDocDbContext _context
+        -IConfiguration _config
+        +Index() Task~IActionResult~
+        +Review(int) Task~IActionResult~
+        +Sign(int, string, string) Task~IActionResult~
+        +Recall(int) Task~IActionResult~
+    }
+
+    class DocumentsController {
+        -QualityDocDbContext _context
+        -IWebHostEnvironment _env
+        -IConfiguration _config
+        +Index() Task~IActionResult~
+        +Create() IActionResult
+        +Create(Document, IFormFile) Task~IActionResult~
+        +NewVersion(int) Task~IActionResult~
+        +NewVersion(NewDocumentVersionViewModel) Task~IActionResult~
+        +Delete(int) Task~IActionResult~
+    }
+
+    class CompaniesController {
+        -QualityDocDbContext _context
+        +Index() Task~IActionResult~
+        +Create() IActionResult
+        +Create(Company) Task~IActionResult~
+        +Edit(int) Task~IActionResult~
+        +Disable(int) Task~IActionResult~
+        +Enable(int) Task~IActionResult~
+    }
+
+    class UsersController {
+        -QualityDocDbContext _context
+        -IEmailService _emailService
+        +Index() Task~IActionResult~
+        +Create() IActionResult
+        +Create(User) Task~IActionResult~
+        +Edit(int) Task~IActionResult~
+        +Delete(int) Task~IActionResult~
+    }
+
+    IEmailService <|.. EmailService : "implements"
+
+    AuthController --> QualityDocDbContext : "usa"
+    AuthController --> IEmailService : "usa"
+    AuthController ..> LoginViewModel : "recibe"
+    AuthController ..> RegisterViewModel : "recibe"
+
+    ApprovalsController --> QualityDocDbContext : "usa"
+
+    DocumentsController --> QualityDocDbContext : "usa"
+    DocumentsController ..> NewDocumentVersionViewModel : "recibe"
+
+    CompaniesController --> QualityDocDbContext : "usa"
+
+    UsersController --> QualityDocDbContext : "usa"
+    UsersController --> IEmailService : "usa"
+``` 
+---
+
+## Notas del diseño
+
+| Aspecto | Detalle |
+|---|---|
+| **Herencia** | `BaseEntity` es la clase abstracta base de 11 de las 12 entidades. Centraliza los 7 campos de auditoría y las 3 navegaciones de auditoría.  |
+| **Filtros globales** | `QualityDocDbContext` aplica `HasQueryFilter` en 8 entidades para implementar soft-delete automático en todas las consultas LINQ.   |
+| **`[NotMapped]`** | `DocumentVersion.UploadedFile` es de tipo `IFormFile` y está marcado con `[NotMapped]` — existe solo en memoria para recibir el archivo del formulario, nunca se persiste.   |
+| **Inyección de dependencias** | Los controladores reciben `QualityDocDbContext` e `IEmailService` por constructor (DI de ASP.NET Core). `AuthController` y `UsersController` son los únicos que dependen del servicio de correo.   |
+| **Triggers registrados** | El `DbContext` registra 3 triggers de SQL Server (`trg_HandleDocumentObsolescence`, `trg_Users_UpdateTimestamp`, `trg_UpdateDocumentTimestamp`) para que EF Core no use `OUTPUT` en esas tablas.   |
+| **ViewModels** | `LoginViewModel` y `RegisterViewModel` están en `QualityDoc.API.ViewModels`. `NewDocumentVersionViewModel` está en `QualityDoc.API.Models` (namespace diferente).
+
+
+---
+
+### 🔄 Diagrama de Secuencia (Flujo de carga y aprobación de un documento).
+
+
+```mermaid
+sequenceDiagram
+    actor Creador as "Creador de Doc"
+    participant DC as "DocumentsController"
+    participant FS as "FileSystem (Disco)"
+    participant DB as "SQL Server"
+    participant AC as "ApprovalsController"
+    actor Revisor as "Revisor"
+    actor Aprobador as "Aprobador"
+    participant PY as "FastAPI (Python)"
+    participant MG as "MongoDB"
+
+    Note over Creador,DB: FASE 1 — Creación del Documento (Borrador)
+
+    Creador->>DC: POST /Documents/Create (formulario + archivo)
+    DC->>DC: Validar tamaño y extensión del archivo
+    DC->>FS: Guardar archivo físico (/uploads/documents/PR-001_v0.1_xxxx.pdf)
+    DC->>DB: BEGIN TRANSACTION
+    DC->>DB: INSERT Documents (DocCode auto-generado: prefijo + contador)
+    DB-->>DC: DocId generado
+    DC->>DB: INSERT DocumentVersions (StatusId=1 Borrador, VersionNum="0.1")
+    DB-->>DC: VersionId generado
+    DC->>DB: INSERT DocumentAuditLogs (ActionType="DraftCreated")
+    DC->>DB: COMMIT
+    DC-->>Creador: Redirect → Index
+
+    Note over Creador,DB: FASE 2 — Enviar a Revisión
+
+    Creador->>DC: POST /Documents/SendToReview (versionId, docId)
+    DC->>DB: SELECT Revisor del mismo departamento (RoleId="Revisor", DeptId=mismo)
+    DB-->>DC: assignedUser (Revisor encontrado)
+    DC->>DB: INSERT DocumentApprovals (StepOrder=1, StepType="Revisó", Status="Pending")
+    DC->>DB: UPDATE DocumentVersions SET StatusId=2 (En Revisión)
+    DC->>DB: INSERT DocumentAuditLogs (ActionType="SentToReview")
+    DC->>DB: SaveChanges
+    DC-->>Creador: Redirect → Details
+
+    Note over Revisor,DB: FASE 3 — Revisión (Paso 1 del Workflow)
+
+    Revisor->>AC: GET /Approvals/Index
+    AC->>DB: SELECT Approvals WHERE ApproverId=Revisor AND Status="Pending"
+    DB-->>AC: Lista de tareas pendientes
+    AC-->>Revisor: Vista con bandeja de firmas
+    Revisor->>AC: GET /Approvals/Review (approvalId)
+    AC-->>Revisor: Vista con PDF + formulario de decisión
+
+    alt Revisor Aprueba
+        Revisor->>AC: POST /Approvals/Sign (decision="Approve", comments)
+        AC->>DB: EXEC sp_SignDocumentWorkflow (ApprovalID, IsApproved=1)
+        Note over DB: SP: Marca Revisó=Approved, crea registro Aprobador (StepOrder=2, StepType="Aprobó")
+        DB-->>AC: OK
+        AC->>DB: UPDATE DocumentVersions (VersionNum suma decimal, ej: 0.1→0.2)
+        AC->>DB: INSERT DocumentAuditLogs (ActionType="Approved")
+        AC->>DB: SaveChanges
+        AC-->>Revisor: Redirect → Index ("Documento avanzó al Aprobador")
+    else Revisor Rechaza
+        Revisor->>AC: POST /Approvals/Sign (decision="Reject", comments)
+        AC->>DB: EXEC sp_SignDocumentWorkflow (IsApproved=0)
+        Note over DB: SP: Marca Revisó=Rejected, StatusId=1 (Borrador)
+        DB-->>AC: OK
+        AC->>DB: INSERT DocumentAuditLogs (ActionType="Rejected")
+        AC->>DB: SaveChanges
+        AC-->>Revisor: Redirect → Index ("Devuelto al creador con observaciones")
+    end
+
+    Note over Aprobador,MG: FASE 4 — Aprobación Final (Paso 2 del Workflow)
+
+    Aprobador->>AC: GET /Approvals/Index
+    AC->>DB: SELECT Approvals WHERE ApproverId=Aprobador AND Status="Pending"
+    DB-->>AC: Lista de tareas pendientes
+    AC-->>Aprobador: Vista con bandeja de firmas
+    Aprobador->>AC: GET /Approvals/Review (approvalId)
+    AC-->>Aprobador: Vista con PDF + formulario de decisión
+
+    alt Aprobador Aprueba
+        Aprobador->>AC: POST /Approvals/Sign (decision="Approve", comments)
+        AC->>DB: EXEC sp_SignDocumentWorkflow (ApprovalID, IsApproved=1)
+        Note over DB: SP: Marca Aprobó=Approved, StatusId=3 (Aprobado)
+        Note over DB: TRIGGER trg_HandleDocumentObsolescence activa: versiones anteriores → StatusId=4 (Obsoleto)
+        DB-->>AC: OK
+        AC->>DB: UPDATE DocumentVersions (VersionNum → entero sagrado, ej: 0.2→1.0)
+        AC->>DB: INSERT DocumentAuditLogs (ActionType="Approved")
+        AC->>DB: SaveChanges
+        AC->>PY: POST /api/docs/index (JSON: codigo, titulo, version, etiquetas, empresa_id...)
+        PY->>MG: replace_one (upsert por documento_id)
+        MG-->>PY: OK
+        PY-->>AC: 200 OK
+        AC-->>Aprobador: Redirect → Index ("Documento publicado en portal operativo")
+    else Aprobador Rechaza
+        Aprobador->>AC: POST /Approvals/Sign (decision="Reject", comments)
+        AC->>DB: EXEC sp_SignDocumentWorkflow (IsApproved=0)
+        Note over DB: SP: Marca Aprobó=Rejected, StatusId=1 (Borrador)
+        DB-->>AC: OK
+        AC->>DB: INSERT DocumentAuditLogs (ActionType="Rejected")
+        AC->>DB: SaveChanges
+        AC-->>Aprobador: Redirect → Index ("Devuelto al creador con observaciones")
+    end
+```
+
+---
+
+### Resumen del flujo por fase
+
+| Fase | Actor | Acción clave | Estado resultante |
+|---|---|---|---|
+| **1. Creación** | Creador de Doc | Sube archivo + metadatos | `StatusId=1` Borrador, `VersionNum="0.1"` |
+| **2. Envío** | Creador de Doc | Inicia flujo de aprobación | `StatusId=2` En Revisión, `DocumentApproval` creado para Revisor |
+| **3. Revisión** | Revisor | Aprueba o rechaza (Paso 1) | Aprueba → crea tarea para Aprobador / Rechaza → regresa a Borrador |
+| **4. Aprobación** | Aprobador | Aprueba o rechaza (Paso 2) | Aprueba → `StatusId=3`, indexa en MongoDB / Rechaza → regresa a Borrador |
+
+### Notas técnicas clave
+
+| Aspecto | Detalle |
+|---|---|
+| **Versionamiento decimal** | Cada edición del borrador suma `+0.1` al número de versión. La aprobación final eleva al siguiente entero (`Math.Floor(v) + 1.0`).  |
+| **Stored Procedure** | `sp_SignDocumentWorkflow` encapsula toda la lógica transaccional de la firma en SQL Server, incluyendo la creación del siguiente paso del workflow.   |
+| **Trigger de obsolescencia** | Al aprobar una nueva versión (`StatusId=3`), el trigger `trg_HandleDocumentObsolescence` marca automáticamente las versiones anteriores como `StatusId=4` (Obsoleto).  |
+| **Indexación en MongoDB** | Solo ocurre cuando el Aprobador (paso final) aprueba y `StatusId==3`. Si FastAPI está fuera de línea, la firma se guarda igual pero se notifica el error.  |
+| **Bitácora inmutable** | Cada transición de estado genera un registro en `DocumentAuditLogs` con `ActionType` específico (`DraftCreated`, `SentToReview`, `Approved`, `Rejected`).  |
+
+---
+
+Aquí está el Diagrama de Despliegue completo basado en los cuatro archivos `docker-compose` y la configuración de Nginx:
+
+---
+
+## 🐳 Diagrama de Despliegue — Arquitectura de Contenedores
+
+```mermaid
+graph TB
+    Browser["Navegador Web\n(Usuario Final)"]
+
+    subgraph "Docker Host (Servidor Ubuntu / Windows)"
+        subgraph "quality-net — Red Docker Privada Interna"
+            Nginx["nginx_gateway_prod\nnginx:1.25-alpine\nPuerto 80 EXPUESTO"]
+
+            DotNet["dotnet_mvc_prod\nASP.NET Core 10\n:8080 interno"]
+            PHP["php_laravel_prod\nPHP-FPM 8.2 Laravel\n:9000 FastCGI interno"]
+            FastAPI["python_fastapi_prod\nPython 3.11 FastAPI\n:8000 interno"]
+
+            MSSQL["sql_server_prod\nSQL Server 2022\nQualityDocDB\nno expuesto"]
+            PG["postgres_prod\nPostgreSQL 15.6\naudit_db\nno expuesto"]
+            Mongo["mongo_prod\nMongoDB 4.4\nqualitydoc_metadata\nno expuesto"]
+        end
+
+        subgraph "Volúmenes Docker Nombrados"
+            V1[("doc_uploads_prod\nPDFs compartidos")]
+            V2[("sql_server_data_prod")]
+            V3[("postgres_data_prod")]
+            V4[("mongo_data_prod")]
+            V5[("crypto_keys_prod\nllaves Data Protection")]
+        end
+    end
+
+    Browser -->|"HTTP :80"| Nginx
+
+    Nginx -->|"location / FastCGI :9000"| PHP
+    Nginx -->|"location /admin/ proxy :8080"| DotNet
+    Nginx -->|"location /api/search/ proxy :8000"| FastAPI
+
+    DotNet -->|"TCP :1433"| MSSQL
+    DotNet -->|"HTTP POST /api/docs/index"| FastAPI
+
+    PHP -->|"TCP :5432"| PG
+    PHP -->|"HTTP :8000"| FastAPI
+    PHP -->|"HTTP :8080 JWT SSO"| DotNet
+
+    FastAPI -->|"TCP :27017"| Mongo
+
+    DotNet --- V1
+    FastAPI -.->|"read-only"| V1
+    DotNet --- V5
+    MSSQL --- V2
+    PG --- V3
+    Mongo --- V4
+```
+
+---
+
+## Inventario de Contenedores
+
+| Contenedor | Imagen | Puerto | Red | `restart` |
+|---|---|---|---|---|
+| `nginx_gateway_prod` | `nginx:1.25-alpine` | **80 (expuesto)** | `quality-net` | `always` |
+| `dotnet_mvc_prod` | Build propio (ASP.NET Core 10) | 8080 (interno) | `quality-net` | `always` |
+| `php_laravel_prod` | Build propio (PHP-FPM 8.2) | 9000 FastCGI (interno) | `quality-net` | `always` |
+| `python_fastapi_prod` | Build propio (Python 3.11) | 8000 (interno) | `quality-net` | `always` |
+| `sql_server_prod` | `mssql/server:2022-CU12-ubuntu-22.04` | no expuesto | `quality-net` | `always` |
+| `postgres_prod` | `postgres:15.6-alpine` | no expuesto | `quality-net` | `always` |
+| `mongo_prod` | `mongo:4.4` | no expuesto | `quality-net` | `always` |
+| `sql_server_init` | `alpine:latest` | — | `quality-net` | `no` (init job) |
+
+---
+
+## Rutas de Nginx (Enrutamiento del Gateway)
+
+| Ruta | Destino | Protocolo | Descripción |
+|---|---|---|---|
+| `/` | `php-app:9000` | FastCGI | Portal Operario (Laravel) |
+| `/admin/` | `dotnet-app:8080` | HTTP reverse proxy | Portal Administrativo (.NET) |
+| `/api/search/` | `python-app:8000` | HTTP reverse proxy | Motor de Búsqueda (FastAPI) |
+
+---
+
+## Volúmenes Compartidos
+
+| Volumen | Montado en | Modo | Propósito |
+|---|---|---|---|
+| `doc_uploads_prod` | `dotnet_mvc_prod:/app/wwwroot/uploads` | lectura/escritura | C# guarda los PDFs subidos |
+| `doc_uploads_prod` | `python_fastapi_prod:/shared_uploads` | **read-only** | FastAPI sirve los PDFs para búsqueda |
+| `crypto_keys_prod` | `dotnet_mvc_prod:/app/keys` | lectura/escritura | Llaves de Data Protection de ASP.NET Core |
+| `sql_server_data_prod` | `sql_server_prod:/var/opt/mssql/data` | lectura/escritura | Datos persistentes de SQL Server |
+| `postgres_data_prod` | `postgres_prod:/var/lib/postgresql/data` | lectura/escritura | Datos persistentes de PostgreSQL |
+| `mongo_data_prod` | `mongo_prod:/data/db` | lectura/escritura | Datos persistentes de MongoDB | 
+
+---
+
+## Notas de Seguridad y Configuración
+
+| Aspecto | Detalle |
+|---|---|
+| **Un solo puerto público** | Solo `nginx_gateway_prod` expone el puerto 80. Todas las bases de datos y servicios de aplicación son inaccesibles desde el exterior.   |
+| **Red compartida** | `quality-net` se declara como `external: true` en los 4 compose files. Se crea una sola vez con el script `deploy.sh/deploy.bat` antes de levantar los servicios.  |
+| **Headers de seguridad** | Nginx agrega `X-Frame-Options`, `X-XSS-Protection`, `X-Content-Type-Options` y `Referrer-Policy` a todas las respuestas.   |
+| **Límite de carga** | `client_max_body_size 35M` en Nginx para permitir subida de PDFs grandes. [10](#9-9)  |
+| **Configuración por `.env`** | Todos los secretos (contraseñas, JWT secret, SMTP) se inyectan mediante `env_file: ../.env`. Ninguna credencial está hardcodeada en los compose files.   |
+| **SSO entre portales** | PHP Laravel llama directamente a `dotnet_mvc_prod:8080` para validar el JWT y establecer la sesión del operario.   |
 
 
 
